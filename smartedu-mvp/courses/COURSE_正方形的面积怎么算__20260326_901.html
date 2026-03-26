@@ -1,150 +1,9 @@
-import { courseAgent, CourseAgent } from './courseAgent';
-import { buildCoursePrompt, QUALITY_GUIDELINES } from '../skills/coursePrompt';
-import { CourseContent, CourseHtmlContent, GenerateCourseRequest } from '../types/course';
-import { getMockCourse, generateMockCourseId } from './mockData';
-import { GenerationProgress, GenerationErrorType } from '../types/generation';
-import { QualityScore } from '../types/refinement';
-import { RefinementLoop } from './refinementLoop';
-import * as fs from 'fs';
-import * as path from 'path';
-
-export class CourseService {
-  private agent: CourseAgent;
-
-  constructor() {
-    this.agent = courseAgent;
-  }
-
-  private isMockMode(): boolean {
-    const key = process.env.OPENCODE_API_KEY;
-    console.log('[CourseService] 检查API密钥:', key ? '已配置' : '未配置');
-    return !key;
-  }
-
-  async generateCourseHtml(
-    params: GenerateCourseRequest,
-    onProgress?: (progress: GenerationProgress) => void,
-    options?: { enableRefinement?: boolean }
-  ): Promise<CourseHtmlContent & { qualityScore?: QualityScore }> {
-    const { user_question, subject, grade_level } = params;
-    const useMock = this.isMockMode();
-    const enableRefinement = options?.enableRefinement !== false;
-
-    console.log(`[CourseService] 开始生成HTML课件: ${user_question}`);
-    console.log(`[CourseService] 学科: ${subject}, 年级: ${grade_level}`);
-    
-    if (useMock) {
-      console.log(`[CourseService] 运行模式: 🔧 MOCK`);
-    } else if (enableRefinement) {
-      console.log(`[CourseService] 运行模式: 🎯 AI (多轮调优模式)`);
-      console.log(QUALITY_GUIDELINES);
-    } else {
-      console.log(`[CourseService] 运行模式: 🚀 AI (基础模式)`);
-    }
-
-    if (useMock) {
-      const mockResult = this.generateMockCourseHtml(user_question, subject, grade_level);
-      return { ...mockResult, qualityScore: undefined };
-    }
-
-    const courseId = this.generateCourseId(user_question);
-    
-    try {
-      const prompt = buildCoursePrompt({
-        user_question,
-        subject,
-        grade_level,
-        duration_minutes: 25,
-      });
-
-      const promptPreview = prompt.length > 300 ? prompt.substring(0, 300) + '...\n\n[提示词已截断]' : prompt;
-      if (onProgress) {
-        onProgress({
-          stage: 'prompt',
-          message: '正在准备生成课件...',
-          timestamp: Date.now(),
-          promptPreview,
-        });
-      }
-
-      let result;
-      if (enableRefinement) {
-        result = await this.agent.generateWithRefinement(prompt, onProgress, courseId);
-      } else {
-        result = await this.agent.generate(prompt, onProgress, courseId);
-      }
-
-      if (!result.success) {
-        if (result.error?.type === GenerationErrorType.VALIDATION_ERROR) {
-          throw new Error(`课件验证失败: ${result.error.message}`);
-        }
-        if (result.error?.type === GenerationErrorType.API_ERROR && !result.error.retryable) {
-          throw new Error(`API错误: ${result.error.message}`);
-        }
-        
-        console.warn(`[CourseService] AI生成失败(${result.attempts}次尝试)，降级到MOCK模式`);
-        const mockResult = this.generateMockCourseHtml(user_question, subject, grade_level);
-        return { ...mockResult, qualityScore: undefined };
-      }
-
-      console.log(`[CourseService] ✅ HTML课件生成成功`);
-      console.log(`[CourseService]   - 迭代次数: ${result.attempts}`);
-      console.log(`[CourseService]   - 耗时: ${result.duration}ms`);
-      
-      if (result.qualityScore) {
-        console.log(`[CourseService]   - 质量评分: ${result.qualityScore.overall}/100`);
-        console.log(RefinementLoop.formatScoreReport(result.qualityScore));
-      }
-
-      if (result.validation && !result.validation.isValid) {
-        const errors = result.validation.errors.map(e => e.message).join('; ');
-        console.warn(`[CourseService] 验证警告: ${errors}`);
-      }
-
-      return {
-        course_id: result.courseId || courseId,
-        html_content: result.html,
-        qualityScore: result.qualityScore,
-        metadata: {
-          subject,
-          grade: grade_level,
-          topic: user_question.substring(0, 20),
-        },
-      };
-    } catch (error: any) {
-      console.error('[CourseService] ❌ HTML课件生成失败:', error.message);
-      throw error;
-    }
-  }
-
-  async generateCourseWithRefinement(
-    params: GenerateCourseRequest,
-    onProgress?: (progress: GenerationProgress) => void
-  ): Promise<CourseHtmlContent & { qualityScore?: QualityScore }> {
-    return this.generateCourseHtml(params, onProgress, { enableRefinement: true });
-  }
-
-  private generateCourseId(question: string): string {
-    const hash = question.split('').reduce((acc, char) => {
-      return ((acc << 5) - acc) + char.charCodeAt(0);
-    }, 0);
-    return `course_${Math.abs(hash).toString(36)}_${Date.now()}`;
-  }
-
-  private generateMockCourseHtml(question: string, subject: string, grade: number): CourseHtmlContent {
-    console.log('[CourseService] 生成模拟HTML课件...');
-    
-    const topic = question.includes('正方形') ? '正方形面积' :
-                  question.includes('分数') ? '分数加减' :
-                  question.includes('三角形') ? '三角形面积' :
-                  question.includes('圆形') || question.includes('圆') ? '圆周长计算' : '数学基础';
-    
-    const html = `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${grade}年级 ${subject} - ${topic}</title>
+    <title>1年级 数学 - 正方形面积</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -199,8 +58,8 @@ export class CourseService {
 </head>
 <body>
     <div class="header">
-        <h1>📐 ${topic}</h1>
-        <p>${grade}年级 ${subject} - 互动课件</p>
+        <h1>📐 正方形面积</h1>
+        <p>1年级 数学 - 互动课件</p>
     </div>
     
     <div class="nav-tabs">
@@ -212,10 +71,10 @@ export class CourseService {
     <div class="main-content">
         <div id="concept" class="tab-content active">
             <div class="card">
-                <div class="card-title">📖 ${topic}</div>
+                <div class="card-title">📖 正方形面积</div>
                 <p style="line-height: 1.8; margin-bottom: 16px;">
-                    欢迎来到数学课堂！今天我们来学习${topic}。
-                    ${question}
+                    欢迎来到数学课堂！今天我们来学习正方形面积。
+                    正方形的面积怎么算？
                 </p>
                 <div class="formula-box">
                     <strong>S = a × a</strong><br>
@@ -380,112 +239,4 @@ export class CourseService {
         drawSquare();
     </script>
 </body>
-</html>`;
-
-    return {
-      course_id: generateMockCourseId(question),
-      html_content: html,
-      metadata: {
-        subject,
-        grade,
-        topic,
-      },
-    };
-  }
-
-  async generateCourse(params: GenerateCourseRequest): Promise<CourseContent> {
-    const htmlResult = await this.generateCourseHtml(params);
-    
-    return {
-      course_id: htmlResult.course_id,
-      metadata: {
-        subject: htmlResult.metadata.subject,
-        grade: htmlResult.metadata.grade,
-        topic: htmlResult.metadata.topic,
-        estimated_minutes: 25,
-        difficulty: 'medium',
-      },
-      sections: [],
-      knowledge_tags: [],
-    };
-  }
-
-  async saveCourseHtml(course: CourseHtmlContent, saveDir: string = './courses'): Promise<string> {
-    const fileName = `${course.course_id}.html`;
-    const filePath = path.join(saveDir, fileName);
-    
-    if (!fs.existsSync(saveDir)) {
-      fs.mkdirSync(saveDir, { recursive: true });
-    }
-    
-    fs.writeFileSync(filePath, course.html_content, 'utf-8');
-    console.log(`[CourseService] 💾 HTML课件已保存: ${filePath}`);
-    
-    return filePath;
-  }
-
-  loadCourseHtml(courseId: string, saveDir: string = './courses'): CourseHtmlContent | null {
-    const filePath = path.join(saveDir, `${courseId}.html`);
-    
-    if (!fs.existsSync(filePath)) {
-      return null;
-    }
-    
-    const content = fs.readFileSync(filePath, 'utf-8');
-    const metadata = this.extractMetadataFromHtml(content);
-    
-    return {
-      course_id: courseId,
-      html_content: content,
-      metadata,
-    };
-  }
-
-  private extractMetadataFromHtml(html: string): { subject: string; grade: number; topic: string } {
-    const titleMatch = html.match(/<title>(.*?)<\/title>/i);
-    const title = titleMatch ? titleMatch[1] : '未知课件';
-    
-    return {
-      subject: title.includes('数学') ? '数学' : title.includes('语文') ? '语文' : '数学',
-      grade: parseInt(title.match(/(\d)年级/)?.[1] || '3'),
-      topic: title.replace(/^\d年级\s+\S+\s+-\s*/, '').replace(/\s+课件$/, '') || '数学基础',
-    };
-  }
-
-  async saveCourse(course: CourseContent, saveDir: string = './courses'): Promise<string> {
-    const fileName = `${course.course_id}.json`;
-    const filePath = path.join(saveDir, fileName);
-    
-    if (!fs.existsSync(saveDir)) {
-      fs.mkdirSync(saveDir, { recursive: true });
-    }
-    
-    fs.writeFileSync(filePath, JSON.stringify(course, null, 2), 'utf-8');
-    console.log(`[CourseService] 💾 课程已保存: ${filePath}`);
-    
-    return filePath;
-  }
-
-  loadCourse(courseId: string, saveDir: string = './courses'): CourseContent | null {
-    const filePath = path.join(saveDir, `${courseId}.json`);
-    
-    if (!fs.existsSync(filePath)) {
-      return null;
-    }
-    
-    const content = fs.readFileSync(filePath, 'utf-8');
-    return JSON.parse(content);
-  }
-
-  listCourses(saveDir: string = './courses'): string[] {
-    if (!fs.existsSync(saveDir)) {
-      return [];
-    }
-    
-    return fs.readdirSync(saveDir)
-      .filter(file => file.endsWith('.json') || file.endsWith('.html'))
-      .map(file => file.replace(/\.(json|html)$/, ''));
-  }
-}
-
-export const courseService = new CourseService();
+</html>

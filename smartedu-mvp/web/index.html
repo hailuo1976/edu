@@ -382,6 +382,55 @@
     .timeline-score.medium { background: #fef3c7; color: #d97706; }
     .timeline-score.low { background: #fee2e2; color: var(--error); }
 
+    /* Prompt Preview Panel */
+    .prompt-panel {
+      display: none;
+      margin-top: 16px;
+      padding: 16px;
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .prompt-panel.show { display: block; }
+
+    .prompt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .prompt-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .prompt-content {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 150px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+    }
+
+    .prompt-toggle {
+      font-size: 0.75rem;
+      color: var(--primary);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
     /* Quality Score Panel */
     .quality-panel {
       margin-top: 20px;
@@ -712,6 +761,17 @@
         <span id="iterationBadge" class="status-badge iteration">第 1 轮</span>
       </div>
 
+      <!-- Prompt Preview Panel -->
+      <div id="promptPanel" class="prompt-panel">
+        <div class="prompt-header">
+          <span class="prompt-title">
+            <span>📝</span> 当前提示词预览
+          </span>
+          <span class="prompt-toggle" id="promptToggle">收起 ▲</span>
+        </div>
+        <div class="prompt-content" id="promptContent">加载中...</div>
+      </div>
+
       <div class="loading-animation show">
         <div class="ai-brain">
           <div class="brain-circle"></div>
@@ -816,6 +876,9 @@
     const issuesList = document.getElementById('issuesList');
     const successState = document.getElementById('successState');
     const errorState = document.getElementById('errorState');
+    const promptPanel = document.getElementById('promptPanel');
+    const promptContent = document.getElementById('promptContent');
+    const promptToggle = document.getElementById('promptToggle');
 
     const stageMessages = {
       prompt: { text: '正在分析问题...', hint: 'AI 正在理解你的需求' },
@@ -828,6 +891,16 @@
       complete: { text: '生成完成!', hint: '' },
       error: { text: '生成失败', hint: '' }
     };
+
+    promptToggle.addEventListener('click', () => {
+      if (promptContent.style.maxHeight === '150px') {
+        promptContent.style.maxHeight = '500px';
+        promptToggle.textContent = '收起 ▲';
+      } else {
+        promptContent.style.maxHeight = '150px';
+        promptToggle.textContent = '展开 ▼';
+      }
+    });
 
     enableRefineCheckbox.addEventListener('change', (e) => {
       enableRefine = e.target.checked;
@@ -908,13 +981,23 @@
     }
 
     function handleProgress(data) {
-      const { stage, message, retryCount, quality_score } = data;
+      const { stage, message, retryCount, qualityScore, promptPreview, issues, totalDuration } = data;
+
+      if (promptPreview) {
+        promptPanel.classList.add('show');
+        promptContent.textContent = promptPreview;
+      }
 
       if (stage === 'complete' && data.course_id) {
         currentCourseId = data.course_id;
         iterationBadge.textContent = `✅ 完成 (${retryCount || 1}轮)`;
         addTimelineItem('complete', message || '生成完成');
         updateLoadingText('课件已准备就绪!');
+        
+        if (totalDuration) {
+          const seconds = Math.round(totalDuration / 1000);
+          addTimelineItem('complete', `总耗时: ${seconds}秒`);
+        }
         return;
       }
 
@@ -934,9 +1017,23 @@
 
       addTimelineItem(stage === 'api_call' && retryCount > 1 ? 'refine' : stage, stageInfo.text);
 
-      if (quality_score) {
-        showQualityScore(quality_score);
+      if (qualityScore) {
+        showQualityScore(qualityScore);
       }
+
+      if (issues && issues.length > 0) {
+        showIssues(issues);
+      }
+    }
+
+    function showIssues(issues) {
+      issuesPanel.classList.add('show');
+      issuesList.innerHTML = issues.map(issue => `
+        <div class="issue-item">
+          <span class="issue-icon ${issue.severity}">${issue.severity === 'critical' ? '!' : issue.severity === 'warning' ? '!' : 'i'}</span>
+          <span>${issue.message}</span>
+        </div>
+      `).join('');
     }
 
     function addTimelineItem(stage, text) {
@@ -970,6 +1067,12 @@
         document.getElementById('dimInteraction').textContent = score.dimensions.interaction;
         document.getElementById('dimSafety').textContent = score.dimensions.safety;
         document.getElementById('dimFormat').textContent = score.dimensions.format;
+      } else {
+        document.getElementById('dimPedagogy').textContent = score.passed ? overall : '--';
+        document.getElementById('dimContent').textContent = '--';
+        document.getElementById('dimInteraction').textContent = '--';
+        document.getElementById('dimSafety').textContent = '--';
+        document.getElementById('dimFormat').textContent = '--';
       }
     }
 
@@ -993,6 +1096,7 @@
       errorState.classList.remove('show');
       qualityPanel.classList.remove('show');
       issuesPanel.classList.remove('show');
+      promptPanel.classList.remove('show');
     }
 
     function hideLoadingState() {
@@ -1007,6 +1111,7 @@
       iterationBadge.className = 'status-badge iteration';
       document.querySelector('.loading-animation').classList.add('show');
       updateLoadingText('正在分析问题...', 'AI 正在发挥最佳水平');
+      promptPanel.classList.remove('show');
     }
 
     function openCourse() {

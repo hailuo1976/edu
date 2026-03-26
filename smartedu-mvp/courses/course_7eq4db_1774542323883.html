@@ -1,0 +1,1041 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>物理课件 - 波的干涉与衍射</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a1628;
+            --bg-secondary: #132238;
+            --bg-card: #1a2d4a;
+            --fg-primary: #e8f0f8;
+            --fg-secondary: #8fa8c4;
+            --accent: #00d4aa;
+            --accent-glow: rgba(0, 212, 170, 0.3);
+            --border: #2a4060;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg-primary);
+            color: var(--fg-primary);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .display-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Background atmosphere */
+        .bg-atmosphere {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background: 
+                radial-gradient(ellipse 80% 50% at 20% 20%, rgba(0, 212, 170, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(59, 130, 246, 0.06) 0%, transparent 50%),
+                linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        }
+
+        /* Grid pattern overlay */
+        .grid-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            background-image: 
+                linear-gradient(rgba(42, 64, 96, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(42, 64, 96, 0.3) 1px, transparent 1px);
+            background-size: 60px 60px;
+            opacity: 0.4;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Navigation tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: var(--bg-card);
+            padding: 0.5rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 1rem 2rem;
+            border: none;
+            background: transparent;
+            color: var(--fg-secondary);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab:hover {
+            color: var(--fg-primary);
+            background: rgba(0, 212, 170, 0.1);
+        }
+
+        .nav-tab.active {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        /* Module sections */
+        .module-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .module-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card styles */
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .content-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        /* Concept module styles */
+        .concept-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--fg-primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .concept-formula {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem 2rem;
+            font-family: 'Courier New', monospace;
+            font-size: 1.25rem;
+            color: var(--accent);
+            text-align: center;
+            margin: 1.5rem 0;
+            letter-spacing: 0.05em;
+        }
+
+        .concept-point {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            margin: 0.75rem 0;
+            background: rgba(0, 212, 170, 0.05);
+            border-radius: 0.75rem;
+            border-left: 3px solid var(--accent);
+        }
+
+        .point-icon {
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg-primary);
+            font-weight: 700;
+            font-size: 0.875rem;
+        }
+
+        /* Demo module styles */
+        .demo-canvas-container {
+            position: relative;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 1rem;
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+
+        #demoCanvas {
+            display: block;
+            width: 100%;
+            height: 400px;
+        }
+
+        .demo-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .control-group {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--border);
+        }
+
+        .control-label {
+            display: block;
+            color: var(--fg-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .control-slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: var(--border);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .control-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .control-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .control-value {
+            text-align: right;
+            color: var(--accent);
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+
+        .demo-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--accent);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .demo-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Exercise module styles */
+        .exercise-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .exercise-card.correct {
+            border-color: var(--accent);
+            background: rgba(0, 212, 170, 0.1);
+        }
+
+        .exercise-card.incorrect {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .exercise-question {
+            font-size: 1.125rem;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .exercise-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option-btn {
+            padding: 1rem 1.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            color: var(--fg-primary);
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .option-btn:hover {
+            border-color: var(--accent);
+            background: rgba(0, 212, 170, 0.1);
+        }
+
+        .option-btn.selected {
+            border-color: var(--accent);
+            background: rgba(0, 212, 170, 0.2);
+        }
+
+        .option-btn.correct-answer {
+            border-color: var(--accent);
+            background: rgba(0, 212, 170, 0.3);
+        }
+
+        .option-btn.wrong-answer {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .score-display {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-align: center;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 1rem;
+            margin-top: 1rem;
+        }
+
+        .feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback.correct {
+            background: rgba(0, 212, 170, 0.2);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+
+        .feedback.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #f87171;
+        }
+
+        /* Floating particles */
+        .particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.6;
+            z-index: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+            }
+
+            .nav-tab {
+                text-align: center;
+            }
+
+            .concept-title {
+                font-size: 1.75rem;
+            }
+
+            .demo-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-atmosphere"></div>
+    <div class="grid-pattern"></div>
+
+    <main class="main-container">
+        <header style="text-align: center; margin-bottom: 2rem;">
+            <h1 class="display-font concept-title" style="font-size: 3rem; margin-bottom: 0.5rem;">
+                波的干涉与衍射
+            </h1>
+            <p style="color: var(--fg-secondary); font-size: 1.125rem;">
+                探索波动现象的核心原理与实验演示
+            </p>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs" role="tablist" aria-label="课程模块导航">
+            <button class="nav-tab active" data-tab="concept" role="tab" aria-selected="true" aria-controls="concept-panel">
+                概念学习
+            </button>
+            <button class="nav-tab" data-tab="demo" role="tab" aria-selected="false" aria-controls="demo-panel">
+                交互演示
+            </button>
+            <button class="nav-tab" data-tab="exercise" role="tab" aria-selected="false" aria-controls="exercise-panel">
+                巩固练习
+            </button>
+        </nav>
+
+        <!-- Concept Module -->
+        <section id="concept-panel" class="module-section active" role="tabpanel" aria-labelledby="concept-tab">
+            <article class="content-card">
+                <h2 class="concept-title">波的干涉原理</h2>
+                
+                <div class="concept-formula">
+                    y = A sin(kx - ωt + φ)
+                </div>
+
+                <p style="color: var(--fg-secondary); line-height: 1.8; margin-bottom: 1.5rem;">
+                    当两列或多列波在空间中相遇时，它们会相互叠加。根据叠加原理，
+                    合成波的位移等于各列波单独作用时位移的矢量和。这种现象称为波的干涉。
+                </p>
+
+                <div class="concept-point">
+                    <span class="point-icon">1</span>
+                    <div>
+                        <strong style="color: var(--fg-primary);">相长干涉</strong>
+                        <p style="color: var(--fg-secondary); margin-top: 0.25rem;">
+                            当两列波的相位差为 2nπ（n为整数）时，振幅相加，形成波峰或波谷增强的现象。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="concept-point">
+                    <span class="point-icon">2</span>
+                    <div>
+                        <strong style="color: var(--fg-primary);">相消干涉</strong>
+                        <p style="color: var(--fg-secondary); margin-top: 0.25rem;">
+                            当两列波的相位差为 (2n+1)π 时，振幅相减，形成波峰与波谷抵消的现象。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="concept-point">
+                    <span class="point-icon">3</span>
+                    <div>
+                        <strong style="color: var(--fg-primary);">波的衍射</strong>
+                        <p style="color: var(--fg-secondary); margin-top: 0.25rem;">
+                            波遇到障碍物或通过狭缝时，会绕过障碍物继续传播的现象。衍射程度与波长和障碍物尺寸有关。
+                        </p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="content-card">
+                <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; color: var(--accent);">
+                    关键公式
+                </h3>
+                <div class="concept-formula">
+                    Δφ = 2π · Δr / λ
+                </div>
+                <p style="color: var(--fg-secondary); text-align: center;">
+                    相位差与波程差的关系，其中 Δr 为波程差，λ 为波长
+                </p>
+            </article>
+        </section>
+
+        <!-- Demo Module -->
+        <section id="demo-panel" class="module-section" role="tabpanel" aria-labelledby="demo-tab">
+            <article class="content-card">
+                <h2 style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0.5rem;">
+                    双缝干涉模拟器
+                </h2>
+                <p style="color: var(--fg-secondary); margin-bottom: 1rem;">
+                    调整参数观察干涉条纹的变化，理解波长、缝间距对干涉图样的影响。
+                </p>
+
+                <div class="demo-canvas-container">
+                    <canvas id="demoCanvas" aria-label="双缝干涉模拟动画"></canvas>
+                </div>
+
+                <div class="demo-controls">
+                    <div class="control-group">
+                        <label class="control-label" for="wavelength">波长 λ</label>
+                        <input type="range" id="wavelength" class="control-slider" min="20" max="100" value="50">
+                        <div class="control-value"><span id="wavelengthValue">50</span> nm</div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label" for="slitDistance">缝间距 d</label>
+                        <input type="range" id="slitDistance" class="control-slider" min="50" max="200" value="100">
+                        <div class="control-value"><span id="slitDistanceValue">100</span> μm</div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label" for="amplitude">振幅 A</label>
+                        <input type="range" id="amplitude" class="control-slider" min="10" max="50" value="30">
+                        <div class="control-value"><span id="amplitudeValue">30</span> units</div>
+                    </div>
+
+                    <div class="control-group" style="display: flex; align-items: center; justify-content: center; gap: 1rem;">
+                        <button id="playPauseBtn" class="demo-btn">暂停</button>
+                        <button id="resetBtn" class="demo-btn" style="background: var(--fg-secondary);">重置</button>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <!-- Exercise Module -->
+        <section id="exercise-panel" class="module-section" role="tabpanel" aria-labelledby="exercise-tab">
+            <article class="content-card">
+                <h2 style="font-size: 1.75rem; font-weight: 600; margin-bottom: 1.5rem;">
+                    知识巩固练习
+                </h2>
+
+                <div id="exerciseContainer">
+                    <!-- Exercises will be rendered here -->
+                </div>
+
+                <div class="score-display" id="scoreDisplay">
+                    得分: <span id="currentScore">0</span> / <span id="totalQuestions">5</span>
+                </div>
+
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <button id="resetExercise" class="demo-btn">重新开始</button>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <script>
+        // ========== Data Definitions ==========
+        const exercises = [
+            {
+                id: 1,
+                question: "当两列波的相位差为 π 时，会发生什么现象？",
+                options: [
+                    "相长干涉，振幅加倍",
+                    "相消干涉，振幅减小或抵消",
+                    "波的频率加倍",
+                    "波的传播方向改变"
+                ],
+                correctIndex: 1,
+                explanation: "当相位差为 π（即 180°）时，两列波振动方向相反，叠加后振幅相减，发生相消干涉。"
+            },
+            {
+                id: 2,
+                question: "双缝干涉实验中，增大波长会怎样影响干涉条纹？",
+                options: [
+                    "条纹间距变小",
+                    "条纹间距变大",
+                    "条纹消失",
+                    "条纹亮度增加"
+                ],
+                correctIndex: 1,
+                explanation: "根据公式 Δx = λL/d，条纹间距与波长成正比，增大波长会使条纹间距变大。"
+            },
+            {
+                id: 3,
+                question: "波的衍射现象发生的条件是？",
+                options: [
+                    "波长远小于障碍物尺寸",
+                    "波长与障碍物尺寸相近或更大",
+                    "波必须是横波",
+                    "必须有多个波源"
+                ],
+                correctIndex: 1,
+                explanation: "当波长与障碍物或狭缝尺寸相近或更大时，衍射现象才显著。"
+            },
+            {
+                id: 4,
+                question: "在干涉图样中，亮条纹对应的是？",
+                options: [
+                    "相消干涉点",
+                    "波程差为半波长的奇数倍",
+                    "相长干涉点",
+                    "振幅为零的点"
+                ],
+                correctIndex: 2,
+                explanation: "亮条纹对应振动加强的位置，即相长干涉点，此时波程差为波长的整数倍。"
+            },
+            {
+                id: 5,
+                question: "两列相干波产生稳定干涉图样的必要条件是？",
+                options: [
+                    "振幅相同",
+                    "频率相同、相位差恒定",
+                    "传播方向相同",
+                    "波长必须相等"
+                ],
+                correctIndex: 1,
+                explanation: "相干条件是频率相同、振动方向相同、相位差恒定，其中频率相同和相位差恒定是产生稳定干涉的必要条件。"
+            }
+        ];
+
+        // ========== State Variables ==========
+        let currentQuestion = 0;
+        let score = 0;
+        let answeredQuestions = new Set();
+        let isPlaying = true;
+        let animationId = null;
+        let time = 0;
+
+        // Canvas and context
+        let canvas = null;
+        let ctx = null;
+
+        // Demo parameters
+        let wavelength = 50;
+        let slitDistance = 100;
+        let amplitude = 30;
+
+        // ========== DOM Ready Handler ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            initNavigation();
+            initCanvas();
+            initDemoControls();
+            renderExercises();
+            createParticles();
+        });
+
+        // ========== Navigation ==========
+        function initNavigation() {
+            const tabs = document.querySelectorAll('.nav-tab');
+            const panels = document.querySelectorAll('.module-section');
+
+            tabs.forEach(function(tab) {
+                tab.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-tab');
+
+                    tabs.forEach(function(t) {
+                        t.classList.remove('active');
+                        t.setAttribute('aria-selected', 'false');
+                    });
+                    this.classList.add('active');
+                    this.setAttribute('aria-selected', 'true');
+
+                    panels.forEach(function(panel) {
+                        panel.classList.remove('active');
+                    });
+                    document.getElementById(targetId + '-panel').classList.add('active');
+
+                    // Start/stop animation based on panel
+                    if (targetId === 'demo') {
+                        startAnimation();
+                    } else {
+                        stopAnimation();
+                    }
+                });
+            });
+        }
+
+        // ========== Canvas Initialization ==========
+        function initCanvas() {
+            canvas = document.getElementById('demoCanvas');
+            if (!canvas) return;
+
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            startAnimation();
+        }
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = 400;
+        }
+
+        // ========== Animation Loop ==========
+        function startAnimation() {
+            if (animationId) return;
+            isPlaying = true;
+            animate();
+        }
+
+        function stopAnimation() {
+            isPlaying = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+        }
+
+        function animate() {
+            if (!isPlaying || !ctx || !canvas) return;
+
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Clear canvas
+            ctx.fillStyle = '#0a1628';
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw interference pattern
+            drawInterferencePattern(width, height);
+
+            // Draw wave sources
+            drawWaveSources(width, height);
+
+            time += 0.05;
+            animationId = requestAnimationFrame(animate);
+        }
+
+        function drawInterferencePattern(width, height) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const slit1X = centerX - slitDistance / 4;
+            const slit2X = centerX + slitDistance / 4;
+            const sourceY = 50;
+
+            // Draw interference fringes on screen
+            const screenWidth = 50;
+            const screenX = width - screenWidth;
+
+            for (let y = 0; y < height; y++) {
+                const d1 = Math.sqrt(Math.pow(slit1X - screenX, 2) + Math.pow(y - sourceY, 2));
+                const d2 = Math.sqrt(Math.pow(slit2X - screenX, 2) + Math.pow(y - sourceY, 2));
+                const pathDiff = Math.abs(d1 - d2);
+                const phase = (pathDiff / wavelength) * 2 * Math.PI;
+                const intensity = Math.pow(Math.cos(phase / 2), 2);
+
+                const brightness = Math.floor(intensity * 200 + 55);
+                const r = brightness;
+                const g = Math.floor(brightness * 0.8);
+                const b = Math.floor(brightness * 0.3);
+
+                ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+                ctx.fillRect(screenX, y, screenWidth, 1);
+            }
+
+            // Draw wave propagation
+            ctx.globalAlpha = 0.3;
+            for (let i = 0; i < 20; i++) {
+                const radius = Math.max(1, (time * 50 + i * wavelength) % 400);
+                const alpha = Math.max(0, 1 - radius / 400);
+
+                ctx.beginPath();
+                ctx.arc(slit1X, sourceY, radius, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(0, 212, 170, ' + alpha + ')';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(slit2X, sourceY, radius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+
+            // Draw barrier with slits
+            ctx.fillStyle = '#2a4060';
+            ctx.fillRect(centerX - 10, 0, 20, sourceY - 30);
+            ctx.fillRect(centerX - 10, sourceY + 30, 20, height - sourceY - 30);
+
+            // Slit openings
+            ctx.fillStyle = '#0a1628';
+            ctx.fillRect(centerX - 10, sourceY - 30, 20, 20);
+            ctx.fillRect(centerX - 10, sourceY + 10, 20, 20);
+        }
+
+        function drawWaveSources(width, height) {
+            const centerX = width / 2;
+            const slit1X = centerX - slitDistance / 4;
+            const slit2X = centerX + slitDistance / 4;
+            const sourceY = 50;
+
+            // Draw source points
+            ctx.beginPath();
+            ctx.arc(slit1X, sourceY, 8, 0, Math.PI * 2);
+            ctx.fillStyle = '#00d4aa';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(slit2X, sourceY, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Labels
+            ctx.font = '14px "Noto Sans SC"';
+            ctx.fillStyle = '#e8f0f8';
+            ctx.textAlign = 'center';
+            ctx.fillText('S1', slit1X, sourceY + 25);
+            ctx.fillText('S2', slit2X, sourceY + 25);
+            ctx.fillText('观察屏', width - 70, height - 20);
+        }
+
+        // ========== Demo Controls ==========
+        function initDemoControls() {
+            const wavelengthSlider = document.getElementById('wavelength');
+            const slitDistanceSlider = document.getElementById('slitDistance');
+            const amplitudeSlider = document.getElementById('amplitude');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const resetBtn = document.getElementById('resetBtn');
+
+            if (wavelengthSlider) {
+                wavelengthSlider.addEventListener('input', function() {
+                    wavelength = parseInt(this.value, 10);
+                    document.getElementById('wavelengthValue').textContent = wavelength;
+                });
+            }
+
+            if (slitDistanceSlider) {
+                slitDistanceSlider.addEventListener('input', function() {
+                    slitDistance = parseInt(this.value, 10);
+                    document.getElementById('slitDistanceValue').textContent = slitDistance;
+                });
+            }
+
+            if (amplitudeSlider) {
+                amplitudeSlider.addEventListener('input', function() {
+                    amplitude = parseInt(this.value, 10);
+                    document.getElementById('amplitudeValue').textContent = amplitude;
+                });
+            }
+
+            if (playPauseBtn) {
+                playPauseBtn.addEventListener('click', function() {
+                    if (isPlaying) {
+                        stopAnimation();
+                        this.textContent = '播放';
+                    } else {
+                        startAnimation();
+                        this.textContent = '暂停';
+                    }
+                });
+            }
+
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function() {
+                    wavelength = 50;
+                    slitDistance = 100;
+                    amplitude = 30;
+                    time = 0;
+
+                    if (wavelengthSlider) wavelengthSlider.value = 50;
+                    if (slitDistanceSlider) slitDistanceSlider.value = 100;
+                    if (amplitudeSlider) amplitudeSlider.value = 30;
+
+                    document.getElementById('wavelengthValue').textContent = '50';
+                    document.getElementById('slitDistanceValue').textContent = '100';
+                    document.getElementById('amplitudeValue').textContent = '30';
+
+                    if (!isPlaying) {
+                        startAnimation();
+                        if (playPauseBtn) playPauseBtn.textContent = '暂停';
+                    }
+                });
+            }
+        }
+
+        // ========== Exercise System ==========
+        function renderExercises() {
+            const container = document.getElementById('exerciseContainer');
+            if (!container) return;
+
+            let html = '';
+            exercises.forEach(function(ex, index) {
+                html += '<div class="exercise-card" id="exercise-' + ex.id + '">';
+                html += '<p class="exercise-question"><strong>第 ' + (index + 1) + ' 题：</strong>' + ex.question + '</p>';
+                html += '<div class="exercise-options">';
+                ex.options.forEach(function(opt, optIndex) {
+                    html += '<button class="option-btn" data-exercise="' + ex.id + '" data-option="' + optIndex + '">';
+                    html += String.fromCharCode(65 + optIndex) + '. ' + opt;
+                    html += '</button>';
+                });
+                html += '</div>';
+                html += '<div class="feedback" id="feedback-' + ex.id + '"></div>';
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
+
+            // Add event listeners
+            document.querySelectorAll('.option-btn').forEach(function(btn) {
+                btn.addEventListener('click', handleAnswer);
+            });
+
+            // Reset button
+            const resetBtn = document.getElementById('resetExercise');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', resetExercises);
+            }
+
+            document.getElementById('totalQuestions').textContent = exercises.length;
+        }
+
+        function handleAnswer(e) {
+            const btn = e.target;
+            const exerciseId = parseInt(btn.getAttribute('data-exercise'), 10);
+            const optionIndex = parseInt(btn.getAttribute('data-option'), 10);
+
+            if (answeredQuestions.has(exerciseId)) return;
+
+            const exercise = exercises.find(function(ex) {
+                return ex.id === exerciseId;
+            });
+            if (!exercise) return;
+
+            answeredQuestions.add(exerciseId);
+
+            const isCorrect = optionIndex === exercise.correctIndex;
+            const card = document.getElementById('exercise-' + exerciseId);
+            const feedback = document.getElementById('feedback-' + exerciseId);
+
+            // Mark all options in this exercise
+            const allOptions = card.querySelectorAll('.option-btn');
+            allOptions.forEach(function(optBtn, idx) {
+                optBtn.style.pointerEvents = 'none';
+                if (idx === exercise.correctIndex) {
+                    optBtn.classList.add('correct-answer');
+                } else if (idx === optionIndex && !isCorrect) {
+                    optBtn.classList.add('wrong-answer');
+                }
+            });
+
+            // Update score
+            if (isCorrect) {
+                score++;
+                card.classList.add('correct');
+                feedback.className = 'feedback show correct';
+                feedback.innerHTML = '<strong>正确!</strong> ' + exercise.explanation;
+            } else {
+                card.classList.add('incorrect');
+                feedback.className = 'feedback show incorrect';
+                feedback.innerHTML = '<strong>错误。</strong> ' + exercise.explanation;
+            }
+
+            document.getElementById('currentScore').textContent = score;
+        }
+
+        function resetExercises() {
+            currentQuestion = 0;
+            score = 0;
+            answeredQuestions.clear();
+
+            document.getElementById('currentScore').textContent = '0';
+
+            exercises.forEach(function(ex) {
+                const card = document.getElementById('exercise-' + ex.id);
+                if (card) {
+                    card.classList.remove('correct', 'incorrect');
+                    const allOptions = card.querySelectorAll('.option-btn');
+                    allOptions.forEach(function(optBtn) {
+                        optBtn.style.pointerEvents = 'auto';
+                        optBtn.classList.remove('correct-answer', 'wrong-answer');
+                    });
+                    const feedback = document.getElementById('feedback-' + ex.id);
+                    if (feedback) {
+                        feedback.className = 'feedback';
+                        feedback.innerHTML = '';
+                    }
+                }
+            });
+        }
+
+        // ========== Background Particles ==========
+        function createParticles() {
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (prefersReducedMotion) return;
+
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                particle.style.opacity = Math.random() * 0.5 + 0.2;
+                document.body.appendChild(particle);
+
+                animateParticle(particle);
+            }
+        }
+
+        function animateParticle(particle) {
+            const duration = 10000 + Math.random() * 20000;
+            const startX = parseFloat(particle.style.left);
+            const startY = parseFloat(particle.style.top);
+            const endX = Math.random() * 100;
+            const endY = Math.random() * 100;
+            const startTime = performance.now();
+
+            function step(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeProgress = 0.5 - Math.cos(progress * Math.PI) / 2;
+
+                particle.style.left = (startX + (endX - startX) * easeProgress) + '%';
+                particle.style.top = (startY + (endY - startY) * easeProgress) + '%';
+
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    animateParticle(particle);
+                }
+            }
+
+            requestAnimationFrame(step);
+        }
+    </script>
+</body>
+</html>

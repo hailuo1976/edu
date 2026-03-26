@@ -91,6 +91,7 @@ export class CourseAgent {
       stage: 'prompt',
       message: '开始多轮调优生成...',
       timestamp: Date.now(),
+      promptPreview: this.getPromptPreview(prompt),
     });
 
     const refinementProgressCallback: RefinementProgressCallback = (progress) => {
@@ -112,7 +113,9 @@ export class CourseAgent {
           qualityScore: progress.currentScore ? {
             overall: progress.currentScore.overall,
             passed: progress.currentScore.passed,
+            dimensions: progress.currentScore.dimensions,
           } : undefined,
+          issues: progress.issues,
         });
       }
     };
@@ -127,7 +130,10 @@ export class CourseAgent {
         qualityScore: result.finalScore ? {
           overall: result.finalScore.overall,
           passed: result.finalScore.passed,
+          dimensions: result.finalScore.dimensions,
         } : undefined,
+        issues: result.finalScore?.issues,
+        totalDuration: Date.now() - startTime,
       });
 
       return {
@@ -375,6 +381,11 @@ export class CourseAgent {
       callback(progress);
     }
     console.log(`[CourseAgent] [${progress.stage}] ${progress.message}`);
+  }
+
+  getPromptPreview(prompt: string, maxLength: number = 200): string {
+    if (prompt.length <= maxLength) return prompt;
+    return prompt.substring(0, maxLength) + '...';
   }
 
   private delay(ms: number): Promise<void> {

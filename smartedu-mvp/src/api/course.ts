@@ -108,13 +108,18 @@ router.post('/generate', async (req: Request, res: Response) => {
         message: '生成完成!', 
         timestamp: Date.now(),
         course_id: htmlResult.course_id,
-        quality_score: htmlResult.qualityScore?.overall
+        qualityScore: htmlResult.qualityScore ? {
+          overall: htmlResult.qualityScore.overall,
+          passed: htmlResult.qualityScore.passed,
+          dimensions: htmlResult.qualityScore.dimensions,
+        } : undefined,
+        issues: htmlResult.qualityScore?.issues,
       })}\n\n`);
       res.end();
     } else {
       res.json({
         ...response,
-        quality_score: htmlResult.qualityScore?.overall,
+        quality_score: htmlResult.qualityScore,
       });
     }
   } catch (error: any) {

@@ -53,7 +53,22 @@ export interface GenerationProgress {
   qualityScore?: {
     overall: number;
     passed: boolean;
+    dimensions?: {
+      pedagogy: number;
+      content: number;
+      interaction: number;
+      safety: number;
+      format: number;
+    };
   };
+  promptPreview?: string;
+  issues?: {
+    severity: string;
+    category: string;
+    message: string;
+    suggestion?: string;
+  }[];
+  totalDuration?: number;
 }
 
 export type ProgressCallback = (progress: GenerationProgress) => void;
