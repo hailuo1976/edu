@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一年级数学-正方形的面积</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff6b4a;
+            --primary-dark: #e85a3a;
+            --secondary: #00b894;
+            --accent: #fdcb6e;
+            --success: #00b894;
+            --error: #ff7675;
+            --bg: #fef9f3;
+            --card-bg: #ffffff;
+            --text: #2d3436;
+            --text-secondary: #636e72;
+            --border: #dfe6e9;
+            --shadow: rgba(255, 107, 74, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, #ff8a65 50%, #ffb74d 100%);
+            padding: 2rem 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: headerFloat 20s ease-in-out infinite;
+        }
+
+        @keyframes headerFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(2%, 2%) rotate(5deg); }
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.95);
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: white;
+            box-shadow: 0 2px 10px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .nav-tab:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .nav-tab.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .main-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+
+        canvas {
+            border-radius: 15px;
+            background: #fff;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.03);
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+            border: 3px solid var(--accent);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .formula-box h3 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .formula-box p {
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px var(--shadow);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,184,148,0.3);
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: var(--text);
+        }
+
+        .btn-accent:hover {
+            transform: scale(1.05);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+
+        .info-text {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .highlight {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .size-display {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--primary);
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .question-box {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border: 2px solid var(--secondary);
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .answer-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            justify-items: center;
+        }
+
+        .answer-btn {
+            padding: 1rem 2rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border: 3px solid var(--border);
+            background: white;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .answer-btn:hover {
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .answer-btn.correct {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+            animation: bounce 0.5s ease;
+        }
+
+        .answer-btn.wrong {
+            background: var(--error);
+            border-color: var(--error);
+            color: white;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .score-box {
+            background: linear-gradient(135deg, var(--primary) 0%, #ff8a65 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: inline-block;
+            margin: 1rem 0;
+        }
+
+        .feedback {
+            padding: 1rem;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            margin: 1rem 0;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid var(--success);
+        }
+
+        .feedback.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid var(--error);
+        }
+
+        .progress-bar {
+            background: var(--border);
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, var(--secondary) 0%, #55efc4 100%);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .stars {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .star {
+            width: 40px;
+            height: 40px;
+            opacity: 0.3;
+            transition: all 0.3s ease;
+        }
+
+        .star.active {
+            opacity: 1;
+            animation: starPop 0.5s ease;
+        }
+
+        @keyframes starPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .result-card {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .result-title {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+
+        .result-score {
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .nav-tab {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .formula-box h3 {
+                font-size: 1.4rem;
+            }
+
+            .answer-btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 1.2rem;
+            }
+        }
+
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
+        .shape:nth-child(2) { top: 30%; right: 10%; animation-delay: -5s; }
+        .shape:nth-child(3) { bottom: 20%; left: 15%; animation-delay: -10s; }
+        .shape:nth-child(4) { top: 60%; right: 5%; animation-delay: -15s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(10deg); }
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .step-dot.active {
+            background: var(--primary);
+            transform: scale(1.3);
+        }
+
+        .step-dot.completed {
+            background: var(--secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-shapes">
+        <svg class="shape" width="80" height="80" viewBox="0 0 80 80">
+            <rect x="10" y="10" width="60" height="60" fill="var(--primary)" rx="5"/>
+        </svg>
+        <svg class="shape" width="60" height="60" viewBox="0 0 60 60">
+            <rect x="5" y="5" width="50" height="50" fill="var(--secondary)" rx="5"/>
+        </svg>
+        <svg class="shape" width="70" height="70" viewBox="0 0 70 70">
+            <rect x="5" y="5" width="60" height="60" fill="var(--accent)" rx="5"/>
+        </svg>
+        <svg class="shape" width="50" height="50" viewBox="0 0 50 50">
+            <rect x="5" y="5" width="40" height="40" fill="var(--primary)" rx="5"/>
+        </svg>
+    </div>
+
+    <div class="header">
+        <h1>正方形的面积</h1>
+        <p>一起来学习如何计算正方形的面积吧</p>
+    </div>
+
+    <div class="nav-tabs">
+        <button class="nav-tab active" data-tab="concept">概念讲解</button>
+        <button class="nav-tab" data-tab="practice">互动练习</button>
+        <button class="nav-tab" data-tab="assessment">小测验</button>
+    </div>
+
+    <div class="main-content">
+        <!-- 概念讲解 -->
+        <div class="tab-content active" id="concept">
+            <div class="card">
+                <div class="card-title">什么是正方形？</div>
+                <div class="canvas-container">
+                    <canvas id="conceptCanvas" width="350" height="300"></canvas>
+                </div>
+                <p class="info-text">正方形有<span class="highlight">四条一样长的边</span>，四个角都是直角</p>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="animateSquare()">看看正方形</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">正方形的面积怎么算？</div>
+                <div class="canvas-container">
+                    <canvas id="gridCanvas" width="350" height="350"></canvas>
+                </div>
+                <p class="info-text">面积就是正方形里面有多少个<span class="highlight">小方格</span></p>
+                <div class="formula-box">
+                    <h3>边长 × 边长 = 面积</h3>
+                    <p>例如：边长是 3，面积就是 3 × 3 = 9</p>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-accent" onclick="animateGrid()">演示计算过程</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 互动练习 -->
+        <div class="tab-content" id="practice">
+            <div class="card">
+                <div class="card-title">数一数小方格</div>
+                <div class="canvas-container">
+                    <canvas id="practiceCanvas" width="320" height="320"></canvas>
+                </div>
+                <div class="size-display" id="sideLength">边长 = ?</div>
+                <div class="question-box">
+                    <div class="question-text">这个正方形的面积是多少？</div>
+                    <div class="answer-options" id="practiceOptions">
+                        <button class="answer-btn" onclick="checkPracticeAnswer(1)">1</button>
+                        <button class="answer-btn" onclick="checkPracticeAnswer(4)">4</button>
+                        <button class="answer-btn" onclick="checkPracticeAnswer(9)">9</button>
+                        <button class="answer-btn" onclick="checkPracticeAnswer(16)">16</button>
+                    </div>
+                </div>
+                <div id="practiceFeedback"></div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="newPracticeQuestion()">换一题</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">自己动手算一算</div>
+                <p class="info-text">拖动滑块改变正方形的边长，看看面积怎么变化</p>
+                <div class="canvas-container">
+                    <canvas id="interactiveCanvas" width="320" height="320"></canvas>
+                </div>
+                <div class="size-display" id="interactiveSize">边长 = 1，面积 = 1</div>
+                <div style="display: flex; justify-content: center; padding: 1rem;">
+                    <input type="range" id="sizeSlider" min="1" max="5" value="1" 
+                           style="width: 200px; height: 30px; cursor: pointer;"
+                           oninput="updateInteractiveSize(this.value)">
+                </div>
+            </div>
+        </div>
+
+        <!-- 小测验 -->
+        <div class="tab-content" id="assessment">
+            <div class="card">
+                <div class="card-title">挑战时间</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <div class="stars" id="starsContainer">
+                    <svg class="star" viewBox="0 0 24 24" fill="#fdcb6e">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    <svg class="star" viewBox="0 0 24 24" fill="#fdcb6e">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    <svg class="star" viewBox="0 0 24 24" fill="#fdcb6e">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    <svg class="star" viewBox="0 0 24 24" fill="#fdcb6e">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    <svg class="star" viewBox="0 0 24 24" fill="#fdcb6e">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                </div>
+                <div id="quizContainer"></div>
+                <div id="quizFeedback"></div>
+            </div>
+
+            <div class="card result-card" id="resultCard" style="display: none;">
+                <div class="result-title">测验完成</div>
+                <div class="result-score" id="finalScore">0/5</div>
+                <div id="resultMessage" style="font-size: 1.2rem; margin: 1rem 0;"></div>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="restartQuiz()">再来一次</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量初始化
+        let currentSide = 3;
+        let currentQuestion = 0;
+        let correctAnswers = 0;
+        let animationId = null;
+
+        // 题目数据
+        const quizQuestions = [
+            { side: 2, answer: 4 },
+            { side: 3, answer: 9 },
+            { side: 4, answer: 16 },
+            { side: 1, answer: 1 },
+            { side: 5, answer: 25 }
+        ];
+
+        // Tab 切换
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                this.classList.add('active');
+                const tabId = this.dataset.tab;
+                document.getElementById(tabId).classList.add('active');
+
+                if (tabId === 'concept') {
+                    animateSquare();
+                    animateGrid();
+                } else if (tabId === 'practice') {
+                    newPracticeQuestion();
+                    initInteractive();
+                } else if (tabId === 'assessment') {
+                    initQuiz();
+                }
+            });
+        });
+
+        // 概念讲解 - 正方形动画
+        function animateSquare() {
+            const canvas = document.getElementById('conceptCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            let progress = 0;
+            if (animationId) cancelAnimationFrame(animationId);
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                const size = Math.min(150, progress * 1.5);
+
+                // 绘制正方形
+                ctx.fillStyle = '#ff6b4a';
+                ctx.shadowColor = 'rgba(255, 107, 74, 0.3)';
+                ctx.shadowBlur = 20;
+                ctx.shadowOffsetY = 10;
+                
+                ctx.beginPath();
+                ctx.roundRect(centerX - size/2, centerY - size/2, size, size, 10);
+                ctx.fill();
+                
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetY = 0;
+
+                // 标注边长
+                if (progress > 80) {
+                    ctx.strokeStyle = '#2d3436';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    
+                    // 顶部标注
+                    ctx.beginPath();
+                    ctx.moveTo(centerX - size/2 - 20, centerY - size/2);
+                    ctx.lineTo(centerX + size/2 + 20, centerY - size/2);
+                    ctx.stroke();
+
+                    // 左侧标注
+                    ctx.beginPath();
+                    ctx.moveTo(centerX - size/2, centerY - size/2 - 20);
+                    ctx.lineTo(centerX - size/2, centerY + size/2 + 20);
+                    ctx.stroke();
+                    
+                    ctx.setLineDash([]);
+
+                    // 文字
+                    ctx.fillStyle = '#2d3436';
+                    ctx.font = 'bold 18px Noto Sans SC';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('边长', centerX, centerY - size/2 - 30);
+                    ctx.fillText('边长', centerX - size/2 - 40, centerY + 5);
+                }
+
+                progress += 2;
+                if (progress < 100) {
+                    animationId = requestAnimationFrame(draw);
+                }
+            }
+
+            draw();
+        }
+
+        // 概念讲解 - 网格动画
+        function animateGrid() {
+            const canvas = document.getElementById('gridCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            let step = 0;
+            const sideLength = 3;
+            const cellSize = 60;
+            const startX = (canvas.width - sideLength * cellSize) / 2;
+            const startY = (canvas.height - sideLength * cellSize) / 2;
+
+            if (animationId) cancelAnimationFrame(animationId);
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // 绘制网格
+                for (let i = 0; i < sideLength; i++) {
+                    for (let j = 0; j < sideLength; j++) {
+                        const delay = (i + j) * 5;
+                        const cellProgress = Math.max(0, Math.min(1, (step - delay) / 20));
+                        
+                        if (cellProgress > 0) {
+                            const x = startX + j * cellSize;
+                            const y = startY + i * cellSize;
+                            
+                            ctx.fillStyle = `rgba(255, 107, 74, ${cellProgress * 0.3})`;
+                            ctx.strokeStyle = '#ff6b4a';
+                            ctx.lineWidth = 2;
+                            
+                            ctx.beginPath();
+                            ctx.roundRect(x + 2, y + 2, cellSize - 4, cellSize - 4, 5);
+                            ctx.fill();
+                            ctx.stroke();
+                            
+                            // 格子编号
+                            if (cellProgress > 0.5) {
+                                const num = i * sideLength + j + 1;
+                                ctx.fillStyle = '#2d3436';
+                                ctx.font = 'bold 20px Noto Sans SC';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillText(num.toString(), x + cellSize/2, y + cellSize/2);
+                            }
+                        }
+                    }
+                }
+
+                step += 1;
+                if (step < 50) {
+                    animationId = requestAnimationFrame(draw);
+                } else {
+                    // 显示公式
+                    ctx.fillStyle = '#2d3436';
+                    ctx.font = 'bold 20px Noto Sans SC';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('边长 = 3', canvas.width / 2, startY - 30);
+                    ctx.fillText('面积 = 3 × 3 = 9 个小方格', canvas.width / 2, startY + sideLength * cellSize + 40);
+                }
+            }
+
+            draw();
+        }
+
+        // 练习模块
+        function newPracticeQuestion() {
+            currentSide = Math.floor(Math.random() * 3) + 2; // 2-4
+            document.getElementById('sideLength').textContent = `边长 = ${currentSide}`;
+            
+            const options = document.querySelectorAll('#practiceOptions .answer-btn');
+            options.forEach(btn => {
+                btn.classList.remove('correct', 'wrong');
+                btn.disabled = false;
+            });
+            
+            document.getElementById('practiceFeedback').innerHTML = '';
+            drawPracticeSquare();
+        }
+
+        function drawPracticeSquare() {
+            const canvas = document.getElementById('practiceCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const cellSize = 60;
+            const startX = (canvas.width - currentSide * cellSize) / 2;
+            const startY = (canvas.height - currentSide * cellSize) / 2;
+
+            for (let i = 0; i < currentSide; i++) {
+                for (let j = 0; j < currentSide; j++) {
+                    const x = startX + j * cellSize;
+                    const y = startY + i * cellSize;
+                    
+                    ctx.fillStyle = '#fff3e0';
+                    ctx.strokeStyle = '#ff6b4a';
+                    ctx.lineWidth = 3;
+                    
+                    ctx.beginPath();
+                    ctx.roundRect(x + 2, y + 2, cellSize - 4, cellSize - 4, 5);
+                    ctx.fill();
+                    ctx.stroke();
+                }
+            }
+        }
+
+        function checkPracticeAnswer(answer) {
+            const correctAnswer = currentSide * currentSide;
+            const feedback = document.getElementById('practiceFeedback');
+            const options = document.querySelectorAll('#practiceOptions .answer-btn');
+            
+            options.forEach(btn => {
+                btn.disabled = true;
+                if (parseInt(btn.textContent) === correctAnswer) {
+                    btn.classList.add('correct');
+                } else if (parseInt(btn.textContent) === answer) {
+                    btn.classList.add('wrong');
+                }
+            });
+
+            if (answer === correctAnswer) {
+                feedback.innerHTML = '<div class="feedback success">太棒了！答对了！</div>';
+            } else {
+                feedback.innerHTML = `<div class="feedback error">再想想哦，边长${currentSide}，面积是${currentSide}×${currentSide}=${correctAnswer}</div>`;
+            }
+        }
+
+        // 互动模块
+        function initInteractive() {
+            updateInteractiveSize(1);
+        }
+
+        function updateInteractiveSize(size) {
+            const canvas = document.getElementById('interactiveCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            size = parseInt(size);
+            const cellSize = 50;
+            const startX = (canvas.width - size * cellSize) / 2;
+            const startY = (canvas.height - size * cellSize) / 2;
+
+            // 绘制网格
+            for (let i = 0; i < size; i++) {
+                for (let j = 0; j < size; j++) {
+                    const x = startX + j * cellSize;
+                    const y = startY + i * cellSize;
+                    
+                    const hue = (i * size + j) * (60 / (size * size)) + 10;
+                    ctx.fillStyle = `hsl(${hue}, 80%, 70%)`;
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 2;
+                    
+                    ctx.beginPath();
+                    ctx.roundRect(x + 1, y + 1, cellSize - 2, cellSize - 2, 5);
+                    ctx.fill();
+                    ctx.stroke();
+                }
+            }
+
+            // 外边框
+            ctx.strokeStyle = '#ff6b4a';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.roundRect(startX, startY, size * cellSize, size * cellSize, 8);
+            ctx.stroke();
+
+            // 更新显示
+            const area = size * size;
+            document.getElementById('interactiveSize').textContent = `边长 = ${size}，面积 = ${area}`;
+        }
+
+        // 测验模块
+        function initQuiz() {
+            currentQuestion = 0;
+            correctAnswers = 0;
+            document.getElementById('resultCard').style.display = 'none';
+            updateStars();
+            updateProgress();
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const container = document.getElementById('quizContainer');
+            const q = quizQuestions[currentQuestion];
+            
+            container.innerHTML = `
+                <div class="question-box">
+                    <div class="question-text">第 ${currentQuestion + 1} 题：边长是 ${q.side} 的正方形，面积是多少？</div>
+                    <div class="canvas-container">
+                        <canvas id="quizCanvas" width="250" height="250"></canvas>
+                    </div>
+                    <div class="answer-options" id="quizOptions">
+                        ${generateOptions(q.answer)}
+                    </div>
+                </div>
+            `;
+            
+            drawQuizSquare(q.side);
+        }
+
+        function generateOptions(correctAnswer) {
+            const options = [correctAnswer];
+            while (options.length < 4) {
+                const opt = Math.floor(Math.random() * 25) + 1;
+                if (!options.includes(opt)) {
+                    options.push(opt);
+                }
+            }
+            options.sort(() => Math.random() - 0.5);
+            
+            return options.map(opt => 
+                `<button class="answer-btn" onclick="checkQuizAnswer(${opt}, ${correctAnswer})">${opt}</button>`
+            ).join('');
+        }
+
+        function drawQuizSquare(side) {
+            setTimeout(() => {
+                const canvas = document.getElementById('quizCanvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                const cellSize = Math.min(200 / side, 50);
+                const startX = (canvas.width - side * cellSize) / 2;
+                const startY = (canvas.height - side * cellSize) / 2;
+
+                for (let i = 0; i < side; i++) {
+                    for (let j = 0; j < side; j++) {
+                        const x = startX + j * cellSize;
+                        const y = startY + i * cellSize;
+                        
+                        ctx.fillStyle = '#e8f5e9';
+                        ctx.strokeStyle = '#00b894';
+                        ctx.lineWidth = 2;
+                        
+                        ctx.beginPath();
+                        ctx.roundRect(x + 1, y + 1, cellSize - 2, cellSize - 2, 3);
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                }
+            }, 50);
+        }
+
+        function checkQuizAnswer(answer, correctAnswer) {
+            const options = document.querySelectorAll('#quizOptions .answer-btn');
+            const feedback = document.getElementById('quizFeedback');
+            
+            options.forEach(btn => {
+                btn.disabled = true;
+                if (parseInt(btn.textContent) === correctAnswer) {
+                    btn.classList.add('correct');
+                } else if (parseInt(btn.textContent) === answer) {
+                    btn.classList.add('wrong');
+                }
+            });
+
+            if (answer === correctAnswer) {
+                correctAnswers++;
+                feedback.innerHTML = '<div class="feedback success">太棒了！答对了！</div>';
+            } else {
+                feedback.innerHTML = `<div class="feedback error">答案是 ${correctAnswer}，继续加油！</div>`;
+            }
+
+            updateStars();
+
+            setTimeout(() => {
+                currentQuestion++;
+                updateProgress();
+                feedback.innerHTML = '';
+                
+                if (currentQuestion < quizQuestions.length) {
+                    showQuestion();
+                } else {
+                    showResult();
+                }
+            }, 1500);
+        }
+
+        function updateProgress() {
+            const progress = (currentQuestion / quizQuestions.length) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+        }
+
+        function updateStars() {
+            const stars = document.querySelectorAll('#starsContainer .star');
+            stars.forEach((star, index) => {
+                if (index < correctAnswers) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        function showResult() {
+            document.getElementById('quizContainer').innerHTML = '';
+            const resultCard = document.getElementById('resultCard');
+            resultCard.style.display = 'block';
+            
+            document.getElementById('finalScore').textContent = `${correctAnswers}/${quizQuestions.length}`;
+            
+            const message = document.getElementById('resultMessage');
+            if (correctAnswers === 5) {

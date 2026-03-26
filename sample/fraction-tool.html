@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>五年级分数教学工具</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #f59e0b;
+            --success: #22c55e;
+            --error: #ef4444;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Noto Sans SC", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* 头部样式 */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 24px 32px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        /* 导航标签 */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            border: none;
+            background: var(--bg);
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab:hover {
+            background: #e0e7ff;
+            color: var(--primary);
+        }
+
+        .nav-tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title .icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            padding: 16px;
+            background: #f1f5f9;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .control-group input[type="number"] {
+            width: 70px;
+            padding: 8px 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+
+        .control-group input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #db2777;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #16a34a;
+            transform: translateY(-2px);
+        }
+
+        /* 分数显示 */
+        .fraction-display {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 4px;
+        }
+
+        .fraction-display .numerator {
+            border-bottom: 2px solid var(--text);
+            padding: 0 8px;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .fraction-display .denominator {
+            padding: 0 8px;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        /* 可视化区域 */
+        .visual-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            padding: 24px;
+        }
+
+        .visual-box {
+            text-align: center;
+        }
+
+        .visual-box h4 {
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .shape-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+        }
+
+        /* SVG 样式 */
+        .fraction-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .fraction-svg .shape-bg {
+            fill: #e2e8f0;
+            stroke: #94a3b8;
+            stroke-width: 2;
+        }
+
+        .fraction-svg .shape-fill {
+            fill: url(#gradient1);
+            stroke: var(--primary);
+            stroke-width: 2;
+        }
+
+        .fraction-svg .divider {
+            stroke: #64748b;
+            stroke-width: 2;
+        }
+
+        /* 练习区域 */
+        .quiz-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .quiz-question {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 24px;
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-radius: 12px;
+        }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .quiz-option {
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--primary);
+            background: #f0f7ff;
+        }
+
+        .quiz-option.correct {
+            border-color: var(--success);
+            background: #f0fdf4;
+        }
+
+        .quiz-option.wrong {
+            border-color: var(--error);
+            background: #fef2f2;
+        }
+
+        .quiz-option.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        /* 答案输入 */
+        .answer-input-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .fraction-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .fraction-input input {
+            width: 80px;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1.25rem;
+            text-align: center;
+        }
+
+        .fraction-input input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .fraction-input .divider-line {
+            width: 60px;
+            height: 2px;
+            background: var(--text);
+        }
+
+        /* 反馈信息 */
+        .feedback {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.success {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .feedback.error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        /* 统计面板 */
+        .stats-panel {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px 24px;
+            background: #f8fafc;
+            border-radius: 12px;
+            min-width: 100px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* 难度选择 */
+        .difficulty-selector {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .difficulty-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .difficulty-btn:hover {
+            border-color: var(--primary);
+        }
+
+        .difficulty-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* 操作符 */
+        .operator {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 16px;
+        }
+
+        /* 等号 */
+        .equals {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 16px;
+        }
+
+        /* 步骤展示 */
+        .steps-container {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .nav-tab {
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+
+            .visual-container {
+                gap: 20px;
+            }
+
+            .shape-container {
+                width: 150px;
+                height: 150px;
+            }
+
+            .quiz-options {
+                grid-template-columns: 1fr;
+            }
+
+            .control-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-group {
+                justify-content: center;
+            }
+        }
+
+        /* 动画 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            animation: fadeIn 0.4s ease;
+        }
+
+        /* 提示框 */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 12px;
+            background: var(--text);
+            color: white;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            white-space: nowrap;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部 -->
+    <header class="header">
+        <h1>🎯 五年级分数教学工具</h1>
+        <p>直观学习分数概念，轻松掌握分数运算</p>
+    </header>
+
+    <!-- 导航标签 -->
+    <nav class="nav-tabs">
+        <button class="nav-tab active" data-tab="concept">📚 分数认知</button>
+        <button class="nav-tab" data-tab="compare">⚖️ 分数比较</button>
+        <button class="nav-tab" data-tab="addsub">➕➖ 加减法</button>
+        <button class="nav-tab" data-tab="muldiv">✖️➗ 乘除法</button>
+        <button class="nav-tab" data-tab="quiz">📝 练习测试</button>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <!-- SVG 渐变定义 -->
+        <svg width="0" height="0" style="position: absolute;">
+            <defs>
+                <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#6366f1;stop-opacity:0.9" />
+                    <stop offset="100%" style="stop-color:#ec4899;stop-opacity:0.9" />
+                </linearGradient>
+                <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#22c55e;stop-opacity:0.9" />
+                    <stop offset="100%" style="stop-color:#14b8a6;stop-opacity:0.9" />
+                </linearGradient>
+            </defs>
+        </svg>
+
+        <!-- 1. 分数认知 -->
+        <section id="concept" class="tab-content active">
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="icon">📊</span>
+                    认识分数
+                </h2>
+                <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                    分数表示一个整体被平均分成若干份后，取其中的几份。分子表示取的份数，分母表示总份数。
+                </p>
+                
+                <div class="control-panel">
+                    <div class="control-group">
+                        <label>分子（取几份）：</label>
+                        <input type="number" id="concept-numerator" min="0" max="20" value="3">
+                    </div>
+                    <div class="control-group">
+                        <label>分母（总共几份）：</label>
+                        <input type="number" id="concept-denominator" min="1" max="20" value="4">
+                    </div>
+                    <div class="control-group">
+                        <label>形状：</label>
+                        <select id="concept-shape" style="padding: 8px 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 0.95rem;">
+                            <option value="circle">圆形</option>
+                            <option value="rectangle">长方形</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="updateConcept()">更新展示</button>
+                </div>
+
+                <div class="visual-container">
+                    <div class="visual-box">
+                        <h4>分数表示</h4>
+                        <div style="font-size: 3rem; margin: 20px 0;">
+                            <span class="fraction-display">
+                                <span class="numerator" id="concept-num-display">3</span>
+                                <span class="denominator" id="concept-den-display">4</span>
+                            </span>
+                        </div>
+                        <p id="concept-desc" style="color: var(--text-secondary);">把整体平均分成4份，取其中的3份</p>
+                    </div>
+                    <div class="visual-box">
+                        <h4>可视化图形</h4>
+                        <div class="shape-container" id="concept-visual"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="icon">🔢</span>
+                    真分数与假分数
+                </h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                    <div style="padding: 20px; background: #f0fdf4; border-radius: 12px;">
+                        <h4 style="color: #166534; margin-bottom: 12px;">✅ 真分数</h4>
+                        <p style="color: #374151; margin-bottom: 12px;">分子 < 分母，值小于1</p>
+                        <div style="font-size: 1.5rem;">
+                            例如：<span class="fraction-display"><span class="numerator">1</span><span class="denominator">2</span></span>、
+                            <span class="fraction-display"><span class="numerator">3</span><span class="denominator">4</span></span>、
+                            <span class="fraction-display"><span class="numerator">5</span><span class="denominator">7</span></span>
+                        </div>
+                    </div>
+                    <div style="padding: 20px; background: #fef3c7; border-radius: 12px;">
+                        <h4 style="color: #92400e; margin-bottom: 12px;">⚠️ 假分数</h4>
+                        <p style="color: #374151; margin-bottom: 12px;">分子 ≥ 分母，值大于或等于1</p>
+                        <div style="font-size: 1.5rem;">
+                            例如：<span class="fraction-display"><span class="numerator">5</span><span class="denominator">4</span></span>、
+                            <span class="fraction-display"><span class="numerator">3</span><span class="denominator">2</span></span>、
+                            <span class="fraction-display"><span class="numerator">4</span><span class="denominator">4</span></span>
+                        </div>
+                    </div>
+                    <div style="padding: 20px; background: #eff6ff; border-radius: 12px;">
+                        <h4 style="color: #1e40af; margin-bottom: 12px;">🔄 带分数</h4>
+                        <p style="color: #374151; margin-bottom: 12px;">整数 + 真分数的形式</p>
+                        <div style="font-size: 1.5rem;">
+                            例如：1<span class="fraction-display"><span class="numerator">1</span><span class="denominator">4</span></span> = 
+                            <span class="fraction-display"><span class="numerator">5</span><span class="denominator">4</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 分数比较 -->
+        <section id="compare" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="icon">⚖️</span>
+                    分数比较
+                </h2>
+                
+                <div class="control-panel">
+                    <div class="control-group">
+                        <label>第一个分数：</label>
+                        <input type="number" id="comp1-num" min="0" max="20" value="2">
+                        <span>/</span>
+                        <input type="number" id="comp1-den" min="1" max="20" value="3">
+                    </div>
+                    <div class="control-group">
+                        <label>第二个分数：</label>
+                        <input type="number" id="comp2-num" min="0" max="20" value="3">
+                        <span>/</span>
+                        <input type="number" id="comp2-den" min="1" max="20" value="4">
+                    </div>
+                    <button class="btn btn-primary" onclick="updateCompare()">比较</button>
+                </div>
+
+                <div class="visual-container">
+                    <div class="visual-box">
+                        <h4>第一个分数</h4>
+                        <div style="font-size: 2rem; margin: 12px 0;">
+                            <span class="fraction-display">
+                                <span class="numerator" id="comp1-num-display">2</span>
+                                <span class="denominator" id="comp1-den-display">3</span>
+                            </span>
+                        </div>
+                        <div class="shape-container" id="compare-visual1"></div>
+                    </div>
+                    <div class="visual-box" style="display: flex; align-items: center;">
+                        <div id="compare-result" style="font-size: 3rem; font-weight: 700; color: var(--primary);">&lt;</div>
+                    </div>
+                    <div class="visual-box">
+                        <h4>第二个分数</h4>
+                        <div style="font-size: 2rem; margin: 12px 0;">
+                            <span class="fraction-display">
+                                <span class="numerator" id="comp2-num-display">3</span>
+                                <span class="denominator" id="comp2-den-display">4</span>
+                            </span>
+                        </div>
+                        <div class="shape-container" id="compare-visual2"></div>
+                    </div>
+                </div>
+
+                <div class="steps-container" id="compare-steps">
+                    <h4 style="margin-bottom: 16px; color: var(--text);">比较方法：</h4>
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <div class="step-content">找到公分母：3和4的最小公倍数是12</div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <span class="fraction-display"><span class="numerator">2</span><span class="denominator">3</span></span> = 
+                            <span class="fraction-display"><span class="numerator">8</span><span class="denominator">12</span></span>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <div class="step-content">
+                            <span class="fraction-display"><span class="numerator">3</span><span class="denominator">4</span></span> = 
+                            <span class="fraction-display"><span class="numerator">9</span><span class="denominator">12</span></span>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">4</span>
+                        <div class="step-content">因为 8 &lt; 9，所以 <span class="fraction-display"><span class="numerator">2</span><span class="denominator">3</span></span> &lt; <span class="fraction-display"><span class="numerator">3</span><span class="denominator">4</span></span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 加减法 -->
+        <section id="addsub" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="icon">➕</span>
+                    分数加法
+                </h2>
+                
+                <div class="control-panel">
+                    <div class="control-group">
+                        <label>第一个分数：</label>
+                        <input type="number" id="add1-num" min="0" max="20" value="1">
+                        <span>/</span>
+                        <input type="number" id="add1-den" min="1" max="20" value="4">
+                    </div>
+                    <div class="control-group">
+                        <label>第二个分数：</label>
+                        <input type="number" id="add2-num" min="0" max="20" value="1">
+                        <span>/</span>
+                        <input type="number" id="add2-den" min="1" max="20" value="6">
+                    </div>
+                    <button class="btn btn-primary" onclick="updateAddition()">计算</button>
+                </div>
+
+                <div style="text-align: center; padding: 24px; font-size: 2rem;">
+                    <span class="fraction-display">
+                        <span class="numerator" id="add1-num-display">1</span>
+                        <span class="denominator" id="add1-den-display">4</span>
+                    </span>
+                    <span class="operator">+</span>
+                    <span class="fraction-display">
+                        <span class="numerator" id="add2-num-display">1</span>
+                        <span class="denominator" id="add2-den-display">6</span>
+                    </span>
+                    <span class="equals">=</span>
+                    <span class="fraction-display">
+                        <span class="numerator" id="add-result-num">5</span>
+                        <span class="denominator" id="add-result-den">12</span>
+                    </span>
+                </div>
+
+                <div class="steps-container" id="add-steps">
+                    <h4 style="margin-bottom: 16px;">计算步骤：</h4>
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <div class="step-content">找公分母：4和6的最小公倍数是12</div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <div class="step-content">通分：<span class="fraction-display"><span class="numerator">1</span><span class="denominator">4</span></span> = <span class="fraction-display"><span class="numerator">3</span><span class="denominator">12</span></span>，<span class="fraction-display"><span class="numerator">1</span><span class="denominator">6</span></span> = <span class="fraction-display"><span class="numerator">2</span><span class="denominator">12</span></span></div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <div class="step-content">分子相加：3 + 2 = 5</div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">4</span>
+                        <div class="step-content">结果：<span class="fraction-display"><span class="numerator">5</span><span class="denominator">12</span></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="icon">➖</span>
+                    分数减法
+                </h2>
+                
+                <div class="control-panel">
+                    <div class="control-group">
+                        <label>被减数：</label>
+                        <input type="number" id="sub1-num" min="0" max="20" value="3">
+                        <span>/</span>
+                        <input type="number" id="sub1-den" min="1" max="20" value="4">
+                    </div>
+                    <div class="control-group">
+                        <label>减数：</label>
+                        <input type="number" id="sub2-num" min="0" max="20" value="1">
+                        <span>/</span>
+                        <input type="number" id="sub2-den" min="1" max="20" value="6">
+                    </div>
+                    <button class="btn btn-primary" onclick="updateSubtraction()">计算</button>
+                </div>
+
+                <div style="text-align: center; padding: 24px; font-size: 2rem;">
+                    <span class="fraction-display">
+                        <span class="numerator" id="sub1-num-display">3</span>
+                        <span class="denominator" id="sub1-den-display">4</span>
+                    </span>
+                    <span class="operator">-</span>
+                    <span class="fraction-display">
+                        <span class="numerator" id="sub2-num-display">1</span>
+                        <span class="denominator" id="sub2-den-display">6</span>
+                    </span>
+                    <span class="equals">=</span>
+                    <span class="fraction-display">
+                        <span class="numerator" id="sub-result-num">7</span>
+                        <span class="denominator" id="sub-result-den">12</span>
+                    </span>
+                </div>
+
+                <div class="steps-container" id="sub-steps">
+                    <h4 style="margin-bottom: 16px;">计算步骤：</h4>
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <div class="step-content">找公分母：4和6的最小公倍数是12</div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <div class="step-content">通分：<span class="fraction-display"><span class="numerator">3</span><span class="denominator">4</span></span> = <span class="fraction-display"><span class="numerator">9</span><span class="denominator">12</span></span>，<span class="fraction-display"><span class="numerator">1</span><span class="denominator">6</span></span> = <span class="fraction-display"><span class="numerator">2</span><span class="denominator">12</span></span></div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <div class="step-content">分子相减：9 - 2 = 7</div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">4</span>
+                        <div class="step-content">结果：<span class="fraction-display"><span class="numerator">7</span><span class="denominator">12</span></span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. 乘除法 -->
+        <section id="muldiv" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="icon">✖️</span>
+                    分数乘法
+                </h2>
+                <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                    分数相乘：分子乘分子，分母乘分母。能约分的先约分。
+                </p>
+                
+                <div class="control-panel">
+                    <div class="control-group">
+                        <label>第一个分数：</label>
+                        <input type="number" id="mul1-num" min="0" max="20" value="2">
+                        <span>/</span>
+                        <input type="number" id="mul1-den" min="1" max="20" value="3">
+                    </div>
+                    <div class="control-group">
+                        <label>第二个分数：</label>
+                        <input type="number" id="mul2-num" min="0" max="20" value="3">
+                        <span>/</span>
+                        <input type="number" id="mul2-den" min="1" max="20" value="4">
+                    </div>
+                    <button class="btn btn-primary" onclick="updateMultiplication()">计算</button>
+                </div>
+
+                <div style="text-align: center; padding: 24px; font-size: 2rem;">
+                    <span class="fraction-display">
+                        <span class="numerator" id="mul1-num-display">2</span>
+                        <span class="denominator" id="mul1-den-display">3</span>
+                    </span>
+                    <span class="operator">×</span>
+                    <span class="fraction-display">
+                        <span class="numerator" id="mul2-num-display">3</span>
+                        <span class="denominator" id="mul2-den-display">4</span>
+                    </span>
+                    <span class="equals">=</span>
+                    <span class="fraction-display">
+                        <span class="numerator" id="mul-result-num">1</span>
+                        <span class="denominator" id="mul-result-den">2</span>
+                    </span>
+                </div>
+
+                <div class="steps-container" id="mul-steps">
+                    <h4 style="margin-bottom: 16px;">计算步骤：</h4>
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <div class="step-content">分子相乘：2 × 3 = 6</div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <div class="step-content">分母相乘：3 × 4 = 12</div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <div class="step-content">得到：<span class="fraction-display"><span class="numerator">6</span><span class="denominator">12</span></span></div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">4</span>
+                        <div class="step-content">约分：分子分母同时除以6，得到 <span class="fraction-display"><span class="numerator">1</span><span class="denominator">2</span></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="icon">➗</span>
+                    分数除法
+                </h2>
+                <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                    分数相除：除以一个分数等于乘以它的倒数。
+                </p>
+                
+                <div class="control-panel">
+                    <div class="control-group">
+                        <label>被除数：</label>
+                        <input type="number" id="div1-num" min="0" max="20" value="2">
+                        <span>/</span>
+                        <input type="number" id="div1-den" min="1" max="20" value="3">
+                    </div>
+                    <div class="control-group">
+                        <label>除数：</label>
+                        <input type="number" id="div2-num" min="1" max="20" value="1">
+                        <span>/</span>
+                        <input type="number" id="div2-den" min="1" max="20" value="4">
+                    </div>
+                    <button class="btn btn-primary" onclick="updateDivision()">计算</button>
+                </div>
+
+                <div style="text-align: center; padding: 24px; font-size: 2rem;">
+                    <span class="fraction-display">
+                        <span class="numerator" id="div1-num-display">2</span>
+                        <span class="denominator" id="div1-den-display">3</span>
+                    </span>
+                    <span class="operator">÷</span>
+                    <span class="fraction-display">
+                        <span class="numerator" id="div2-num-display">1</span>
+                        <span class="denominator" id="div2-den-display">4</span>
+                    </span>
+                    <span class="equals">=</span>
+                    <span class="fraction-display">
+                        <span class="numerator" id="div-result-num">8</span>
+                        <span class="denominator" id="div-result-den">3</span>
+                    </span>
+                </div>
+
+                <div class="steps-container" id="div-steps">
+                    <h4 style="margin-bottom: 16px;">计算步骤：</h4>
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <div class="step-content">找到除数的倒数：<span class="fraction-display"><span class="numerator">1</span><span class="denominator">4</span></span> 的倒数是 <span class="fraction-display"><span class="numerator">4</span><span class="denominator">1</span></span></div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <div class="step-content">转换为乘法：<span class="fraction-display"><span class="numerator">2</span><span class="denominator">3</span></span> × <span class="fraction-display"><span class="numerator">4</span><span class="denominator">1</span></span></div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <div class="step-content">分子相乘：2 × 4 = 8</div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">4</span>
+                        <div class="step-content">分母相乘：3 × 1 = 3</div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">5</span>
+                        <div class="step-content">结果：<span class="fraction-display"><span class="numerator">8</span><span class="denominator">3</span></span> = 2<span class="fraction-display"><span class="numerator">2</span><span class="denominator">3</span></span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 练习测试 -->
+        <section id="quiz" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="icon">📝</span>
+                    分数练习
+                </h2>
+
+                <div class="stats-panel">
+                    <div class="stat-item">
+                        <div class="stat-value" id="correct-count">0</div>
+                        <div class="stat-label">答对</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="wrong-count">0</div>
+                        <div class="stat-label">答错</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="accuracy-rate">0%</div>
+                        <div class="stat-label">正确率</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="streak-count">0</div>
+                        <div class="stat-label">连对</div>
+                    </div>
+                </div>
+
+                <div class="difficulty-selector">
+                    <button class="difficulty-btn active" data-level="easy">简单</button>
+                    <button class="difficulty-btn" data-level="medium">中等</button>
+                    <button class="difficulty-btn" data-level="hard">困难</button>
+                </div>
+
+                <div class="quiz-container">
+                    <div class="quiz-question" id="quiz-question">
+                        点击"开始练习"生成题目
+                    </div>
+
+                    <div id="quiz-answer-section" style="display: none;">
+                        <div class="answer-input-group">
+                            <div class="fraction-input">
+                                <input type="number" id="answer-num" placeholder="分子">
+                                <div class="divider-line"></div>
+                                <input type="number" id="answer-den" placeholder="分母">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-options" id="quiz-options">
+                        <!-- 选项将动态生成 -->
+                    </div>
+
+                    <div class="feedback" id="quiz-feedback"></div>
+
+                    <div style="text-align: center;">
+                        <button class="btn btn-primary" id="start-btn" onclick="startQuiz()">开始练习</button>
+                        <button class="btn btn-success" id="submit-btn" style="display: none;" onclick="checkAnswer()">提交答案</button>
+                        <button class="btn btn-secondary" id="next-btn" style="display: none;" onclick="nextQuestion()">下一题</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // ==================== 工具函数 ====================
+        
+        /**
+         * 计算最大公约数 (GCD)
+         * @param {number} a - 第一个数
+         * @param {number} b - 第二个数
+         * @returns {number} 最大公约数
+         */
+        function gcd(a, b) {
+            a = Math.abs(a);
+            b = Math.abs(b);
+            while (b !== 0) {
+                let temp = b;
+                b = a % b;
+                a = temp;
+            }
+            return a;
+        }
+
+        /**
+         * 计算最小公倍数 (LCM)
+         * @param {number} a - 第一个数
+         * @param {number} b - 第二个数
+         * @returns {number} 最小公倍数
+         */
+        function lcm(a, b) {
+            return Math.abs(a * b) / gcd(a, b);
+        }
+
+        /**
+         * 约分分数
+         * @param {number} numerator - 分子
+         * @param {number} denominator - 分母
+         * @returns {Object} 约分后的分子和分母
+         */
+        function simplifyFraction(numerator, denominator) {
+            if (denominator === 0) return { numerator: 0, denominator: 1 };
+            const commonDivisor = gcd(numerator, denominator);
+            return {
+                numerator: numerator / commonDivisor,
+                denominator: denominator / commonDivisor
+            };
+        }
+
+        /**
+         * 生成圆形分数SVG
+         * @param {number} numerator - 分子
+         * @param {number} denominator - 分母
+         * @param {string} gradientId - 渐变ID
+         * @returns {string} SVG HTML字符串
+         */
+        function generateCircleFraction(numerator, denominator, gradientId = 'gradient1') {
+            const cx = 100, cy = 100, r = 90;
+            let svg = `<svg class="fraction-svg" viewBox="0 0 200 200">`;
+            
+            // 背景圆
+            svg += `<circle cx="${cx}" cy="${cy}" r="${r}" class="shape-bg" />`;
+            
+            // 绘制扇形
+            const anglePerSlice = 360 / denominator;
+            for (let i = 0; i < numerator; i++) {
+                const startAngle = i * anglePerSlice - 90;
+                const endAngle = (i + 1) * anglePerSlice - 90;
+                const path = describeArc(cx, cy, r - 2, startAngle, endAngle);
+                svg += `<path d="${path}" fill="url(#${gradientId})" stroke="white" stroke-width="2" />`;
+            }
+            
+            // 分隔线
+            for (let i = 0; i < denominator; i++) {
+                const angle = i * anglePerSlice - 90;
+                const rad = angle * Math.PI / 180;
+                const x2 = cx + r * Math.cos(rad);
+                const y2 = cy + r * Math.sin(rad);
+                svg += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" class="divider" />`;
+            }
+            
+            svg += `</svg>`;
+            return svg;
+        }
+
+        /**
+         * 生成长方形分数SVG
+         * @param {number} numerator - 分子
+         * @param {number} denominator - 分母
+         * @param {string} gradientId - 渐变ID
+         * @returns {string} SVG HTML字符串
+         */
+        function generateRectangleFraction(numerator, denominator, gradientId = 'gradient1') {
+            const width = 180, height = 120;
+            const x = 10, y = 40;
+            let svg = `<svg class="fraction-svg" viewBox="0 0 200 200">`;
+            
+            // 背景矩形
+            svg += `<rect x="${x}" y="${y}" width="${width}" height="${height}" class="shape-bg" />`;
+            
+            // 计算每份的宽度
+            const sliceWidth = width / denominator;
+            
+            // 绘制填充部分
+            for (let i = 0; i < numerator; i++) {
+                svg += `<rect x="${x + i * sliceWidth}" y="${y}" width="${sliceWidth}" height="${height}" fill="url(#${gradientId})" stroke="white" stroke-width="2" />`;
+            }
+            
+            // 分隔线
+            for (let i = 0; i <= denominator; i++) {
+                const lineX = x + i * sliceWidth;
+                svg += `<line x1="${lineX}" y1="${y}" x2="${lineX}" y2="${y + height}" class="divider" />`;
+            }
+            
+            // 上下边线
+            svg += `<line x1="${x}" y1="${y}" x2="${x + width}" y2="${y}" class="divider" />`;
+            svg += `<line x1="${x}" y1="${y + height}" x2="${x + width}" y2="${y + height}" class="divider" />`;
+            
+            svg += `</svg>`;
+            return svg;
+        }
+
+        /**
+         * 计算圆弧路径
+         * @param {number} x - 圆心X
+         * @param {number} y - 圆心Y
+         * @param {number} radius - 半径
+         * @param {number} startAngle - 起始角度
+         * @param {number} endAngle - 结束角度
+         * @returns {string} SVG路径
+         */
+        function describeArc(x, y, radius, startAngle, endAngle) {
+            const start = polarToCartesian(x, y, radius, endAngle);
+            const end = polarToCartesian(x, y, radius, startAngle);
+            const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+            return `M ${x} ${y} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} 0 ${end.x} ${end.y} Z`;
+        }
+
+        /**
+         * 极坐标转笛卡尔坐标
+         */
+        function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+            const angleInRadians = angleInDegrees * Math.PI / 180.0;
+            return {
+                x: centerX + radius * Math.cos(angleInRadians),
+                y: centerY + radius * Math.sin(angleInRadians)
+            };
+        }
+
+        // ==================== 标签切换 ====================
+        
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // ==================== 分数认知模块 ====================
+        
+        /**
+         * 更新分数认知展示
+         */
+        function updateConcept() {
+            const numerator = parseInt(document.getElementById('concept-numerator').value) || 0;
+            const denominator = parseInt(document.getElementById('concept-denominator').value) || 1;
+            const shape = document.getElementById('concept-shape').value;
+            
+            // 更新显示
+            document.getElementById('concept-num-display').textContent = numerator;
+            document.getElementById('concept-den-display').textContent = denominator;
+            document.getElementById('concept-desc').textContent = 
+                `把整体平均分成${denominator}份，取其中的${numerator}份`;
+            
+            // 生成可视化
+            const visualContainer = document.getElementById('concept-visual');
+            if (shape === 'circle') {
+                visualContainer.innerHTML = generateCircleFraction(
+                    Math.min(numerator, denominator), 
+                    denominator
+                );
+            } else {
+                visualContainer.innerHTML = generateRectangleFraction(
+                    Math.min(numerator, denominator), 
+                    denominator
+                );
+            }
+        }
+
+        // ==================== 分数比较模块 ====================
+        
+        /**
+         * 更新分数比较
+         */
+        function updateCompare() {
+            const num1 = parseInt(document.getElementById('comp1-num').value) || 0;
+            const den1 = parseInt(document.getElementById('comp1-den').value) || 1;
+            const num2 = parseInt(document.getElementById('comp2-num').value) || 0;
+            const den2 = parseInt(document.getElementById('comp2-den').value) || 1;
+            
+            // 更新显示
+            document.getElementById('comp1-num-display').textContent = num1;
+            document.getElementById('comp1-den-display').textContent = den1;
+            document.getElementById('comp2-num-display').textContent = num2;
+            document.getElementById('comp2-den-display').textContent = den2;
+            
+            // 更新可视化
+            document.getElementById('compare-visual1').innerHTML = 
+                generateCircleFraction(Math.min(num1, den1), den1, 'gradient1');
+            document.getElementById('compare-visual2').innerHTML = 
+                generateCircleFraction(Math.min(num2, den2), den2, 'gradient2');
+            
+            // 计算比较结果
+            const value1 = num1 / den1;
+            const value2 = num2 / den2;
+            let result = '=';
+            if (value1 < value2) result = '<';
+            else if (value1 > value2) result = '>';
+            document.getElementById('compare-result').textContent = result;
+            
+            // 更新步骤
+            const commonDen = lcm(den1, den2);
+            const newNum1 = num1 * (commonDen / den1);
+            const newNum2 = num2 * (commonDen / den2);
+            
+            document.getElementById('compare-steps').innerHTML = `
+                <h4 style="margin-bottom: 16px; color: var(--text);">比较方法：</h4>
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">找到公分母：${den1}和${den2}的最小公倍数是${commonDen}</div>
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">
+                        <span class="fraction-display"><span class="numerator">${num1}</span><span class="denominator">${den1}</span></span> = 
+                        <span class="fraction-display"><span class="numerator">${newNum1}</span><span class="denominator">${commonDen}</span></span>
+                    </div>
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">
+                        <span class="fraction-display"><span class="numerator">${num2}</span><span class="denominator">${den2}</span></span> = 
+                        <span class="fraction-display"><span class="numerator">${newNum2}</span><span class="denominator">${commonDen}</span></span>
+                    </div>
+                </div>
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <div class="step-content">因为 ${newNum1} ${result} ${newNum2}，所以 
+                        <span class="fraction-display"><span class="numerator">${num1}</span><span class="denominator">${den1}</span></span> 
+                        ${result} 
+                        <span class="fraction-display"><span class="numerator">${num2}</span><span class="denominator">${den2}</span></span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ==================== 加减法模块 ====================
+        
+        /**
+         * 更新加法计算
+         */
+        function updateAddition() {
+            const num1 = parseInt(document.getElementById('add1-num').value) || 0;
+            const den1 = parseInt(document.getElementById('add1-den').value) || 1;
+            const num2 = parseInt(document.getElementById('add2-num').value) || 0;
+            const den2 = parseInt(document.getElementById('add2-den').value) || 1;
+            
+            // 更新显示
+            document.getElementById('add1-num-display').textContent = num1;
+            document.getElementById('add1-den-display').textContent = den1;
+            document.getElementById('add2-num-display').textContent = num2;
+            document.getElementById('add2-den-display').textContent = den2;
+            
+            // 计算结果
+            const commonDen = lcm(den1, den2);
+            const newNum1 = num1 * (commonDen / den1);
+            const newNum2 = num2 * (commonDen / den2);
+            const resultNum = newNum1 + newNum2;
+            
+            const simplified = simplifyFraction(resultNum, commonDen);
+            document.getElementById('add-result-num').textContent = simplified.numerator;
+            document.getElementById('add-result-den').textContent = simplified.denominator;
+            
+            // 更新步骤
+            let stepsHtml = `
+                <h4 style="margin-bottom: 16px;">计算步骤：</h4>
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">找公分母：${den1}和${den2}的最小公倍数是${commonDen}</div>
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">通分：<span class="fraction-display"><span class="numerator">${num1}</span><span class="denominator">${den1}</span></span> = <span class="fraction-display"><span class="numerator">${newNum1}</span><span class="denominator">${commonDen}</span></span>，<span class="fraction-display"><span class="numerator">${num2}</span><span class="denominator">${den2}</span></span> = <span class="fraction-display"><span class="numerator">${newNum2}</span><span class="denominator">${commonDen}</span></span></div>
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">分子相加：${newNum1} + ${newNum2} = ${resultNum}</div>
+                </div>
+            `;
+            
+            if (simplified.numerator !== resultNum || simplified.denominator !== commonDen) {
+                stepsHtml += `
+                    <div class="step">
+                        <span class="step-number">4</span>
+                        <div class="step-content">约分：<span class="fraction-display"><span class="numerator">${resultNum}</span><span class="denominator">${commonDen}</span></span> = <span class="fraction-display"><span class="numerator">${simplified.numerator}</span><span class="denominator">${simplified.denominator}</span></span></div>
+                    </div>
+                `;
+            } else {
+                stepsHtml += `
+                    <div class="step">
+                        <span class="step-number">4</span>
+                        <div class="step-content">结果：<span class="fraction-display"><span class="numerator">${simplified.numerator}</span><span class="denominator">${simplified.denominator}</span></span></div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('add-steps').innerHTML = stepsHtml;
+        }
+
+        /**
+         * 更新减法计算
+         */
+        function updateSubtraction() {
+            const num1 = parseInt(document.getElementById('sub1-num').value) || 0;
+            const den1 = parseInt(document.getElementById('sub1-den').value) || 1;
+            const num2 = parseInt(document.getElementById('sub2-num').value) || 0;
+            const den2 = parseInt(document.getElementById('sub2-den').value) || 1;
+            
+            // 更新显示
+            document.getElementById('sub1-num-display').textContent = num1;
+            document.getElementById('sub1-den-display').textContent = den1;
+            document.getElementById('sub2-num-display').textContent = num2;
+            document.getElementById('sub2-den-display').textContent = den2;
+            
+            // 计算结果
+            const commonDen = lcm(den1, den2);
+            const newNum1 = num1 * (commonDen / den1);
+            const newNum2 = num2 * (commonDen / den2);
+            const resultNum = newNum1 - newNum2;
+            
+            const simplified = simplifyFraction(resultNum, commonDen);
+            document.getElementById('sub-result-num').textContent = simplified.numerator;
+            document.getElementById('sub-result-den').textContent = simplified.denominator;
+            
+            // 更新步骤
+            let stepsHtml = `
+                <h4 style="margin-bottom: 16px;">计算步骤：</h4>
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">找公分母：${den1}和${den2}的最小公倍数是${commonDen}</div>
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">通分：<span class="fraction-display"><span class="numerator">${num1}</span><span class="denominator">${den1}</span></span> = <span class="fraction-display"><span class="numerator">${newNum1}</span><span class="denominator">${commonDen}</span></span>，<span class="fraction-display"><span class="numerator">${num2}</span><span class="denominator">${den2}</span></span> = <span class="fraction-display"><span class="numerator">${newNum2}</span><span class="denominator">${commonDen}</span></span></div>
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">分子相减：${newNum1} - ${newNum2} = ${resultNum}</div>
+                </div>
+            `;
+            
+            if (simplified.numerator !== resultNum || simplified.denominator !== commonDen) {
+                stepsHtml += `
+                    <div class="step">
+                        <span class="step-number">4</span>
+                        <div class="step-content">约分：<span class="fraction-display"><span class="numerator">${resultNum}</span><span class="denominator">${commonDen}</span></span> = <span class="fraction-display"><span class="numerator">${simplified.numerator}</span><span class="denominator">${simplified.denominator}</span></span></div>
+                    </div>
+                `;
+            } else {
+                stepsHtml += `
+                    <div class="step">
+                        <span class="step-number">4</span>
+                        <div class="step-content">结果：<span class="fraction-display"><span class="numerator">${simplified.numerator}</span><span class="denominator">${simplified.denominator}</span></span></div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('sub-steps').innerHTML = stepsHtml;
+        }
+
+        // ==================== 乘除法模块 ====================
+        
+        /**
+         * 更新乘法计算
+         */
+        function updateMultiplication() {
+            const num1 = parseInt(document.getElementById('mul1-num').value) || 0;
+            const den1 = parseInt(document.getElementById('mul1-den').value) || 1;
+            const num2 = parseInt(document.getElementById('mul2-num').value) || 0;
+            const den2 = parseInt(document.getElementById('mul2-den').value) || 1;
+            
+            // 更新显示
+            document.getElementById('mul1-num-display').textContent = num1;
+            document.getElementById('mul1-den-display').textContent = den1;
+            document.getElementById('mul2-num-display').textContent = num2;
+            document.getElementById('mul2-den-display').textContent = den2;
+            
+            // 计算结果
+            let resultNum = num1 * num2;
+            let resultDen = den1 * den2;
+            
+            // 先约分再计算
+            const common1 = gcd(num1, den2);
+            const common2 = gcd(num2, den1);
+            const simplifiedNum1 = num1 / common1;
+            const simplifiedDen2 = den2 / common1;
+            const simplifiedNum2 = num2 / common2;
+            const simplifiedDen1 = den1 / common2;
+            
+            resultNum = simplifiedNum1 * simplifiedNum2;
+            resultDen = simplifiedDen1 * simplifiedDen2;
+            
+            const finalSimplified = simplifyFraction(resultNum, resultDen);
+            document.getElementById('mul-result-num').textContent = finalSimplified.numerator;
+            document.getElementById('mul-result-den').textContent = finalSimplified.denominator;
+            
+            // 更新步骤
+            let stepsHtml = `
+                <h4 style="margin-bottom: 16px;">计算步骤：</h4>
+            `;
+            
+            if (common1 > 1 || common2 > 1) {
+                stepsHtml += `
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <div class="step-content">先约分：${common1 > 1 ? `<span class="fraction-display"><span class="numerator">${num1}</span><span class="denominator">${den2}</span></span> 约去 ${common1}` : ''} ${common2 > 1 ? `${common1 > 1 ? '，' : ''}<span class="fraction-display"><span class="numerator">${num2}</span><span class="denominator">${den1}</span></span> 约去 ${common2}` : ''}</div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <div class="step-content">分子相乘：${simplifiedNum1} × ${simplifiedNum2} = ${resultNum}</div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <div class="step-content">分母相乘：${simplifiedDen1} × ${simplifiedDen2} = ${resultDen}</div>
+                    </div>
+                `;
+            } else {
+                stepsHtml += `
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <div class="step-content">分子相乘：${num1} × ${num2} = ${num1 * num2}</div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <div class="step-content">分母相乘：${den1} × ${den2} = ${den1 * den2}</div>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <div class="step-content">得到：<span class="fraction-display"><span class="numerator">${num1 * num2}</span><span class="denominator">${den1 * den2}</span></span></div>
+                    </div>
+                `;
+            }
+            
+            const finalGcd = gcd(resultNum, resultDen);
+            if (finalGcd > 1) {
+                stepsHtml += `
+                    <div class="step">
+                        <span class="step-number">${common1 > 1 || common2 > 1 ? 4 : 4}</span>
+                        <div class="step-content">约分：分子分母同时除以${finalGcd}，得到 <span class="fraction-display"><span class="numerator">${finalSimplified.numerator}</span><span class="denominator">${finalSimplified.denominator}</span></span></div>
+                    </div>
+                `;
+            } else if (common1 > 1 || common2 > 1) {
+                stepsHtml += `
+                    <div class="step">
+                        <span class="step-number">4</span>
+                        <div class="step-content">结果：<span class="fraction-display"><span class="numerator">${finalSimplified.numerator}</span><span class="denominator">${finalSimplified.denominator}</span></span></div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('mul-steps').innerHTML = stepsHtml;
+        }
+
+        /**
+         * 更新除法计算
+         */
+        function updateDivision() {
+            const num1 = parseInt(document.getElementById('div1-num').value) || 0;
+            const den1 = parseInt(document.getElementById('div1-den').value) || 1;
+            const num2 = parseInt(document.getElementById('div2-num').value) || 1;
+            const den2 = parseInt(document.getElementById('div2-den').value) || 1;
+            
+            // 更新显示
+            document.getElementById('div1-num-display').textContent = num1;
+            document.getElementById('div1-den-display').textContent = den1;
+            document.getElementById('div2-num-display').textContent = num2;
+            document.getElementById('div2-den-display').textContent = den2;
+            
+            // 倒数
+            const reciprocalNum = den2;
+            const reciprocalDen = num2;
+            
+            // 计算结果（除以一个分数 = 乘以它的倒数）
+            let resultNum = num1 * reciprocalNum;
+            let resultDen = den1 * reciprocalDen;
+            
+            const simplified = simplifyFraction(resultNum, resultDen);
+            document.getElementById('div-result-num').textContent = simplified.numerator;
+            document.getElementById('div-result-den').textContent = simplified.denominator;
+            
+            // 计算带分数
+            const wholeNum = Math.floor(simplified.numerator / simplified.denominator);
+            const remainderNum = simplified.numerator % simplified.denominator;
+            
+            // 更新步骤
+            let stepsHtml = `
+                <h4 style="margin-bottom: 16px;">计算步骤：</h4>
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">找到除数的倒数：<span class="fraction-display"><span class="numerator">${num2}</span><span class="denominator">${den2}</span></span> 的倒数是 <span class="fraction-display"><span class="numerator">${reciprocalNum}</span><span class="denominator">${reciprocalDen}</span></span></div>
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">转换为乘法：<span class="fraction-display"><span class="numerator">${num1}</span><span class="denominator">${den1}</span></span> × <span class="fraction-display"><span class="numerator">${reciprocalNum}</span><span class="denominator">${reciprocalDen}</span></span></div>
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">分子相乘：${num1} × ${reciprocalNum} = ${resultNum}</div>
+                </div>
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <div class="step-content">分母相乘：${den1} × ${reciprocalDen} = ${resultDen}</div>
+                </div>
+            `;
+            
+            const commonDivisor = gcd(resultNum, resultDen);
+            if (commonDivisor > 1) {
+                stepsHtml += `
+                    <div class="step">
+                        <span class="step-number">5</span>
+                        <div class="step-content">约分：<span class="fraction-display"><span class="numerator">${resultNum}</span><span class="denominator">${resultDen}</span></span> = <span class="fraction-display"><span class="numerator">${simplified.numerator}</span><span class="denominator">${simplified.denominator}</span></span></div>
+                    </div>
+                `;
+            }
+            
+            if (wholeNum > 0 && remainderNum > 0) {
+                stepsHtml += `
+                    <div class="step">
+                        <span class="step-number">${commonDivisor > 1 ? 6 : 5}</span>
+                        <div class="step-content">结果：<span class="fraction-display"><span class="numerator">${simplified.numerator}</span><span class="denominator">${simplified.denominator}</span></span> = ${wholeNum}<span class="fraction-display"><span class="numerator">${remainderNum}</span><span class="denominator">${simplified.denominator}</span></span></div>
+                    </div>
+                `;
+            } else {
+                stepsHtml += `
+                    <div class="step">
+                        <span class="step-number">${commonDivisor > 1 ? 6 : 5}</span>
+                        <div class="step-content">结果：<span class="fraction-display"><span class="numerator">${simplified.numerator}</span><span class="denominator">${simplified.denominator}</span></span></div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('div-steps').innerHTML = stepsHtml;
+        }
+
+        // ==================== 练习测试模块 ====================
+        
+        let quizStats = {
+            correct: 0,
+            wrong: 0,
+            streak: 0,
+            currentQuestion: null,
+            difficulty: 'easy'
+        };
+
+        // 难度选择
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                quizStats.difficulty = btn.dataset.level;
+            });
+        });
+
+        /**
+         * 更新统计面板
+         */
+        function updateStats() {
+            document.getElementById('correct-count').textContent = quizStats.correct;
+            document.getElementById('wrong-count').textContent = quizStats.wrong;
+            const total = quizStats.correct + quizStats.wrong;
+            const rate = total > 0 ? Math.round((quizStats.correct / total) * 100) : 0;
+            document.getElementById('accuracy-rate').textContent = rate + '%';
+            document.getElementById('streak-count').textContent = quizStats.streak;
+        }
+
+        /**
+         * 生成随机整数
+         * @param {number} min - 最小值
+         * @param {number} max - 最大值
+         * @returns {number} 随机整数
+         */
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        /**
+         * 生成题目
+         */
+        function generateQuestion() {
+            const difficulty = quizStats.difficulty;
+            let num1, den1, num2, den2, operator, answer, questionText;
+            
+            // 根据难度设置范围
+            let maxDen = difficulty === 'easy' ? 8 : (difficulty === 'medium' ? 12 : 20);
+            let maxNum = difficulty === 'easy' ? 6 : (difficulty === 'medium' ? 10 : 15);
+            
+            const operators = ['+', '-', '×', '÷', 'compare'];
+            operator = operators[randomInt(0, operators.length - 1)];
+            
+            switch(operator) {
+                case '+':
+                    den1 = randomInt(2, maxDen);
+                    den2 = randomInt(2, maxDen);
+                    num1 = randomInt(1, Math.min(maxNum, den1 - 1));
+                    num2 = randomInt(1, Math.min(maxNum, den2 - 1));
+                    
+                    const addCommonDen = lcm(den1, den2);
+                    const addNewNum1 = num1 * (addCommonDen / den1);
+                    const addNewNum2 = num2 * (addCommonDen / den2);
+                    const addResult = simplifyFraction(addNewNum1 + addNewNum2, addCommonDen);
+                    
+                    answer = { num: addResult.numerator, den: addResult.denominator };
+                    questionText = `<span class="fraction-display"><span class="numerator">${num1}</span><span class="denominator">${den1}</span></span> + <span class="fraction-display"><span class="numerator">${num2}</span><span class="denominator">${den2}</span></span> = ?`;
+                    break;
+                    
+                case '-':
+                    den1 = randomInt(2, maxDen);
+                    den2 = randomInt(2, maxDen);
+                    // 确保结果为正数
+                    const subCommonDen = lcm(den1, den2);
+                    const maxFirstNum = Math.min(maxNum, den1 - 1);
+                    num1 = randomInt(2, maxFirstNum);
+                    num2 = randomInt(1, Math.min(num1 - 1, den2 - 1));
+                    
+                    const subNewNum1 = num1 * (subCommonDen / den1);
+                    const subNewNum2 = num2 * (subCommonDen / den2);
+                    // 确保被减数大于减数
+                    if (subNewNum1 <= subNewNum2) {
+                        num1 = Math.max(num1, num2 + 1);
+                    }
+                    const subResult = simplifyFraction(subNewNum1 - subNewNum2, subCommonDen);
+                    
+                    answer = { num: subResult.numerator, den: subResult.denominator };
+                    questionText = `<span class="fraction-display"><span class="numerator">${num1}</span><span class="denominator">${den1}</span></span> - <span class="fraction-display"><span class="numerator">${num2}</span><span class="denominator">${den2}</span></span> = ?`;
+                    break;
+                    
+                case '×':
+                    den1 = randomInt(2, maxDen);
+                    den2 = randomInt(2, maxDen);
+                    num1 = randomInt(1, maxNum);
+                    num2 = randomInt(1, maxNum);
+                    
+                    const mulResult = simplifyFraction(num1 * num2, den1 * den2);
+                    answer = { num: mulResult.numerator, den: mulResult.denominator };
+                    questionText = `<span class="fraction-display"><span class="numerator">${num1}</span><span class="denominator">${den1}</span></span> × <span class="fraction-display"><span class="numerator">${num2}</span><span class="denominator">${den2}</span></span> = ?`;
+                    break;
+                    
+                case '÷':
+                    den1 = randomInt(2, maxDen);
+                    den2 = randomInt(2, maxDen);
+                    num1 = randomInt(1, maxNum);
+                    num2 = randomInt(1, maxNum);
+                    
+                    const divResult = simplifyFraction(num1 * den2, den1 * num2);
+                    answer = { num: divResult.numerator, den: divResult.denominator };
+                    questionText = `<span class="fraction-display"><span class="numerator">${num1}</span><span class="denominator">${den1}</span></span> ÷ <span class="fraction-display"><span class="numerator">${num2}</span><span class="denominator">${den2}</span></span> = ?`;
+                    break;
+                    
+                case 'compare':
+                    den1 = randomInt(2, maxDen);
+                    den2 = randomInt(2, maxDen);
+                    num1 = randomInt(1, den1);
+                    num2 = randomInt(1, den2);
+                    
+                    const val1 = num1 / den1;
+                    const val2 = num2 / den2;
+                    if (val1 < val2) answer = '<';
+                    else if (val1 > val2) answer = '>';
+                    else answer = '=';
+                    
+                    questionText = `<span class="fraction-display"><span class="numerator">${num1}</span><span class="denominator">${den1}</span></span> ? <span class="fraction-display"><span class="numerator">${num2}</span><span class="denominator">${den2}</span></span>`;
+                    break;
+            }
+            
+            return {
+                text: questionText,
+                answer: answer,
+                operator: operator
+            };
+        }
+
+        /**
+         * 生成选项（用于比较题）
+         * @param {string} correctAnswer - 正确答案
+         * @returns {Array} 选项数组
+         */
+        function generateOptions(correctAnswer) {
+            const options = ['<', '>', '='];
+            return options;
+        }
+
+        /**
+         * 开始练习
+         */
+        function startQuiz() {
+            quizStats.currentQuestion = generateQuestion();
+            
+            document.getElementById('quiz-question').innerHTML = quizStats.currentQuestion.text;
+            document.getElementById('start-btn').style.display = 'none';
+            document.getElementById('submit-btn').style.display = 'inline-block';
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('quiz-feedback').classList.remove('show');
+            
+            // 清空输入
+            document.getElementById('answer-num').value = '';
+            document.getElementById('answer-den').value = '';
+            
+            // 根据题型显示不同的输入方式
+            if (quizStats.currentQuestion.operator === 'compare') {
+                document.getElementById('quiz-answer-section').style.display = 'none';
+                document.getElementById('quiz-options').style.display = 'grid';
+                
+                // 生成选项
+                const options = generateOptions(quizStats.currentQuestion.answer);
+                let optionsHtml = '';
+                options.forEach(opt => {
+                    optionsHtml += `<div class="quiz-option" onclick="selectOption(this, '${opt}')" data-value="${opt}">${opt}</div>`;
+                });
+                document.getElementById('quiz-options').innerHTML = optionsHtml;
+            } else {
+                document.getElementById('quiz-answer-section').style.display = 'block';
+                document.getElementById('quiz-options').style.display = 'none';
+            }
+        }
+
+        let selectedOption = null;
+
+        /**
+         * 选择选项
+         * @param {HTMLElement} element - 选项元素
+         * @param {string} value - 选项值
+         */
+        function selectOption(element, value) {
+            document.querySelectorAll('.quiz-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedOption = value;
+        }
+
+        /**
+         * 检查答案
+         */
+        function checkAnswer() {
+            const question = quizStats.currentQuestion;
+            let isCorrect = false;
+            let userAnswer = '';
+            
+            if (question.operator === 'compare') {
+                if (!selectedOption) {
+                    showFeedback('请选择一个选项', 'error');
+                    return;
+                }
+                userAnswer = selectedOption;
+                isCorrect = userAnswer === question.answer;
+            } else {
+                const num = parseInt(document.getElementById('answer-num').value);
+                const den = parseInt(document.getElementById('answer-den').value);
+                
+                if (isNaN(num) || isNaN(den) || den === 0) {
+                    showFeedback('请输入有效的分数', 'error');
+                    return;
+                }
+                
+                // 检查是否等价（约分后相同）
+                const userSimplified = simplifyFraction(num, den);
+                isCorrect = userSimplified.numerator === question.answer.num && 
+                           userSimplified.denominator === question.answer.den;
+            }
+            
+            if (isCorrect) {
+                quizStats.correct++;
+                quizStats.streak++;
+                showFeedback('🎉 回答正确！', 'success');
+            } else {
+                quizStats.wrong++;
+                quizStats.streak = 0;
+                let correctText = question.operator === 'compare' ? 
+                    question.answer : 
+                    `<span class="fraction-display"><span class="numerator">${question.answer.num}</span><span class="denominator">${question.answer.den}</span></span>`;
+                showFeedback(`❌ 回答错误！正确答案是 ${correctText}`, 'error');
+            }
+            
+            updateStats();
+            
+            // 禁用输入并显示下一题按钮
+            document.getElementById('submit-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'inline-block';
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.add('disabled');
+                if (opt.dataset.value === question.answer) {
+                    opt.classList.add('correct');
+                } else if (opt.dataset.value === userAnswer && !isCorrect) {
+                    opt.classList.add('wrong');
+                }
+            });
+        }
+
+        /**
+         * 显示反馈
+         * @param {string} message - 消息内容
+         * @param {string} type - 类型（success/error）
+         */
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('quiz-feedback');
+            feedback.innerHTML = message;
+            feedback.className = 'feedback show ' + type;
+        }
+
+        /**
+         * 下一题
+         */
+        function nextQuestion() {
+            selectedOption = null;
+            startQuiz();
+        }
+
+        // ==================== 初始化 ====================
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            updateConcept();
+            updateCompare();
+            updateAddition();
+            updateSubtraction();
+            updateMultiplication();
+            updateDivision();
+        });
+    </script>
+</body>
+</html>

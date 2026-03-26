@@ -1,0 +1,729 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>循环结构 - 交互式课件</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f1419;
+            --bg-secondary: #1a2332;
+            --fg: #e8edf4;
+            --muted: #6b7d93;
+            --accent: #00d4aa;
+            --accent-dim: rgba(0, 212, 170, 0.15);
+            --card: #1e2a3a;
+            --border: #2d3f52;
+            --warning: #ff6b4a;
+            --info: #4a9eff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .bg-pattern {
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(0, 212, 170, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(74, 158, 255, 0.06) 0%, transparent 50%),
+                linear-gradient(180deg, var(--bg) 0%, var(--bg-secondary) 100%);
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .accent-glow {
+            box-shadow: 0 0 30px rgba(0, 212, 170, 0.3);
+        }
+
+        .tab-btn {
+            position: relative;
+            padding: 12px 28px;
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .tab-btn:hover {
+            color: var(--fg);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .code-block {
+            background: #0a0e14;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .code-line {
+            display: flex;
+            align-items: center;
+            padding: 4px 0;
+            transition: background 0.2s ease;
+        }
+
+        .code-line:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .line-num {
+            color: var(--muted);
+            width: 32px;
+            text-align: right;
+            padding-right: 16px;
+            user-select: none;
+        }
+
+        .keyword { color: #ff7b72; }
+        .function { color: #d2a8ff; }
+        .string { color: #a5d6ff; }
+        .number { color: #79c0ff; }
+        .comment { color: var(--muted); font-style: italic; }
+        .variable { color: #ffa657; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, #00b894 100%);
+            color: var(--bg);
+            font-weight: 600;
+            padding: 12px 32px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(0, 212, 170, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--fg);
+            font-weight: 500;
+            padding: 12px 32px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+
+        #demoCanvas {
+            border-radius: 12px;
+            background: #0a0e14;
+        }
+
+        .input-field {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: var(--fg);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            width: 100%;
+            transition: border-color 0.2s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .feedback {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .feedback.success {
+            background: rgba(0, 212, 170, 0.15);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        .feedback.error {
+            background: rgba(255, 107, 74, 0.15);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tab-btn {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-pattern">
+    <div class="min-h-screen py-8 px-4">
+        <header class="max-w-5xl mx-auto mb-12 fade-in">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-2" style="color: var(--fg);">循环结构</h1>
+                    <p class="text-lg" style="color: var(--muted);">掌握程序重复执行的核心理念</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <svg class="progress-ring" width="60" height="60" viewBox="0 0 60 60">
+                            <circle cx="30" cy="30" r="26" fill="none" stroke="var(--border)" stroke-width="4"/>
+                            <circle class="progress-ring-circle" id="progressCircle" cx="30" cy="30" r="26" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="163.36"/>
+                        </svg>
+                        <span id="progressText" class="absolute inset-0 flex items-center justify-center font-mono text-sm font-semibold" style="color: var(--accent);">0%</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <nav class="max-w-5xl mx-auto mb-8 fade-in stagger-1">
+            <div class="flex gap-2 p-2 rounded-xl" style="background: var(--card);">
+                <button class="tab-btn active" data-tab="concept" onclick="switchTab('concept')">概念讲解</button>
+                <button class="tab-btn" data-tab="demo" onclick="switchTab('demo')">可视化演示</button>
+                <button class="tab-btn" data-tab="exercise" onclick="switchTab('exercise')">交互练习</button>
+            </div>
+        </nav>
+
+        <main class="max-w-5xl mx-auto">
+            <!-- Concept Module -->
+            <section id="concept" class="tab-content fade-in stagger-2">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="card p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: var(--accent-dim);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round">
+                                    <path d="M17 1l4 4-4 4"/>
+                                    <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                                    <path d="M7 23l-4-4 4-4"/>
+                                    <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                                </svg>
+                            </div>
+                            <h2 class="text-xl font-bold">什么是循环</h2>
+                        </div>
+                        <p class="leading-relaxed mb-4" style="color: var(--muted);">
+                            循环是程序设计中的一种基本控制结构，它允许一段代码被重复执行多次，直到满足特定的终止条件为止。
+                        </p>
+                        <div class="flex gap-4 text-sm">
+                            <div class="flex-1 p-3 rounded-lg" style="background: var(--bg);">
+                                <div class="font-semibold" style="color: var(--accent);">for循环</div>
+                                <div style="color: var(--muted);">已知次数</div>
+                            </div>
+                            <div class="flex-1 p-3 rounded-lg" style="background: var(--bg);">
+                                <div class="font-semibold" style="color: var(--info);">while循环</div>
+                                <div style="color: var(--muted);">条件控制</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card p-6">
+                        <h3 class="text-lg font-bold mb-4">for 循环语法</h3>
+                        <div class="code-block font-mono text-sm">
+                            <div class="code-line">
+                                <span class="line-num">1</span>
+                                <span><span class="keyword">for</span> (<span class="variable">初始化</span>; <span class="variable">条件</span>; <span class="variable">更新</span>) {</span>
+                            </div>
+                            <div class="code-line">
+                                <span class="line-num">2</span>
+                                <span>    <span class="comment">// 循环体</span></span>
+                            </div>
+                            <div class="code-line">
+                                <span class="line-num">3</span>
+                                <span>    <span class="variable">循环语句</span>;</span>
+                            </div>
+                            <div class="code-line">
+                                <span class="line-num">4</span>
+                                <span>}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card p-6 md:col-span-2">
+                        <h3 class="text-lg font-bold mb-4">执行流程</h3>
+                        <div class="flex flex-wrap gap-4 justify-center">
+                            <div class="flex items-center gap-3 p-4 rounded-xl" style="background: var(--bg);">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold" style="background: var(--accent); color: var(--bg);">1</div>
+                                <span>初始化变量</span>
+                            </div>
+                            <svg class="hidden md:block" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                            <div class="flex items-center gap-3 p-4 rounded-xl" style="background: var(--bg);">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold" style="background: var(--info); color: var(--bg);">2</div>
+                                <span>判断条件</span>
+                            </div>
+                            <svg class="hidden md:block" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                            <div class="flex items-center gap-3 p-4 rounded-xl" style="background: var(--bg);">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold" style="background: #ffa657; color: var(--bg);">3</div>
+                                <span>执行循环体</span>
+                            </div>
+                            <svg class="hidden md:block" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                            <div class="flex items-center gap-3 p-4 rounded-xl" style="background: var(--bg);">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold" style="background: var(--warning); color: var(--bg);">4</div>
+                                <span>更新变量</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Demo Module -->
+            <section id="demo" class="tab-content hidden">
+                <div class="card p-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                        <h3 class="text-xl font-bold">循环可视化</h3>
+                        <div class="flex gap-3">
+                            <button class="btn-secondary" onclick="resetDemo()">重置</button>
+                            <button class="btn-primary" onclick="runDemo()" id="runBtn">运行演示</button>
+                        </div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <canvas id="demoCanvas" width="400" height="300"></canvas>
+                        </div>
+                        <div>
+                            <div class="code-block font-mono text-sm mb-4">
+                                <div class="code-line">
+                                    <span class="line-num">1</span>
+                                    <span><span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">i</span> = <span class="number">0</span>; <span class="variable">i</span> &lt; <span class="number" id="maxIter">5</span>; <span class="variable">i</span>++) {</span>
+                                </div>
+                                <div class="code-line">
+                                    <span class="line-num">2</span>
+                                    <span>    <span class="function">drawCircle</span>(<span class="variable">i</span>);</span>
+                                </div>
+                                <div class="code-line">
+                                    <span class="line-num">3</span>
+                                    <span>}</span>
+                                </div>
+                            </div>
+                            <div class="p-4 rounded-xl" style="background: var(--bg);">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span style="color: var(--muted);">当前迭代</span>
+                                    <span class="font-mono font-bold text-lg" id="currentIter" style="color: var(--accent);">0</span>
+                                </div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span style="color: var(--muted);">变量 i 值</span>
+                                    <span class="font-mono font-bold text-lg" id="varI" style="color: var(--info);">0</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span style="color: var(--muted);">条件 i &lt; 5</span>
+                                    <span class="font-mono font-bold text-lg" id="condition" style="color: var(--accent);">true</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Exercise Module -->
+            <section id="exercise" class="tab-content hidden">
+                <div class="grid gap-6">
+                    <div class="card p-6">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(255, 107, 74, 0.15);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round">
+                                    <path d="M12 20h9"/>
+                                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold">练习：计算求和</h3>
+                        </div>
+                        <p class="mb-6" style="color: var(--muted);">
+                            请编写一个 for 循环，计算从 1 加到 <strong id="targetNum" style="color: var(--accent);">10</strong> 的和。
+                            正确答案应该是 <strong id="expectedSum" style="color: var(--accent);">55</strong>。
+                        </p>
+                        <div class="code-block font-mono text-sm mb-4">
+                            <div class="code-line">
+                                <span class="line-num">1</span>
+                                <span><span class="keyword">let</span> <span class="variable">sum</span> = <span class="number">0</span>;</span>
+                            </div>
+                            <div class="code-line">
+                                <span class="line-num">2</span>
+                                <span><span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">i</span> = <span class="number">1</span>; <span class="variable">i</span> &lt;= <span class="number" id="loopEnd">10</span>; <span class="variable">i</span>++) {</span>
+                            </div>
+                            <div class="code-line">
+                                <span class="line-num">3</span>
+                                <span>    sum += i;  <span class="comment">// 累加</span></span>
+                            </div>
+                            <div class="code-line">
+                                <span class="line-num">4</span>
+                                <span>}</span>
+                            </div>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block mb-2 font-medium" style="color: var(--muted);">请输入计算结果：</label>
+                                <input type="number" id="userAnswer" class="input-field" placeholder="输入你的答案">
+                            </div>
+                            <div class="flex items-end">
+                                <button class="btn-primary w-full" onclick="checkAnswer()">提交答案</button>
+                            </div>
+                        </div>
+                        <div id="feedback" class="feedback hidden"></div>
+                    </div>
+
+                    <div class="card p-6">
+                        <h3 class="text-lg font-bold mb-4">进阶挑战</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="p-4 rounded-xl cursor-pointer transition-all hover:scale-105" style="background: var(--bg);" onclick="setChallenge(10)">
+                                <div class="font-bold mb-1" style="color: var(--accent);">初级</div>
+                                <div style="color: var(--muted);">计算 1 到 10 的和</div>
+                            </div>
+                            <div class="p-4 rounded-xl cursor-pointer transition-all hover:scale-105" style="background: var(--bg);" onclick="setChallenge(50)">
+                                <div class="font-bold mb-1" style="color: var(--info);">中级</div>
+                                <div style="color: var(--muted);">计算 1 到 50 的和</div>
+                            </div>
+                            <div class="p-4 rounded-xl cursor-pointer transition-all hover:scale-105" style="background: var(--bg);" onclick="setChallenge(100)">
+                                <div class="font-bold mb-1" style="color: #ffa657;">高级</div>
+                                <div style="color: var(--muted);">计算 1 到 100 的和</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="max-w-5xl mx-auto mt-12 pt-8 border-t" style="border-color: var(--border);">
+            <div class="flex flex-wrap justify-between items-center gap-4">
+                <p style="color: var(--muted);">交互式编程课件</p>
+                <div class="flex gap-2">
+                    <span class="px-3 py-1 rounded-full text-sm font-medium" style="background: var(--accent-dim); color: var(--accent);">循环结构</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium" style="background: rgba(74, 158, 255, 0.15); color: var(--info);">入门级</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // State management
+        let currentTab = 'concept';
+        let progress = 0;
+        let demoRunning = false;
+        let demoInterval = null;
+        let canvas = null;
+        let ctx = null;
+        let currentIteration = 0;
+        const maxIterations = 5;
+
+        // Initialize on DOM ready
+        document.addEventListener('DOMContentLoaded', function() {
+            initCanvas();
+            updateProgress(0);
+        });
+
+        // Canvas initialization
+        function initCanvas() {
+            canvas = document.getElementById('demoCanvas');
+            if (canvas) {
+                ctx = canvas.getContext('2d');
+                clearCanvas();
+            }
+        }
+
+        function clearCanvas() {
+            if (ctx && canvas) {
+                ctx.fillStyle = '#0a0e14';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            document.querySelectorAll('.tab-content').forEach(function(content) {
+                content.classList.add('hidden');
+            });
+            
+            document.querySelectorAll('.tab-btn').forEach(function(btn) {
+                btn.classList.remove('active');
+            });
+            
+            var targetContent = document.getElementById(tabName);
+            if (targetContent) {
+                targetContent.classList.remove('hidden');
+            }
+            
+            var activeBtn = document.querySelector('[data-tab="' + tabName + '"]');
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+            
+            if (tabName === 'concept') {
+                updateProgress(33);
+            } else if (tabName === 'demo') {
+                updateProgress(66);
+                if (!canvas) {
+                    initCanvas();
+                }
+            } else if (tabName === 'exercise') {
+                updateProgress(100);
+            }
+        }
+
+        // Progress update
+        function updateProgress(value) {
+            progress = Math.min(100, Math.max(0, value));
+            var circle = document.getElementById('progressCircle');
+            var text = document.getElementById('progressText');
+            
+            if (circle && text) {
+                var circumference = 163.36;
+                var offset = circumference - (progress / 100) * circumference;
+                circle.style.strokeDashoffset = offset;
+                text.textContent = progress + '%';
+            }
+        }
+
+        // Demo functions
+        function runDemo() {
+            if (demoRunning) return;
+            
+            demoRunning = true;
+            currentIteration = 0;
+            clearCanvas();
+            
+            var runBtn = document.getElementById('runBtn');
+            if (runBtn) {
+                runBtn.textContent = '运行中...';
+                runBtn.disabled = true;
+            }
+            
+            demoInterval = setInterval(function() {
+                if (currentIteration < maxIterations) {
+                    drawCircle(currentIteration);
+                    updateDemoState(currentIteration);
+                    currentIteration++;
+                } else {
+                    stopDemo();
+                }
+            }, 800);
+        }
+
+        function stopDemo() {
+            if (demoInterval) {
+                clearInterval(demoInterval);
+                demoInterval = null;
+            }
+            demoRunning = false;
+            
+            var runBtn = document.getElementById('runBtn');
+            if (runBtn) {
+                runBtn.textContent = '运行演示';
+                runBtn.disabled = false;
+            }
+            
+            var condEl = document.getElementById('condition');
+            if (condEl) {
+                condEl.textContent = 'false';
+                condEl.style.color = 'var(--warning)';
+            }
+        }
+
+        function resetDemo() {
+            stopDemo();
+            currentIteration = 0;
+            clearCanvas();
+            
+            var iterEl = document.getElementById('currentIter');
+            var varEl = document.getElementById('varI');
+            var condEl = document.getElementById('condition');
+            
+            if (iterEl) iterEl.textContent = '0';
+            if (varEl) varEl.textContent = '0';
+            if (condEl) {
+                condEl.textContent = 'true';
+                condEl.style.color = 'var(--accent)';
+            }
+        }
+
+        function drawCircle(index) {
+            if (!ctx || !canvas) return;
+            
+            var colors = ['#00d4aa', '#4a9eff', '#ffa657', '#ff6b4a', '#d2a8ff'];
+            var radius = 30;
+            var gap = 20;
+            var totalWidth = maxIterations * (radius * 2) + (maxIterations - 1) * gap;
+            var startX = (canvas.width - totalWidth) / 2 + radius;
+            var centerY = canvas.height / 2;
+            
+            var x = startX + index * (radius * 2 + gap);
+            
+            // Draw glow effect
+            var gradient = ctx.createRadialGradient(x, centerY, 0, x, centerY, radius * 1.5);
+            gradient.addColorStop(0, colors[index % colors.length]);
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(x, centerY, radius * 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw main circle
+            ctx.fillStyle = colors[index % colors.length];
+            ctx.beginPath();
+            ctx.arc(x, centerY, radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw number
+            ctx.fillStyle = '#0f1419';
+            ctx.font = 'bold 24px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(index.toString(), x, centerY);
+        }
+
+        function updateDemoState(iteration) {
+            var iterEl = document.getElementById('currentIter');
+            var varEl = document.getElementById('varI');
+            
+            if (iterEl) iterEl.textContent = (iteration + 1).toString();
+            if (varEl) varEl.textContent = iteration.toString();
+        }
+
+        // Exercise functions
+        function setChallenge(maxNum) {
+            var targetEl = document.getElementById('targetNum');
+            var expectedEl = document.getElementById('expectedSum');
+            var loopEndEl = document.getElementById('loopEnd');
+            var feedbackEl = document.getElementById('feedback');
+            var answerEl = document.getElementById('userAnswer');
+            
+            var sum = (maxNum * (maxNum + 1)) / 2;
+            
+            if (targetEl) targetEl.textContent = maxNum.toString();
+            if (expectedEl) expectedEl.textContent = sum.toString();
+            if (loopEndEl) loopEndEl.textContent = maxNum.toString();
+            if (feedbackEl) feedbackEl.classList.add('hidden');
+            if (answerEl) answerEl.value = '';
+        }
+
+        function checkAnswer() {
+            var answerEl = document.getElementById('userAnswer');
+            var expectedEl = document.getElementById('expectedSum');
+            var feedbackEl = document.getElementById('feedback');
+            
+            if (!answerEl || !expectedEl || !feedbackEl) return;
+            
+            var userAnswer = parseInt(answerEl.value, 10);
+            var correctAnswer = parseInt(expectedEl.textContent, 10);
+            
+            feedbackEl.classList.remove('hidden', 'success', 'error');
+            
+            if (userAnswer === correctAnswer) {
+                feedbackEl.classList.add('success');
+                feedbackEl.textContent = '正确！你掌握了循环求和的原理。';
+            } else {
+                feedbackEl.classList.add('error');
+                feedbackEl.textContent = '再试一次。提示：使用公式 sum = (n * (n + 1)) / 2 可以快速验证。';
+            }
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && currentTab === 'exercise') {
+                checkAnswer();
+            }
+        });
+    </script>
+</body>
+</html>

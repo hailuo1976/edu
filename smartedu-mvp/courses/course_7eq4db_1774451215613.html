@@ -1,0 +1,979 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一年级数学-圆的周长</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+            --secondary: #14b8a6;
+            --accent: #f97316;
+            --success: #22c55e;
+            --error: #ef4444;
+            --bg: #f0fdfa;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --border: #cbd5e1;
+            --gradient-1: linear-gradient(135deg, #0ea5e9 0%, #14b8a6 100%);
+            --gradient-2: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: "Noto Sans SC", sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(14, 165, 233, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(20, 184, 166, 0.08) 0%, transparent 50%);
+        }
+        
+        .header { 
+            background: var(--gradient-1); 
+            color: white; 
+            padding: 28px 32px; 
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: headerPulse 8s ease-in-out infinite;
+        }
+        @keyframes headerPulse {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(5%, 5%); }
+        }
+        .header h1 { 
+            font-size: 2.2rem; 
+            margin-bottom: 8px;
+            font-weight: 900;
+            position: relative;
+            z-index: 1;
+        }
+        .header p { 
+            font-size: 1.1rem; 
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .nav-tabs { 
+            display: flex; 
+            justify-content: center; 
+            gap: 12px; 
+            padding: 20px; 
+            background: white; 
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .nav-tab { 
+            padding: 14px 28px; 
+            border: 2px solid var(--border); 
+            background: white; 
+            color: var(--text-secondary); 
+            border-radius: 50px; 
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .nav-tab:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+        }
+        .nav-tab.active { 
+            background: var(--gradient-1); 
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 16px rgba(14, 165, 233, 0.3);
+        }
+        
+        .main-content { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 32px 24px; 
+        }
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card { 
+            background: var(--card-bg); 
+            border-radius: 20px; 
+            padding: 28px; 
+            margin-bottom: 24px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.04);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: var(--primary-dark);
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card h3 {
+            color: var(--text);
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+        }
+        .card p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+        
+        .formula-box { 
+            background: var(--gradient-2); 
+            border-left: 5px solid var(--accent); 
+            padding: 20px 28px; 
+            border-radius: 12px; 
+            text-align: center; 
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text);
+            margin: 20px 0;
+        }
+        .formula-note {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: 8px;
+        }
+        
+        .highlight {
+            color: var(--accent);
+            font-weight: 700;
+        }
+        
+        .concept-list {
+            list-style: none;
+            padding: 0;
+        }
+        .concept-list li {
+            padding: 12px 16px;
+            margin: 8px 0;
+            background: #f8fafc;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: transform 0.2s ease;
+        }
+        .concept-list li:hover {
+            transform: translateX(8px);
+        }
+        .concept-list .icon {
+            width: 36px;
+            height: 36px;
+            background: var(--gradient-1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        canvas { 
+            background: white; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            border: 2px solid var(--border);
+            max-width: 100%;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);
+        }
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f8fafc;
+            padding: 12px 20px;
+            border-radius: 12px;
+        }
+        .slider-group label {
+            font-weight: 600;
+            color: var(--text);
+        }
+        input[type="range"] {
+            width: 150px;
+            height: 8px;
+            -webkit-appearance: none;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 3px solid var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .slider-value {
+            font-weight: 700;
+            color: var(--primary);
+            min-width: 40px;
+        }
+        
+        .info-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .info-card {
+            background: linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .info-card .label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .info-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+        
+        .exercise-item {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .exercise-item:hover {
+            border-color: var(--primary);
+        }
+        .exercise-question {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .question-number {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-1);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .exercise-input {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .exercise-input input {
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1.1rem;
+            width: 120px;
+            text-align: center;
+            transition: border-color 0.3s ease;
+        }
+        .exercise-input input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .feedback {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: none;
+        }
+        .feedback.correct {
+            background: #dcfce7;
+            color: var(--success);
+            display: block;
+            animation: bounceIn 0.4s ease;
+        }
+        .feedback.wrong {
+            background: #fee2e2;
+            color: var(--error);
+            display: block;
+            animation: shake 0.4s ease;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+        
+        .score-board {
+            background: var(--gradient-1);
+            color: white;
+            padding: 20px 32px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .score-board h3 {
+            font-size: 1.3rem;
+        }
+        .score-value {
+            font-size: 2rem;
+            font-weight: 900;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-1);
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+        
+        .hint-box {
+            background: #fef3c7;
+            border-left: 4px solid var(--accent);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-size: 0.95rem;
+        }
+        
+        .star {
+            display: inline-block;
+            color: var(--accent);
+            font-size: 1.5rem;
+            animation: starPop 0.3s ease;
+        }
+        @keyframes starPop {
+            0% { transform: scale(0) rotate(-180deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        .demo-hint {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-top: 12px;
+            font-style: italic;
+        }
+        
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.6rem; }
+            .nav-tab { padding: 10px 20px; font-size: 0.9rem; }
+            .card { padding: 20px; }
+            .formula-box { font-size: 1.1rem; padding: 16px; }
+            canvas { width: 100% !important; height: auto !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>圆形的周长</h1>
+        <p>一年级数学 | 一起来探索圆的秘密</p>
+    </div>
+    
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="switchTab('concept')">概念讲解</button>
+        <button class="nav-tab" onclick="switchTab('demo')">图形演示</button>
+        <button class="nav-tab" onclick="switchTab('exercise')">练习测试</button>
+    </div>
+    
+    <div class="main-content">
+        <!-- 概念讲解 -->
+        <div id="concept" class="tab-content active">
+            <div class="card">
+                <h2>什么是圆的周长？</h2>
+                <p>小朋友们，你们围着一棵树跑一圈，跑过的路线就是一个<span class="highlight">圆</span>。这条路线的长度，就是圆的<span class="highlight">周长</span>！</p>
+                <p>想象一下：如果有一只小蚂蚁沿着圆的边爬了一圈，它爬过的距离就是这个圆的周长。</p>
+            </div>
+            
+            <div class="card">
+                <h2>周长怎么算？</h2>
+                <p>聪明的数学家们发现了一个神奇的秘密：无论圆多大或多小，圆的周长和它的直径之间有一个固定的关系！</p>
+                
+                <div class="formula-box">
+                    周长 = 直径 × 3.14
+                </div>
+                <p class="formula-note">我们把 3.14 这个特别的数叫做"圆周率"，用字母 π 表示</p>
+                
+                <ul class="concept-list">
+                    <li>
+                        <span class="icon">1</span>
+                        <span><strong>直径</strong>：从圆的一边穿过圆心到另一边的直线，是圆的宽度</span>
+                    </li>
+                    <li>
+                        <span class="icon">2</span>
+                        <span><strong>半径</strong>：从圆心到圆边上的线，是直径的一半</span>
+                    </li>
+                    <li>
+                        <span class="icon">3</span>
+                        <span><strong>圆周率(π)</strong>：约等于 3.14，是周长除以直径的结果</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h2>简单记忆法</h2>
+                <div class="formula-box">
+                    周长 = 直径 × 3.14 = 半径 × 2 × 3.14
+                </div>
+                <p class="formula-note">知道直径，直接乘3.14；知道半径，先乘2再乘3.14</p>
+            </div>
+        </div>
+        
+        <!-- 图形演示 -->
+        <div id="demo" class="tab-content">
+            <div class="card">
+                <h2>动手试试看</h2>
+                <p>拖动下面的滑块改变圆的大小，观察周长是如何变化的：</p>
+                
+                <div class="canvas-container">
+                    <canvas id="mainCanvas" width="500" height="350"></canvas>
+                    
+                    <div class="controls">
+                        <div class="slider-group">
+                            <label>直径：</label>
+                            <input type="range" id="diameterSlider" min="2" max="10" value="6" step="0.5" oninput="updateCircle()">
+                            <span class="slider-value" id="diameterValue">6</span>
+                        </div>
+                        <button class="btn btn-primary" onclick="animateUnfold()">展开周长</button>
+                        <button class="btn btn-secondary" onclick="resetCanvas()">重置</button>
+                    </div>
+                    
+                    <div class="info-display">
+                        <div class="info-card">
+                            <div class="label">直径</div>
+                            <div class="value" id="infoDiameter">6</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="label">半径</div>
+                            <div class="value" id="infoRadius">3</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="label">周长</div>
+                            <div class="value" id="infoPerimeter">18.84</div>
+                        </div>
+                    </div>
+                </div>
+                <p class="demo-hint">点击"展开周长"按钮，看周长变成一条直线！</p>
+            </div>
+            
+            <div class="card">
+                <h2>滚动演示</h2>
+                <p>看小圆滚动一圈，它走过的距离就是周长！</p>
+                <div class="canvas-container">
+                    <canvas id="rollCanvas" width="500" height="180"></canvas>
+                    <div class="controls">
+                        <button class="btn btn-primary" onclick="startRolling()">开始滚动</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 练习测试 -->
+        <div id="exercise" class="tab-content">
+            <div class="score-board">
+                <div>
+                    <h3>我的得分</h3>
+                    <div class="score-value"><span id="score">0</span> / <span id="total">5</span></div>
+                </div>
+                <div id="stars"></div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            
+            <div class="card">
+                <h2>来挑战一下吧！</h2>
+                
+                <div class="exercise-item" id="q1">
+                    <div class="exercise-question">
+                        <span class="question-number">1</span>
+                        <span>一个圆的直径是 <strong>4厘米</strong>，它的周长是多少厘米？</span>
+                    </div>
+                    <div class="hint-box">提示：周长 = 直径 × 3.14 = 4 × 3.14</div>
+                    <div class="exercise-input" style="margin-top: 12px;">
+                        <span>答案：</span>
+                        <input type="number" id="a1" step="0.01" placeholder="输入答案">
+                        <span>厘米</span>
+                        <button class="btn btn-primary" onclick="checkAnswer(1, 12.56)">确定</button>
+                        <span class="feedback" id="f1"></span>
+                    </div>
+                </div>
+                
+                <div class="exercise-item" id="q2">
+                    <div class="exercise-question">
+                        <span class="question-number">2</span>
+                        <span>一个圆的半径是 <strong>5厘米</strong>，直径是多少厘米？</span>
+                    </div>
+                    <div class="hint-box">提示：直径 = 半径 × 2</div>
+                    <div class="exercise-input" style="margin-top: 12px;">
+                        <span>答案：</span>
+                        <input type="number" id="a2" step="0.1" placeholder="输入答案">
+                        <span>厘米</span>
+                        <button class="btn btn-primary" onclick="checkAnswer(2, 10)">确定</button>
+                        <span class="feedback" id="f2"></span>
+                    </div>
+                </div>
+                
+                <div class="exercise-item" id="q3">
+                    <div class="exercise-question">
+                        <span class="question-number">3</span>
+                        <span>一个圆的半径是 <strong>3厘米</strong>，周长是多少厘米？</span>
+                    </div>
+                    <div class="hint-box">提示：先算直径 = 3 × 2 = 6，再算周长 = 6 × 3.14</div>
+                    <div class="exercise-input" style="margin-top: 12px;">
+                        <span>答案：</span>
+                        <input type="number" id="a3" step="0.01" placeholder="输入答案">
+                        <span>厘米</span>
+                        <button class="btn btn-primary" onclick="checkAnswer(3, 18.84)">确定</button>
+                        <span class="feedback" id="f3"></span>
+                    </div>
+                </div>
+                
+                <div class="exercise-item" id="q4">
+                    <div class="exercise-question">
+                        <span class="question-number">4</span>
+                        <span>一个圆的直径是 <strong>10厘米</strong>，周长是多少厘米？</span>
+                    </div>
+                    <div class="hint-box">提示：周长 = 10 × 3.14</div>
+                    <div class="exercise-input" style="margin-top: 12px;">
+                        <span>答案：</span>
+                        <input type="number" id="a4" step="0.01" placeholder="输入答案">
+                        <span>厘米</span>
+                        <button class="btn btn-primary" onclick="checkAnswer(4, 31.4)">确定</button>
+                        <span class="feedback" id="f4"></span>
+                    </div>
+                </div>
+                
+                <div class="exercise-item" id="q5">
+                    <div class="exercise-question">
+                        <span class="question-number">5</span>
+                        <span>圆周率 π 约等于多少？</span>
+                    </div>
+                    <div class="hint-box">提示：我们常用的近似值</div>
+                    <div class="exercise-input" style="margin-top: 12px;">
+                        <span>答案：</span>
+                        <input type="number" id="a5" step="0.01" placeholder="输入答案">
+                        <button class="btn btn-primary" onclick="checkAnswer(5, 3.14)">确定</button>
+                        <span class="feedback" id="f5"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 状态变量初始化
+        let score = 0;
+        let answered = [false, false, false, false, false];
+        let currentDiameter = 6;
+        let animationId = null;
+        let isUnfolding = false;
+        let unfoldProgress = 0;
+        let isRolling = false;
+        let rollProgress = 0;
+        let circleX = 60;
+        
+        // Tab切换
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabId === 'demo') {
+                setTimeout(() => {
+                    drawCircle();
+                    drawRollCanvas();
+                }, 100);
+            }
+        }
+        
+        // 绘制圆
+        function drawCircle() {
+            const canvas = document.getElementById('mainCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const centerX = width / 2;
+            const centerY = height / 2 - 20;
+            const radius = Math.max(1, currentDiameter * 15);
+            
+            // 绘制背景网格
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < width; i += 30) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < height; i += 30) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(width, i);
+                ctx.stroke();
+            }
+            
+            // 绘制圆
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(14, 165, 233, 0.15)';
+            ctx.fill();
+            ctx.strokeStyle = '#0ea5e9';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            
+            // 绘制直径
+            ctx.beginPath();
+            ctx.moveTo(centerX - radius, centerY);
+            ctx.lineTo(centerX + radius, centerY);
+            ctx.strokeStyle = '#f97316';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([8, 4]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 绘制半径
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(centerX + radius, centerY);
+            ctx.strokeStyle = '#22c55e';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // 标注
+            ctx.font = 'bold 16px Noto Sans SC';
+            ctx.fillStyle = '#f97316';
+            ctx.fillText('直径 = ' + currentDiameter, centerX - 30, centerY + radius + 40);
+            
+            ctx.fillStyle = '#22c55e';
+            ctx.fillText('半径 = ' + (currentDiameter / 2), centerX + radius + 10, centerY + 5);
+            
+            // 绘制圆心
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#0ea5e9';
+            ctx.fill();
+            ctx.fillStyle = '#0ea5e9';
+            ctx.fillText('圆心', centerX + 10, centerY - 10);
+            
+            // 如果在展开动画中
+            if (isUnfolding && unfoldProgress > 0) {
+                const perimeter = currentDiameter * 3.14;
+                const lineLength = perimeter * unfoldProgress;
+                const startX = 50;
+                const lineY = height - 40;
+                
+                // 绘制展开线
+                ctx.beginPath();
+                ctx.moveTo(startX, lineY);
+                ctx.lineTo(startX + lineLength * 8, lineY);
+                ctx.strokeStyle = '#0ea5e9';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                
+                // 标注
+                ctx.fillStyle = '#0ea5e9';
+                ctx.font = 'bold 14px Noto Sans SC';
+                ctx.fillText('周长 = ' + (perimeter * unfoldProgress).toFixed(2), startX, lineY - 15);
+                
+                if (unfoldProgress >= 1) {
+                    ctx.fillStyle = '#22c55e';
+                    ctx.fillText('周长 = 直径 × 3.14 = ' + currentDiameter + ' × 3.14 = ' + perimeter.toFixed(2), startX + lineLength * 4 - 60, lineY + 30);
+                }
+            }
+        }
+        
+        // 更新圆
+        function updateCircle() {
+            const slider = document.getElementById('diameterSlider');
+            if (!slider) return;
+            currentDiameter = parseFloat(slider.value);
+            document.getElementById('diameterValue').textContent = currentDiameter;
+            document.getElementById('infoDiameter').textContent = currentDiameter;
+            document.getElementById('infoRadius').textContent = (currentDiameter / 2).toFixed(1);
+            document.getElementById('infoPerimeter').textContent = (currentDiameter * 3.14).toFixed(2);
+            isUnfolding = false;
+            unfoldProgress = 0;
+            drawCircle();
+        }
+        
+        // 展开周长动画
+        function animateUnfold() {
+            if (isUnfolding) return;
+            isUnfolding = true;
+            unfoldProgress = 0;
+            
+            function animate() {
+                unfoldProgress += 0.02;
+                if (unfoldProgress > 1) unfoldProgress = 1;
+                drawCircle();
+                if (unfoldProgress < 1) {
+                    animationId = requestAnimationFrame(animate);
+                }
+            }
+            animate();
+        }
+        
+        // 重置画布
+        function resetCanvas() {
+            isUnfolding = false;
+            unfoldProgress = 0;
+            drawCircle();
+        }
+        
+        // 绘制滚动演示画布
+        function drawRollCanvas() {
+            const canvas = document.getElementById('rollCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制地面
+            ctx.beginPath();
+            ctx.moveTo(0, height - 30);
+            ctx.lineTo(width, height - 30);
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 圆的参数
+            const radius = 40;
+            
+            // 起点标记
+            ctx.beginPath();
+            ctx.arc(60, height - 30 - radius, radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(20, 184, 166, 0.1)';
+            ctx.fill();
+            ctx.strokeStyle = '#14b8a6';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 当前圆的位置
+            const currentX = isRolling ? 60 + rollProgress * (radius * 2 * Math.PI) : 60;
+            const rotation = isRolling ? rollProgress * Math.PI * 2 : 0;
+            
+            if (currentX < width - 40) {
+                // 绘制滚动的圆
+                ctx.beginPath();
+                ctx.arc(currentX, height - 30 - radius, radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(20, 184, 166, 0.2)';
+                ctx.fill();
+                ctx.strokeStyle = '#14b8a6';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                // 绘制半径线（显示旋转）
+                ctx.beginPath();
+                ctx.moveTo(currentX, height - 30 - radius);
+                ctx.lineTo(
+                    currentX + Math.cos(rotation - Math.PI/2) * radius,
+                    height - 30 - radius + Math.sin(rotation - Math.PI/2) * radius
+                );
+                ctx.strokeStyle = '#f97316';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                // 圆心
+                ctx.beginPath();
+                ctx.arc(currentX, height - 30 - radius, 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#14b8a6';
+                ctx.fill();
+            }
+            
+            // 已滚动的距离
+            if (isRolling && rollProgress > 0) {
+                const dist = rollProgress * (radius * 2 * Math.PI);
+                ctx.fillStyle = '#0f172a';
+                ctx.font = 'bold 14px Noto Sans SC';
+                ctx.fillText('滚动距离: ' + dist.toFixed(1) + ' = 周长!', 50, 25);
+                
+                if (rollProgress >= 1) {
+                    ctx.fillStyle = '#22c55e';
+                    ctx.font = 'bold 16px Noto Sans SC';
+                    ctx.fillText('圆滚动一圈的距离正好是周长!', 150, height - 50);
+                }
+            }
+        }
+        
+        // 开始滚动
+        function startRolling() {
+            if (isRolling) return;
+            isRolling = true;
+            rollProgress = 0;
+            
+            function animate() {
+                rollProgress += 0.01;
+                if (rollProgress > 1) rollProgress = 1;
+                drawRollCanvas();
+                if (rollProgress < 1) {
+                    animationId = requestAnimationFrame(animate);
+                } else {
+                    setTimeout(() => {
+                        isRolling = false;
+                        rollProgress = 0;
+                        drawRollCanvas();
+                    }, 2000);
+                }
+            }
+            animate();
+        }
+        
+        // 检查答案
+        function checkAnswer(questionNum, correctAnswer) {
+            if (answered[questionNum - 1]) return;
+            
+            const input = document.getElementById('a' + questionNum);
+            const feedback = document.getElementById('f' + questionNum);
+            const userAnswer = parseFloat(input.value);
+            
+            if (isNaN(userAnswer)) {
+                feedback.textContent = '请输入数字';
+                feedback.className = 'feedback wrong';
+                return;
+            }
+            
+            answered[questionNum - 1] = true;
+            
+            if (Math.abs(userAnswer - correctAnswer) < 0.01) {
+                feedback.textContent = '太棒了！答对了！';
+                feedback.className = 'feedback correct';
+                score++;
+                document.getElementById('score').textContent = score;
+                updateProgress();
+                updateStars();
+            } else {
+                feedback.textContent = '再想想哦，正确答案是 ' + correctAnswer;
+                feedback.className = 'feedback wrong';
+                updateProgress();
+            }
+            
+            input.disabled = true;
+        }
+        
+        // 更新进度
+        function updateProgress() {
+            const answeredCount = answered.filter(a => a).length;
+            const progress = (answeredCount / 5) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+        
+        // 更新星星
+        function updateStars() {
+            const starsDiv = document.getElementById('stars');
+            starsDiv.innerHTML = '';
+            for (let i = 0; i < score; i++) {
+                const star = document.createElement('span');
+                star.className = 'star';
+                star.textContent = '★';
+                star.style.animationDelay = (i * 0.1) + 's';
+                starsDiv.appendChild(star);
+            }
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                drawCircle();
+                drawRollCanvas();
+            }, 100);
+        });
+    </script>
+</body>
+</html>

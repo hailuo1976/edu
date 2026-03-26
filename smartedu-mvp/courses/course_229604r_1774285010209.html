@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一年级数学 - 分数的加减法</title>
+    <link href="fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff6b35;
+            --primary-dark: #e55a2b;
+            --secondary: #4ecdc4;
+            --accent: #ffe66d;
+            --success: #06d6a0;
+            --error: #ef476f;
+            --bg: #fff9f0;
+            --card-bg: #ffffff;
+            --text: #2d3436;
+            --text-secondary: #636e72;
+            --border: #ffeaa7;
+            --shadow: rgba(255, 107, 53, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(255, 107, 53, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(78, 205, 196, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(255, 230, 109, 0.05) 0%, transparent 60%);
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, #ff8c5a 100%);
+            border-radius: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 40px var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.03) 10px,
+                rgba(255,255,255,0.03) 20px
+            );
+            animation: patternMove 20s linear infinite;
+        }
+
+        @keyframes patternMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .header h1 {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: clamp(28px, 6vw, 42px);
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: clamp(14px, 3vw, 18px);
+            color: rgba(255,255,255,0.9);
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-tab {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 18px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 50px;
+            background: var(--card-bg);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-tab::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: var(--primary);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.4s ease;
+            z-index: 0;
+        }
+
+        .nav-tab span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-tab:hover::before {
+            width: 200%;
+            height: 200%;
+        }
+
+        .nav-tab:hover {
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, var(--primary) 0%, #ff8c5a 100%);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px var(--shadow);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+            border: 2px solid var(--border);
+        }
+
+        .card-title {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 24px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(255, 230, 109, 0.3);
+        }
+
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        canvas {
+            border-radius: 16px;
+            background: linear-gradient(135deg, #fffbf5 0%, #fff5eb 100%);
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.03);
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 18px;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, #ff8c5a 100%);
+            color: white;
+            box-shadow: 0 6px 20px var(--shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary) 0%, #6ee7de 100%);
+            color: white;
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #34e8c0 100%);
+            color: white;
+            box-shadow: 0 6px 20px rgba(6, 214, 160, 0.3);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .fraction-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 36px;
+            color: var(--text);
+            margin: 20px 0;
+        }
+
+        .fraction {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, var(--accent) 0%, #fff3c4 100%);
+            padding: 10px 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(255, 230, 109, 0.3);
+        }
+
+        .fraction-line {
+            width: 100%;
+            height: 4px;
+            background: var(--text);
+            border-radius: 2px;
+            margin: 5px 0;
+        }
+
+        .operator {
+            color: var(--primary);
+            font-size: 42px;
+        }
+
+        .result {
+            background: linear-gradient(135deg, var(--secondary) 0%, #6ee7de 100%);
+        }
+
+        .feedback {
+            text-align: center;
+            padding: 20px;
+            border-radius: 16px;
+            margin: 20px 0;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        .feedback.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .feedback.success {
+            background: linear-gradient(135deg, rgba(6, 214, 160, 0.15) 0%, rgba(6, 214, 160, 0.05) 100%);
+            color: var(--success);
+            border: 2px solid var(--success);
+        }
+
+        .feedback.error {
+            background: linear-gradient(135deg, rgba(239, 71, 111, 0.15) 0%, rgba(239, 71, 111, 0.05) 100%);
+            color: var(--error);
+            border: 2px solid var(--error);
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .score-item {
+            background: linear-gradient(135deg, var(--card-bg) 0%, #fff9f5 100%);
+            padding: 20px 30px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: 2px solid var(--border);
+            min-width: 120px;
+        }
+
+        .score-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 36px;
+            color: var(--primary);
+        }
+
+        .question-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .question-text {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 28px;
+            color: var(--text);
+            text-align: center;
+        }
+
+        .answer-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .answer-btn {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 24px;
+            padding: 20px 40px;
+            background: white;
+            border: 3px solid var(--border);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .answer-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+
+        .answer-btn.correct {
+            background: linear-gradient(135deg, var(--success) 0%, #34e8c0 100%);
+            border-color: var(--success);
+            color: white;
+            animation: correctPulse 0.5s ease;
+        }
+
+        .answer-btn.wrong {
+            background: linear-gradient(135deg, var(--error) 0%, #f77a98 100%);
+            border-color: var(--error);
+            color: white;
+            animation: wrongShake 0.5s ease;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .step-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+
+        .step {
+            background: linear-gradient(135deg, #fffbf5 0%, #fff5eb 100%);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 20px;
+            margin: 0 auto 10px;
+        }
+
+        .step-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .explanation {
+            background: linear-gradient(135deg, rgba(78, 205, 196, 0.1) 0%, rgba(78, 205, 196, 0.05) 100%);
+            padding: 20px;
+            border-radius: 16px;
+            border-left: 4px solid var(--secondary);
+            margin: 20px 0;
+        }
+
+        .explanation p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--text);
+        }
+
+        .star-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .star {
+            width: 50px;
+            height: 50px;
+            opacity: 0.3;
+            transition: all 0.3s ease;
+        }
+
+        .star.earned {
+            opacity: 1;
+            animation: starPop 0.5s ease;
+        }
+
+        @keyframes starPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .hint-text {
+            font-size: 16px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .fraction-display {
+                font-size: 28px;
+            }
+            
+            .btn {
+                padding: 12px 24px;
+                font-size: 16px;
+            }
+            
+            .answer-btn {
+                padding: 15px 25px;
+                font-size: 20px;
+            }
+            
+            canvas {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    
+    <div class="container">
+        <header class="header">
+            <h1>分数的加减法</h1>
+            <p>和小熊一起学习分数的奥秘</p>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-tab="learn"><span>概念学习</span></button>
+            <button class="nav-tab" data-tab="demo"><span>动画演示</span></button>
+            <button class="nav-tab" data-tab="practice"><span>动手练习</span></button>
+            <button class="nav-tab" data-tab="quiz"><span>小测验</span></button>
+        </nav>
+
+        <main>
+            <!-- 概念学习 -->
+            <section id="learn" class="tab-content active">
+                <div class="card">
+                    <h2 class="card-title">什么是分数</h2>
+                    <div class="canvas-container">
+                        <canvas id="learnCanvas1" width="200" height="200"></canvas>
+                        <canvas id="learnCanvas2" width="200" height="200"></canvas>
+                    </div>
+                    <div class="fraction-display">
+                        <div class="fraction">
+                            <span id="num1">1</span>
+                            <div class="fraction-line"></div>
+                            <span id="den1">2</span>
+                        </div>
+                        <span class="operator">=</span>
+                        <span id="percent1" style="font-size: 24px; color: var(--secondary);">一半</span>
+                    </div>
+                    <div class="controls">
+                        <button class="btn btn-primary" onclick="showFraction(2, 4)">四分之二</button>
+                        <button class="btn btn-secondary" onclick="showFraction(1, 4)">四分之一</button>
+                        <button class="btn btn-success" onclick="showFraction(3, 4)">四分之三</button>
+                    </div>
+                    <div class="explanation">
+                        <p>分数就是把一个整体分成相等的几份，取其中的几份。<br>
+                        比如：把一个蛋糕分成4份，取其中1份，就是四分之一(1/4)。<br>
+                        上面的数字叫<strong>分子</strong>，下面的数字叫<strong>分母</strong>。</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 动画演示 -->
+            <section id="demo" class="tab-content">
+                <div class="card">
+                    <h2 class="card-title">分数加法动画</h2>
+                    <div class="canvas-container">
+                        <canvas id="demoCanvas" width="500" height="300"></canvas>
+                    </div>
+                    <div class="fraction-display">
+                        <div class="fraction">
+                            <span id="demoNum1">1</span>
+                            <div class="fraction-line"></div>
+                            <span id="demoDen1">4</span>
+                        </div>
+                        <span class="operator">+</span>
+                        <div class="fraction">
+                            <span id="demoNum2">2</span>
+                            <div class="fraction-line"></div>
+                            <span id="demoDen2">4</span>
+                        </div>
+                        <span class="operator">=</span>
+                        <div class="fraction result">
+                            <span id="demoResultNum">?</span>
+                            <div class="fraction-line"></div>
+                            <span id="demoResultDen">4</span>
+                        </div>
+                    </div>
+                    <div class="controls">
+                        <button class="btn btn-primary" onclick="playDemo()">播放动画</button>
+                        <button class="btn btn-secondary" onclick="resetDemo()">重新开始</button>
+                        <button class="btn btn-success" onclick="nextDemo()">下一题</button>
+                    </div>
+                    <div id="demoFeedback" class="feedback">
+                        分母相同，分子相加！1 + 2 = 3，答案是 3/4
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">分数减法动画</h2>
+                    <div class="canvas-container">
+                        <canvas id="subDemoCanvas" width="500" height="300"></canvas>
+                    </div>
+                    <div class="fraction-display">
+                        <div class="fraction">
+                            <span id="subNum1">3</span>
+                            <div class="fraction-line"></div>
+                            <span id="subDen1">4</span>
+                        </div>
+                        <span class="operator">-</span>
+                        <div class="fraction">
+                            <span id="subNum2">1</span>
+                            <div class="fraction-line"></div>
+                            <span id="subDen2">4</span>
+                        </div>
+                        <span class="operator">=</span>
+                        <div class="fraction result">
+                            <span id="subResultNum">?</span>
+                            <div class="fraction-line"></div>
+                            <span id="subResultDen">4</span>
+                        </div>
+                    </div>
+                    <div class="controls">
+                        <button class="btn btn-primary" onclick="playSubDemo()">播放动画</button>
+                        <button class="btn btn-secondary" onclick="resetSubDemo()">重新开始</button>
+                        <button class="btn btn-success" onclick="nextSubDemo()">下一题</button>
+                    </div>
+                    <div id="subDemoFeedback" class="feedback">
+                        分母相同，分子相减！3 - 1 = 2，答案是 2/4
+                    </div>
+                </div>
+            </section>
+
+            <!-- 动手练习 -->
+            <section id="practice" class="tab-content">
+                <div class="card">
+                    <h2 class="card-title">动手练习</h2>
+                    <div class="score-board">
+                        <div class="score-item">
+                            <div class="score-label">已做题目</div>
+                            <div class="score-value" id="practiceCount">0</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="score-label">答对数量</div>
+                            <div class="score-value" id="practiceCorrect">0</div>
+                        </div>
+                    </div>
+                    <div class="question-area">
+                        <div class="question-text" id="practiceQuestion">请看图填空</div>
+                        <div class="canvas-container">
+                            <canvas id="practiceCanvas" width="450" height="250"></canvas>
+                        </div>
+                        <div class="fraction-display" id="practiceFraction">
+                            <div class="fraction">
+                                <span id="pracNum1">?</span>
+                                <div class="fraction-line"></div>
+                                <span id="pracDen1">4</span>
+                            </div>
+                            <span class="operator" id="pracOp">+</span>
+                            <div class="fraction">
+                                <span id="pracNum2">?</span>
+                                <div class="fraction-line"></div>
+                                <span id="pracDen2">4</span>
+                            </div>
+                            <span class="operator">=</span>
+                            <div class="fraction result">
+                                <span id="pracAnsNum">?</span>
+                                <div class="fraction-line"></div>
+                                <span id="pracAnsDen">4</span>
+                            </div>
+                        </div>
+                        <div class="answer-options" id="practiceOptions">
+                        </div>
+                    </div>
+                    <div id="practiceFeedback" class="feedback"></div>
+                    <div class="controls">
+                        <button class="btn btn-primary" onclick="newPractice()">换一题</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 小测验 -->
+            <section id="quiz" class="tab-content">
+                <div class="card">
+                    <h2 class="card-title">小测验挑战</h2>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="quizProgress" style="width: 0%"></div>
+                    </div>
+                    <div class="hint-text" id="quizHint">第 1 题，共 5 题</div>
+                    <div class="score-board">
+                        <div class="score-item">
+                            <div class="score-label">当前得分</div>
+                            <div class="score-value" id="quizScore">0</div>
+                        </div>
+                    </div>
+                    <div class="star-container" id="starContainer">
+                        <svg class="star" viewBox="0 0 24 24" fill="#ffe66d">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        <svg class="star" viewBox="0 0 24 24" fill="#ffe66d">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        <svg class="star" viewBox="0 0 24 24" fill="#ffe66d">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        <svg class="star" viewBox="0 0 24 24" fill="#ffe66d">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        <svg class="star" viewBox="0 0 24 24" fill="#ffe66d">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                    </div>
+                    <div class="question-area">
+                        <div class="question-text" id="quizQuestion">计算下面的分数</div>
+                        <div class="fraction-display" id="quizFraction">
+                            <div class="fraction">
+                                <span id="quizNum1">1</span>
+                                <div class="fraction-line"></div>
+                                <span id="quizDen1">4</span>
+                            </div>
+                            <span class="operator" id="quizOp">+</span>
+                            <div class="fraction">
+                                <span id="quizNum2">2</span>
+                                <div class="fraction-line"></div>
+                                <span id="quizDen2">4</span>
+                            </div>
+                            <span class="operator">=</span>
+                            <span style="color: var(--primary);">?</span>
+                        </div>
+                        <div class="answer-options" id="quizOptions"></div>
+                    </div>
+                    <div id="quizFeedback" class="feedback"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // 全局状态
+        const state = {
+            practiceCount: 0,
+            practiceCorrect: 0,
+            quizScore: 0,
+            quizQuestion: 0,
+            totalQuestions: 5,
+            currentDemo: 0,
+            currentSubDemo: 0,
+            animationId: null
+        };
+
+        // 分数演示数据
+        const demoData = [
+            { n1: 1, d1: 4, n2: 2, d2: 4, result: 3 },
+            { n1: 2, d1: 4, n2: 1, d2: 4, result: 3 },
+            { n1: 1, d1: 4, n2: 3, d2: 4, result: 4 }
+        ];
+
+        const subDemoData = [
+            { n1: 3, d1: 4, n2: 1, d2: 4, result: 2 },
+            { n1: 4, d1: 4, n2: 2, d2: 4, result: 2 },
+            { n1: 3, d1: 4, n2: 2, d2: 4, result: 1 }
+        ];
+
+        const quizData = [
+            { n1: 1, d1: 4, n2: 2, d2: 4, op: '+', answer: 3 },
+            { n1: 2, d1: 4, n2: 1, d2: 4, op: '+', answer: 3 },
+            { n1: 3, d1: 4, n2: 2, d2: 4, op: '-', answer: 1 },
+            { n1: 1, d1: 4, n2: 3, d2: 4, op: '+', answer: 4 },
+            { n1: 4, d1: 4, n2: 1, d2: 4, op: '-', answer: 3 }
+        ];
+
+        // Tab导航
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // 绘制饼图分数
+        function drawFractionPie(canvasId, numerator, denominator, colors, animated = false) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(centerX, centerY) - 20;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制背景圆
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#f0f0f0';
+            ctx.fill();
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 绘制分数部分
+            if (numerator > 0) {
+                const angle = (Math.PI * 2 * numerator) / denominator;
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + angle);
+                ctx.closePath();
+                
+                const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+                gradient.addColorStop(0, colors[0]);
+                gradient.addColorStop(1, colors[1]);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+            }
+            
+            // 绘制分割线
+            for (let i = 0; i < denominator; i++) {
+                const angle = (Math.PI * 2 * i) / denominator - Math.PI / 2;
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(
+                    centerX + Math.cos(angle) * radius,
+                    centerY + Math.sin(angle) * radius
+                );
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            }
+            
+            // 绘制外圈
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        // 概念学习
+        function showFraction(num, den) {
+            drawFractionPie('learnCanvas1', num, den, ['#ff6b35', '#ff8c5a']);
+            drawFractionPie('learnCanvas2', num, den, ['#4ecdc4', '#6ee7de']);
+            
+            document.getElementById('num1').textContent = num;
+            document.getElementById('den1').textContent = den;
+            
+            const percent = (num / den);
+            let text = '';
+            if (percent === 0.5) text = '一半';
+            else if (percent === 0.25) text = '四分之一';
+            else if (percent === 0.5) text = '四分之二';
+            else if (percent === 0.75) text = '四分之三';
+            else if (percent === 1) text = '整个';
+            else text = num + '/' + den;
+            
+            document.getElementById('percent1').textContent = text;
+        }
+
+        // 动画演示 - 加法
+        function playDemo() {
+            const data = demoData[state.currentDemo];
+            const canvas = document.getElementById('demoCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            let progress = 0;
+            const duration = 2000;
+            const startTime = Date.now();
+            
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                progress = Math.min(elapsed / duration, 1);
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // 绘制三个圆
+                const positions = [
+                    { x: 80, y: 150 },
+                    { x: 250, y: 150 },
+                    { x: 420, y: 150 }
+                ];
+                const radius = 60;
+                
+                // 第一个分数
+                drawPieAt(ctx, positions[0].x, positions[0].y, radius, data.n1, data.d1, '#ff6b35', '#ff8c5a');
+                
+                // 加号
+                ctx.font = 'bold 40px ZCOOL KuaiLe';
+                ctx.fillStyle = '#333';
+                ctx.textAlign = 'center';
+                ctx.fillText('+', 165, 160);
+                
+                // 第二个分数（动画显示）
+                const shownN2 = Math.floor(data.n2 * progress);
+                drawPieAt(ctx, positions[1].x

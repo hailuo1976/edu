@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartEdu AI 课件生成器</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #1e40af;
+      --secondary: #ec4899;
+      --accent: #f59e0b;
+      --success: #22c55e;
+      --error: #ef4444;
+      --warning: #eab308;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Noto Sans SC", sans-serif;
+      background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: var(--text);
+    }
+
+    .container { max-width: 900px; margin: 0 auto; }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p { opacity: 0.8; font-size: 1rem; }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      margin-bottom: 20px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .badge-mode {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+    }
+
+    .badge-refine {
+      background: linear-gradient(135deg, var(--accent), #f97316);
+      color: white;
+    }
+
+    .form-group { margin-bottom: 20px; }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .question-input {
+      width: 100%;
+      padding: 16px 20px;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      font-size: 1.05rem;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+
+    .question-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    }
+
+    .options {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .select-wrapper { flex: 1; min-width: 140px; }
+
+    .select-wrapper label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: var(--text);
+      font-size: 0.85rem;
+    }
+
+    select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 1rem;
+      cursor: pointer;
+      background: white;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+
+    select:focus { outline: none; border-color: var(--primary); }
+
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: #fef3c7;
+      border: 2px solid #fcd34d;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .checkbox-wrapper:hover { background: #fde68a; }
+
+    .checkbox-wrapper input { width: 18px; height: 18px; cursor: pointer; }
+
+    .checkbox-wrapper span { font-size: 0.95rem; font-weight: 600; color: #92400e; }
+
+    .btn {
+      padding: 16px 36px;
+      border: none;
+      border-radius: 14px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      flex: 1;
+      min-width: 160px;
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(59, 130, 246, 0.5);
+    }
+
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .examples { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+    .examples-title {
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+    }
+
+    .example-btn {
+      display: inline-block;
+      padding: 8px 16px;
+      background: #f1f5f9;
+      border-radius: 20px;
+      margin: 4px 4px 4px 0;
+      font-size: 0.85rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 1px solid transparent;
+    }
+
+    .example-btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Generation Status */
+    .generation-status {
+      display: none;
+      margin-top: 24px;
+    }
+
+    .generation-status.show { display: block; }
+
+    .status-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .status-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .status-badge.iteration {
+      background: #dbeafe;
+      color: var(--primary);
+    }
+
+    .status-badge.generating {
+      background: #fef3c7;
+      color: #d97706;
+    }
+
+    .status-badge.reviewing {
+      background: #f3e8ff;
+      color: #9333ea;
+    }
+
+    .status-badge.fixing {
+      background: #fee2e2;
+      color: var(--error);
+    }
+
+    .status-badge.passed {
+      background: #dcfce7;
+      color: var(--success);
+    }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 30px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 12px;
+      padding: 14px 18px;
+      background: #f8fafc;
+      border-radius: 12px;
+      border-left: 3px solid var(--border);
+      transition: all 0.3s;
+    }
+
+    .timeline-item.pending {
+      opacity: 0.5;
+      border-left-color: var(--border);
+    }
+
+    .timeline-item.active {
+      border-left-color: var(--primary);
+      background: #eff6ff;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    }
+
+    .timeline-item.complete {
+      border-left-color: var(--success);
+      background: #f0fdf4;
+    }
+
+    .timeline-item.error {
+      border-left-color: var(--error);
+      background: #fef2f2;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -26px;
+      top: 18px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--border);
+      border: 3px solid white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .timeline-item.active::before {
+      background: var(--primary);
+      animation: pulse 1.5s infinite;
+    }
+
+    .timeline-item.complete::before { background: var(--success); }
+
+    .timeline-item.error::before { background: var(--error); }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.8; }
+    }
+
+    .timeline-icon {
+      position: absolute;
+      left: -26px;
+      top: 18px;
+      width: 14px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+
+    .timeline-content { display: flex; justify-content: space-between; align-items: center; }
+
+    .timeline-text { font-size: 0.95rem; color: var(--text); }
+
+    .timeline-time { font-size: 0.8rem; color: var(--text-secondary); }
+
+    .timeline-score {
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+
+    .timeline-score.high { background: #dcfce7; color: var(--success); }
+    .timeline-score.medium { background: #fef3c7; color: #d97706; }
+    .timeline-score.low { background: #fee2e2; color: var(--error); }
+
+    /* Quality Score Panel */
+    .quality-panel {
+      margin-top: 20px;
+      padding: 20px;
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+      border-radius: 16px;
+      border: 2px solid #bbf7d0;
+      display: none;
+    }
+
+    .quality-panel.show { display: block; }
+
+    .quality-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .quality-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #166534;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quality-score {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--success);
+    }
+
+    .quality-bar {
+      height: 8px;
+      background: #d1fae5;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .quality-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--success), #34d399);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    .quality-dimensions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+    }
+
+    .quality-dim {
+      text-align: center;
+      padding: 12px 8px;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #bbf7d0;
+    }
+
+    .quality-dim-value {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .quality-dim-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* Issues Panel */
+    .issues-panel {
+      margin-top: 16px;
+      padding: 16px;
+      background: #fef2f2;
+      border-radius: 12px;
+      border: 1px solid #fecaca;
+      display: none;
+    }
+
+    .issues-panel.show { display: block; }
+
+    .issues-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--error);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .issue-item {
+      padding: 8px 12px;
+      margin-bottom: 6px;
+      background: white;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .issue-item:last-child { margin-bottom: 0; }
+
+    .issue-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .issue-icon.critical { background: #fee2e2; color: var(--error); }
+    .issue-icon.warning { background: #fef3c7; color: var(--warning); }
+    .issue-icon.info { background: #dbeafe; color: var(--primary); }
+
+    /* Loading Animation */
+    .loading-animation {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+    }
+
+    .loading-animation.show { display: flex; }
+
+    .ai-brain {
+      width: 80px;
+      height: 80px;
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .brain-circle {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 4px solid var(--border);
+      border-top-color: var(--primary);
+      animation: spin 1s linear infinite;
+      position: relative;
+    }
+
+    .brain-circle::before {
+      content: '🤖';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 28px;
+    }
+
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .loading-text {
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .loading-hint {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      margin-top: 8px;
+    }
+
+    /* Success State */
+    .success-state {
+      display: none;
+      text-align: center;
+      padding: 30px;
+    }
+
+    .success-state.show { display: block; }
+
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, var(--success), #34d399);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      animation: bounce 0.5s ease;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .success-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .success-info {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--success), #16a34a);
+      color: white;
+      padding: 14px 32px;
+      font-size: 1rem;
+      box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(34, 197, 94, 0.5);
+    }
+
+    /* Error */
+    .error-msg {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: var(--error);
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .error-msg.show { display: block; }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      color: rgba(255,255,255,0.5);
+      font-size: 0.85rem;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 { font-size: 1.6rem; }
+      .card { padding: 20px; }
+      .options { flex-direction: column; }
+      .btn-primary { min-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>SmartEdu AI 课件生成器</h1>
+      <p>Claude Code Solo Mode · 多轮调优 · 质量门禁</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">
+          <span>📚</span> 创建新课件
+        </span>
+        <span id="modeBadge" class="badge badge-mode">AI 模式</span>
+      </div>
+
+      <div class="form-group">
+        <label for="question">你的问题</label>
+        <input type="text" id="question" class="question-input"
+          placeholder="例如：正方形的面积怎么算？分数的加减法怎么做？">
+      </div>
+
+      <div class="examples">
+        <div class="examples-title">试试这些问题：</div>
+        <span class="example-btn" data-question="正方形的面积怎么算？">正方形面积</span>
+        <span class="example-btn" data-question="分数的加减法怎么做？">分数加减</span>
+        <span class="example-btn" data-question="三角形的面积怎么算？">三角形面积</span>
+        <span class="example-btn" data-question="圆形的周长怎么算？">圆形周长</span>
+      </div>
+
+      <div class="options" style="margin-top: 20px;">
+        <div class="select-wrapper">
+          <label>学科</label>
+          <select id="subject">
+            <option value="数学">数学</option>
+            <option value="语文">语文</option>
+            <option value="英语">英语</option>
+            <option value="科学">科学</option>
+          </select>
+        </div>
+
+        <div class="select-wrapper">
+          <label>年级</label>
+          <select id="grade">
+            <option value="1">1年级</option>
+            <option value="2">2年级</option>
+            <option value="3">3年级</option>
+            <option value="4">4年级</option>
+            <option value="5">5年级</option>
+            <option value="6">6年级</option>
+          </select>
+        </div>
+
+        <label class="checkbox-wrapper">
+          <input type="checkbox" id="enableRefine" checked>
+          <span>🎯 启用多轮调优 (质量门禁)</span>
+        </label>
+
+        <button id="generateBtn" class="btn btn-primary">
+          <span>✨</span> 生成课件
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="card generation-status">
+      <div class="status-header">
+        <span class="status-title">
+          <span>🧠</span> AI 正在生成...
+        </span>
+        <span id="iterationBadge" class="status-badge iteration">第 1 轮</span>
+      </div>
+
+      <div class="loading-animation show">
+        <div class="ai-brain">
+          <div class="brain-circle"></div>
+        </div>
+        <div class="loading-text" id="loadingText">正在分析问题...</div>
+        <div class="loading-hint" id="loadingHint">请稍候，AI 正在发挥最佳水平</div>
+      </div>
+
+      <div class="timeline" id="timeline"></div>
+    </div>
+
+    <!-- Quality Score Panel -->
+    <div id="qualityPanel" class="card quality-panel">
+      <div class="quality-header">
+        <span class="quality-title">
+          <span>📊</span> 质量评分
+        </span>
+        <span class="quality-score" id="qualityScore">--/100</span>
+      </div>
+      <div class="quality-bar">
+        <div class="quality-bar-fill" id="qualityBar" style="width: 0%"></div>
+      </div>
+      <div class="quality-dimensions">
+        <div class="quality-dim">
+          <div class="quality-dim-value" id="dimPedagogy">--</div>
+          <div class="quality-dim-label">教学设计</div>
+        </div>
+        <div class="quality-dim">
+          <div class="quality-dim-value" id="dimContent">--</div>
+          <div class="quality-dim-label">内容质量</div>
+        </div>
+        <div class="quality-dim">
+          <div class="quality-dim-value" id="dimInteraction">--</div>
+          <div class="quality-dim-label">交互设计</div>
+        </div>
+        <div class="quality-dim">
+          <div class="quality-dim-value" id="dimSafety">--</div>
+          <div class="quality-dim-label">安全合规</div>
+        </div>
+        <div class="quality-dim">
+          <div class="quality-dim-value" id="dimFormat">--</div>
+          <div class="quality-dim-label">格式规范</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Issues Panel -->
+    <div id="issuesPanel" class="issues-panel">
+      <div class="issues-title">
+        <span>⚠️</span> 发现问题 (需要修复)
+      </div>
+      <div id="issuesList"></div>
+    </div>
+
+    <!-- Success State -->
+    <div id="successState" class="card success-state">
+      <div class="success-icon">✅</div>
+      <div class="success-title" id="successTitle">课件生成成功!</div>
+      <div class="success-info" id="successInfo">质量评分达标，课件已准备就绪</div>
+      <button class="btn btn-success" id="openCourseBtn">🚀 打开课件</button>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="error-msg"></div>
+
+    <div class="footer">
+      SmartEdu AI · Claude Code Solo Mode · 确保每次交付都达到专业标准
+    </div>
+  </div>
+
+  <!-- Course Modal -->
+  <div id="courseModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:1000;padding:20px;">
+    <div style="max-width:1400px;height:100%;margin:0 auto;display:flex;flex-direction:column;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;color:white;">
+        <h2 id="modalTitle">交互式课件</h2>
+        <button onclick="closeModal()" style="background:rgba(255,255,255,0.2);border:none;color:white;width:40px;height:40px;border-radius:50%;font-size:1.5rem;cursor:pointer;">&times;</button>
+      </div>
+      <iframe id="courseFrame" style="flex:1;border:none;border-radius:12px;background:white;"></iframe>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3000';
+    let currentHtmlContent = null;
+    let currentCourseId = null;
+    let enableRefine = true;
+
+    const questionInput = document.getElementById('question');
+    const subjectSelect = document.getElementById('subject');
+    const gradeSelect = document.getElementById('grade');
+    const enableRefineCheckbox = document.getElementById('enableRefine');
+    const generateBtn = document.getElementById('generateBtn');
+    const modeBadge = document.getElementById('modeBadge');
+
+    const loadingState = document.getElementById('loadingState');
+    const loadingText = document.getElementById('loadingText');
+    const loadingHint = document.getElementById('loadingHint');
+    const timeline = document.getElementById('timeline');
+    const iterationBadge = document.getElementById('iterationBadge');
+    const qualityPanel = document.getElementById('qualityPanel');
+    const issuesPanel = document.getElementById('issuesPanel');
+    const issuesList = document.getElementById('issuesList');
+    const successState = document.getElementById('successState');
+    const errorState = document.getElementById('errorState');
+
+    const stageMessages = {
+      prompt: { text: '正在分析问题...', hint: 'AI 正在理解你的需求' },
+      search: { text: '搜索相关知识点...', hint: '正在查询本地知识库' },
+      api_call: { text: 'AI 正在生成课件...', hint: '发挥创意中，请稍候' },
+      parse: { text: '解析生成内容...', hint: '正在整理课件结构' },
+      validate: { text: '验证课件质量...', hint: '检查格式和完整性' },
+      review: { text: '正在进行质量审查...', hint: '评估教学设计' },
+      refine: { text: '正在修复问题...', hint: '针对问题进行优化' },
+      complete: { text: '生成完成!', hint: '' },
+      error: { text: '生成失败', hint: '' }
+    };
+
+    enableRefineCheckbox.addEventListener('change', (e) => {
+      enableRefine = e.target.checked;
+      modeBadge.className = enableRefine ? 'badge badge-refine' : 'badge badge-mode';
+      modeBadge.textContent = enableRefine ? '多轮调优' : 'AI 模式';
+    });
+
+    document.querySelectorAll('.example-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        questionInput.value = btn.dataset.question;
+        questionInput.focus();
+      });
+    });
+
+    async function generateCourse() {
+      const question = questionInput.value.trim();
+      if (!question) {
+        alert('请输入你的问题');
+        return;
+      }
+
+      resetState();
+      showLoadingState();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      try {
+        const response = await fetch(`${API_BASE}/api/course/generate?stream=true`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json; charset=utf-8' },
+          body: JSON.stringify({
+            user_question: question,
+            subject: subjectSelect.value,
+            grade_level: parseInt(gradeSelect.value),
+            enable_refinement: enableRefine
+          })
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
+        }
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (reader) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                handleProgress(data);
+              } catch (e) {}
+            }
+          }
+        }
+
+        if (currentCourseId) {
+          const courseRes = await fetch(`${API_BASE}/api/course/${currentCourseId}`);
+          const courseData = await courseRes.json();
+          currentHtmlContent = courseData.course.html_content;
+          showSuccessState();
+        }
+
+      } catch (err) {
+        showError(err.message || '生成失败，请稍后重试');
+        addTimelineItem('error', err.message || '生成失败');
+      } finally {
+        hideLoadingState();
+      }
+    }
+
+    function handleProgress(data) {
+      const { stage, message, retryCount, quality_score } = data;
+
+      if (stage === 'complete' && data.course_id) {
+        currentCourseId = data.course_id;
+        iterationBadge.textContent = `✅ 完成 (${retryCount || 1}轮)`;
+        addTimelineItem('complete', message || '生成完成');
+        updateLoadingText('课件已准备就绪!');
+        return;
+      }
+
+      if (stage === 'error') {
+        addTimelineItem('error', message);
+        updateLoadingText('生成失败');
+        return;
+      }
+
+      const stageInfo = stageMessages[stage] || { text: message || stage, hint: '' };
+      updateLoadingText(stageInfo.text, stageInfo.hint);
+
+      if (retryCount) {
+        iterationBadge.textContent = `第 ${retryCount} 轮`;
+        iterationBadge.className = 'status-badge ' + (stage === 'review' ? 'reviewing' : stage === 'refine' ? 'fixing' : 'generating');
+      }
+
+      addTimelineItem(stage === 'api_call' && retryCount > 1 ? 'refine' : stage, stageInfo.text);
+
+      if (quality_score) {
+        showQualityScore(quality_score);
+      }
+    }
+
+    function addTimelineItem(stage, text) {
+      const item = document.createElement('div');
+      item.className = 'timeline-item ' + (stage === 'complete' ? 'complete' : stage === 'error' ? 'error' : 'active');
+      item.innerHTML = `
+        <div class="timeline-content">
+          <span class="timeline-text">${text}</span>
+          <span class="timeline-time">${new Date().toLocaleTimeString()}</span>
+        </div>
+      `;
+      timeline.appendChild(item);
+      timeline.scrollTop = timeline.scrollHeight;
+    }
+
+    function updateLoadingText(text, hint = '') {
+      loadingText.textContent = text;
+      loadingHint.textContent = hint;
+    }
+
+    function showQualityScore(score) {
+      qualityPanel.classList.add('show');
+      
+      const overall = score.overall || 0;
+      document.getElementById('qualityScore').textContent = `${overall}/100`;
+      document.getElementById('qualityBar').style.width = `${overall}%`;
+
+      if (score.dimensions) {
+        document.getElementById('dimPedagogy').textContent = score.dimensions.pedagogy;
+        document.getElementById('dimContent').textContent = score.dimensions.content;
+        document.getElementById('dimInteraction').textContent = score.dimensions.interaction;
+        document.getElementById('dimSafety').textContent = score.dimensions.safety;
+        document.getElementById('dimFormat').textContent = score.dimensions.format;
+      }
+    }
+
+    function showSuccessState() {
+      successState.classList.add('show');
+      document.getElementById('successTitle').textContent = '课件生成成功!';
+      document.getElementById('successInfo').textContent = enableRefine 
+        ? '质量评分达标，课件已准备就绪'
+        : '课件已生成，可打开查看';
+    }
+
+    function showError(msg) {
+      errorState.textContent = msg;
+      errorState.classList.add('show');
+    }
+
+    function showLoadingState() {
+      loadingState.classList.add('show');
+      generateBtn.disabled = true;
+      successState.classList.remove('show');
+      errorState.classList.remove('show');
+      qualityPanel.classList.remove('show');
+      issuesPanel.classList.remove('show');
+    }
+
+    function hideLoadingState() {
+      loadingState.classList.remove('show');
+      document.querySelector('.loading-animation').classList.remove('show');
+      generateBtn.disabled = false;
+    }
+
+    function resetState() {
+      timeline.innerHTML = '';
+      iterationBadge.textContent = '第 1 轮';
+      iterationBadge.className = 'status-badge iteration';
+      document.querySelector('.loading-animation').classList.add('show');
+      updateLoadingText('正在分析问题...', 'AI 正在发挥最佳水平');
+    }
+
+    function openCourse() {
+      if (!currentHtmlContent) return;
+      const blob = new Blob([currentHtmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    }
+
+    function closeModal() {
+      document.getElementById('courseModal').style.display = 'none';
+      document.getElementById('courseFrame').srcdoc = '';
+    }
+
+    generateBtn.addEventListener('click', generateCourse);
+    document.getElementById('openCourseBtn').addEventListener('click', openCourse);
+    questionInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') generateCourse(); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>四年级数学 - 小数加减法</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0891b2;
+            --primary-dark: #0e7490;
+            --primary-light: #22d3ee;
+            --secondary: #f97316;
+            --accent: #eab308;
+            --success: #22c55e;
+            --error: #ef4444;
+            --bg: #f0fdfa;
+            --bg-pattern: #ccfbf1;
+            --card-bg: #ffffff;
+            --text: #134e4a;
+            --text-secondary: #5eead4;
+            --border: #99f6e4;
+            --shadow: rgba(8, 145, 178, 0.15);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: "Noto Sans SC", sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Animated background */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(34, 211, 238, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(249, 115, 22, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, var(--bg) 0%, var(--bg-pattern) 100%);
+        }
+        
+        .floating-shape {
+            position: fixed;
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: float 20s ease-in-out infinite;
+        }
+        
+        .shape1 { width: 300px; height: 300px; background: var(--primary); top: -100px; right: -100px; animation-delay: 0s; }
+        .shape2 { width: 200px; height: 200px; background: var(--secondary); bottom: 10%; left: -50px; animation-delay: -5s; }
+        .shape3 { width: 150px; height: 150px; background: var(--accent); top: 50%; right: 10%; animation-delay: -10s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+        
+        .header { 
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); 
+            color: white; 
+            padding: 32px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+        
+        .header h1 { 
+            font-size: 2.5rem; 
+            font-weight: 900;
+            margin-bottom: 8px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        
+        .header p { 
+            margin-top: 16px; 
+            font-size: 1.1rem;
+            opacity: 0.95;
+            position: relative;
+        }
+        
+        .nav-tabs { 
+            display: flex; 
+            justify-content: center; 
+            gap: 12px; 
+            padding: 20px; 
+            background: white; 
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+        
+        .nav-tab { 
+            padding: 14px 28px; 
+            border: 2px solid var(--border);
+            background: white; 
+            color: var(--text); 
+            border-radius: 50px; 
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary);
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: -1;
+        }
+        
+        .nav-tab:hover::before {
+            transform: translateY(0);
+        }
+        
+        .nav-tab:hover {
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .nav-tab.active { 
+            background: var(--primary); 
+            color: white; 
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(8, 145, 178, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .main-content { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 32px 20px;
+        }
+        
+        .tab-content { 
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .tab-content.active { 
+            display: block; 
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card { 
+            background: var(--card-bg); 
+            border-radius: 20px; 
+            padding: 28px; 
+            margin-bottom: 24px; 
+            box-shadow: 0 4px 20px var(--shadow);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+        
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .formula-box { 
+            background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); 
+            border-left: 5px solid var(--primary); 
+            padding: 20px 24px; 
+            border-radius: 12px; 
+            text-align: center; 
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin: 20px 0;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.03);
+        }
+        
+        .example-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+            background: var(--bg);
+            border-radius: 12px;
+            margin: 16px 0;
+            flex-wrap: wrap;
+        }
+        
+        .example-item {
+            text-align: center;
+            padding: 16px 24px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px var(--shadow);
+            transition: transform 0.3s ease;
+        }
+        
+        .example-item:hover {
+            transform: translateY(-4px);
+        }
+        
+        .example-item .number {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--primary);
+        }
+        
+        .example-item .label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        
+        .step-list {
+            list-style: none;
+            counter-reset: step;
+        }
+        
+        .step-list li {
+            position: relative;
+            padding: 16px 20px 16px 70px;
+            margin: 12px 0;
+            background: linear-gradient(135deg, #f8fafc 0%, #f0fdfa 100%);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            counter-increment: step;
+            transition: all 0.3s ease;
+        }
+        
+        .step-list li:hover {
+            transform: translateX(8px);
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+        
+        .step-list li::before {
+            content: counter(step);
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        canvas { 
+            background: white; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 20px var(--shadow);
+            border: 2px solid var(--border);
+            max-width: 100%;
+        }
+        
+        .btn {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: inherit;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(8, 145, 178, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(8, 145, 178, 0.5);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary) 0%, #ea580c 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.5);
+        }
+        
+        .btn:active {
+            transform: translateY(-1px);
+        }
+        
+        /* 练习区域 */
+        .exercise-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .question-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f0fdfa 100%);
+            border-radius: 16px;
+            padding: 24px;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        
+        .question-card:hover {
+            border-color: var(--primary);
+        }
+        
+        .question-card.correct {
+            border-color: var(--success);
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        }
+        
+        .question-card.wrong {
+            border-color: var(--error);
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        }
+        
+        .question-number {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--text);
+        }
+        
+        .answer-input {
+            width: 150px;
+            padding: 12px 16px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-align: center;
+            border: 3px solid var(--border);
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .answer-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.2);
+        }
+        
+        .answer-input.correct {
+            border-color: var(--success);
+            background: #dcfce7;
+        }
+        
+        .answer-input.wrong {
+            border-color: var(--error);
+            background: #fee2e2;
+        }
+        
+        .feedback {
+            margin-top: 12px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+        
+        .feedback.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .feedback.success {
+            background: #dcfce7;
+            color: var(--success);
+        }
+        
+        .feedback.error {
+            background: #fee2e2;
+            color: var(--error);
+        }
+        
+        .score-board {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 20px 32px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .score-board h3 {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        
+        .score-value {
+            font-size: 3rem;
+            font-weight: 900;
+        }
+        
+        .score-value span {
+            font-size: 1.5rem;
+            opacity: 0.8;
+        }
+        
+        /* 演示控制按钮 */
+        .demo-controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .highlight-text {
+            color: var(--primary);
+            font-weight: 700;
+        }
+        
+        .accent-text {
+            color: var(--secondary);
+            font-weight: 700;
+        }
+        
+        .tip-box {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border-left: 5px solid var(--accent);
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .tip-box .icon {
+            font-size: 1.5rem;
+        }
+        
+        .tip-box p {
+            flex: 1;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.8rem; }
+            .nav-tab { padding: 10px 18px; font-size: 0.9rem; }
+            .card { padding: 20px; }
+            .formula-box { font-size: 1.1rem; padding: 16px; }
+            .question-text { font-size: 1.2rem; }
+            .answer-input { width: 120px; font-size: 1.1rem; }
+        }
+        
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        .vertical-calc {
+            display: inline-block;
+            text-align: right;
+            font-family: monospace;
+            font-size: 1.5rem;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+        
+        .calc-line {
+            min-width: 150px;
+            padding: 4px 12px;
+        }
+        
+        .calc-line.operator {
+            border-top: 2px solid var(--text);
+        }
+        
+        .decimal-point {
+            color: var(--secondary);
+            font-weight: 900;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    <div class="floating-shape shape1"></div>
+    <div class="floating-shape shape2"></div>
+    <div class="floating-shape shape3"></div>
+    
+    <div class="header">
+        <h1>小数加减法</h1>
+        <p>四年级数学 · 轻松掌握小数运算</p>
+    </div>
+    
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="switchTab('concept')">概念讲解</button>
+        <button class="nav-tab" onclick="switchTab('demo')">图形演示</button>
+        <button class="nav-tab" onclick="switchTab('exercise')">练习测试</button>
+    </div>
+    
+    <div class="main-content">
+        <!-- 概念讲解 -->
+        <div id="concept" class="tab-content active">
+            <div class="card">
+                <h2>什么是小数加减法？</h2>
+                <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text);">
+                    小数加减法就是把带有小数点的数进行相加或相减。就像我们在超市买东西时计算价格一样！
+                </p>
+                
+                <div class="example-row">
+                    <div class="example-item">
+                        <div class="number">3.50</div>
+                        <div class="label">元（铅笔盒）</div>
+                    </div>
+                    <div style="font-size: 2rem; color: var(--primary);">+</div>
+                    <div class="example-item">
+                        <div class="number">2.25</div>
+                        <div class="label">元（笔记本）</div>
+                    </div>
+                    <div style="font-size: 2rem; color: var(--secondary);">=</div>
+                    <div class="example-item" style="background: linear-gradient(135deg, #f0fdfa, #ccfbf1);">
+                        <div class="number">5.75</div>
+                        <div class="label">元（总共）</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>核心法则：小数点对齐</h2>
+                <div class="formula-box">
+                    小数点对齐 = 相同数位对齐
+                </div>
+                
+                <p style="font-size: 1.05rem; line-height: 1.8; margin: 16px 0;">
+                    做小数加减法时，最重要的是<span class="highlight-text">把小数点对齐</span>。这样，个位对个位，十分位对十分位，百分位对百分位，计算就不会出错啦！
+                </p>
+                
+                <div class="tip-box">
+                    <span class="icon">💡</span>
+                    <p><strong>小技巧：</strong>想象小数点是一根"定海神针"，所有的数字都要围绕它排好队，这样计算就简单多了！</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>计算步骤</h2>
+                <ol class="step-list">
+                    <li><strong>小数点对齐</strong> —— 把两个数的小数点上下对齐，相同数位就对齐了</li>
+                    <li><strong>按位计算</strong> —— 从最低位开始，一位一位地相加或相减</li>
+                    <li><strong>满十进一</strong> —— 某一位满10就向前一位进1（加法）</li>
+                    <li><strong>不够减借一</strong> —— 某一位不够减就向前一位借1当10（减法）</li>
+                    <li><strong>点上小数点</strong> —— 结果的小数点和上面的小数点对齐</li>
+                </ol>
+            </div>
+            
+            <div class="card">
+                <h2>竖式计算示例</h2>
+                <div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;">
+                    <div>
+                        <h3 style="text-align: center; margin-bottom: 12px; color: var(--primary);">加法示例</h3>
+                        <div class="vertical-calc">
+                            <div class="calc-line">2<span class="decimal-point">.</span>35</div>
+                            <div class="calc-line">+ 4<span class="decimal-point">.</span>62</div>
+                            <div class="calc-line operator">6<span class="decimal-point">.</span>97</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="text-align: center; margin-bottom: 12px; color: var(--secondary);">减法示例</h3>
+                        <div class="vertical-calc">
+                            <div class="calc-line">5<span class="decimal-point">.</span>80</div>
+                            <div class="calc-line">- 2<span class="decimal-point">.</span>35</div>
+                            <div class="calc-line operator">3<span class="decimal-point">.</span>45</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 图形演示 -->
+        <div id="demo" class="tab-content">
+            <div class="card">
+                <h2>可视化演示</h2>
+                <p style="margin-bottom: 16px; color: var(--text-secondary);">
+                    通过方格图直观理解小数加减法。每个大方格代表1，小方格代表0.01。
+                </p>
+                
+                <div class="canvas-container">
+                    <canvas id="mainCanvas" width="800" height="450"></canvas>
+                    
+                    <div class="demo-controls">
+                        <button class="btn btn-primary" onclick="startDemo('add')">加法演示</button>
+                        <button class="btn btn-secondary" onclick="startDemo('subtract')">减法演示</button>
+                        <button class="btn" style="background: #e2e8f0; color: var(--text);" onclick="resetDemo()">重置</button>
+                    </div>
+                    
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #22d3ee;"></div>
+                            <span>第一个数</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #f97316;"></div>
+                            <span>第二个数</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #22c55e;"></div>
+                            <span>结果</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>小数点对齐动画</h2>
+                <p style="margin-bottom: 16px; color: var(--text-secondary);">
+                    观察小数点如何对齐，理解相同数位对齐的重要性。
+                </p>
+                <div class="canvas-container">
+                    <canvas id="alignCanvas" width="600" height="300"></canvas>
+                    <div class="demo-controls">
+                        <button class="btn btn-primary" onclick="playAlignAnimation()">播放对齐动画</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 练习测试 -->
+        <div id="exercise" class="tab-content">
+            <div class="score-board">
+                <h3>当前得分</h3>
+                <div class="score-value"><span id="score">0</span><span> / 100</span></div>
+            </div>
+            
+            <div class="exercise-container" id="exerciseContainer">
+                <!-- 动态生成题目 -->
+            </div>
+            
+            <div style="text-align: center; margin-top: 24px;">
+                <button class="btn btn-primary" onclick="resetExercise()" style="margin-right: 12px;">重新开始</button>
+                <button class="btn btn-secondary" onclick="generateNewQuestions()">换一批题目</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ==================== 全局变量初始化 ====================
+        let score = 0;
+        let currentDemo = null;
+        let animationId = null;
+        let alignAnimationId = null;
+        
+        // 题目数据
+        const questions = [
+            { type: 'add', a: 2.35, b: 1.42, answer: 3.77 },
+            { type: 'add', a: 0.56, b: 0.38, answer: 0.94 },
+            { type: 'subtract', a: 5.80, b: 2.35, answer: 3.45 },
+            { type: 'add', a: 3.27, b: 4.63, answer: 7.90 },
+            { type: 'subtract', a: 8.00, b: 3.56, answer: 4.44 }
+        ];
+        
+        // 颜色常量
+        const COLORS = {
+            primary: '#0891b2',
+            primaryLight: '#22d3ee',
+            secondary: '#f97316',
+            accent: '#eab308',
+            success: '#22c55e',
+            error: '#ef4444',
+            text: '#134e4a',
+            bg: '#f0fdfa'
+        };
+        
+        // ==================== Tab 切换 ====================
+        function switchTab(tabId) {
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+            
+            if (tabId === 'demo') {
+                setTimeout(() => {
+                    initMainCanvas();
+                    initAlignCanvas();
+                }, 100);
+            }
+            
+            if (tabId === 'exercise') {
+                generateQuestions();
+            }
+        }
+        
+        // ==================== 主画布初始化 ====================
+        function initMainCanvas() {
+            const canvas = document.getElementById('mainCanvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawGridBackground(ctx, canvas.width, canvas.height);
+            drawWelcomeText(ctx, canvas.width, canvas.height);
+        }
+        
+        function drawGridBackground(ctx, w, h) {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, w, h);
+            
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            
+            for (let x = 0; x <= w; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, h);
+                ctx.stroke();
+            }
+            
+            for (let y = 0; y <= h; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.stroke();
+            }
+        }
+        
+        function drawWelcomeText(ctx, w, h) {
+            ctx.fillStyle = COLORS.text;
+            ctx.font = 'bold 24px "Noto Sans SC"';
+            ctx.textAlign = 'center';
+            ctx.fillText('点击下方按钮开始演示', w / 2, h / 2 - 20);
+            
+            ctx.font = '16px "Noto Sans SC"';
+            ctx.fillStyle = '#64748b';
+            ctx.fillText('通过方格图直观理解小数加减法', w / 2, h / 2 + 20);
+        }
+        
+        // ==================== 演示动画 ====================
+        function startDemo(type) {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            
+            const canvas = document.getElementById('mainCanvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            
+            let progress = 0;
+            const duration = 120;
+            
+            const addExample = { a: 1.25, b: 0.75, answer: 2.0 };
+            const subExample = { a: 2.5, b: 0.75, answer: 1.75 };
+            
+            const example = type === 'add' ? addExample : subExample;
+            
+            function animate() {
+                progress++;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawGridBackground(ctx, canvas.width, canvas.height);
+                
+                const unitSize = 80;
+                const startX = 100;
+                const startY = 100;
+                
+                // 绘制标题
+                ctx.fillStyle = COLORS.text;
+                ctx.font = 'bold 20px "Noto Sans SC"';
+                ctx.textAlign = 'left';
+                ctx.fillText(type === 'add' ? '加法演示: 1.25 + 0.75 = 2.0' : '减法演示: 2.5 - 0.75 = 1.75', 50, 40);
+                
+                // 绘制第一个数
+                drawDecimalBlocks(ctx, startX, startY, example.a, COLORS.primaryLight, unitSize, Math.min(progress / 40, 1));
+                
+                // 绘制第二个数
+                const secondProgress = Math.max(0, (progress - 30) / 40);
+                if (secondProgress > 0) {
+                    if (type === 'add') {
+                        drawDecimalBlocks(ctx, startX, startY, example.b, COLORS.secondary, unitSize, secondProgress, true);
+                    } else {
+                        drawDecimalBlocks(ctx, startX + 300, startY, example.b, COLORS.secondary, unitSize, secondProgress);
+                    }
+                }
+                
+                // 显示结果
+                if (progress > 80) {
+                    const resultProgress = (progress - 80) / 40;
+                    ctx.fillStyle = COLORS.success;
+                    ctx.globalAlpha = Math.min(resultProgress, 1);
+                    ctx.font = 'bold 28px "Noto Sans SC"';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`= ${example.answer}`, 600, 350);
+                    ctx.globalAlpha = 1;
+                }
+                
+                // 绘制图例
+                drawLegend(ctx, 50, 400);
+                
+                if (progress < duration) {
+                    animationId = requestAnimationFrame(animate);
+                }
+            }
+            
+            animate();
+        }
+        
+        function drawDecimalBlocks(ctx, startX, startY, value, color, unitSize, progress, offset = false) {
+            const safeValue = Math.max(0, value);
+            const safeProgress = Math.max(0, Math.min(1, progress));
+            
+            const whole = Math.floor(safeValue);
+            const decimal = safeValue - whole;
+            
+            const offsetX = offset ? whole * unitSize * safeProgress : 0;
+            const actualX = startX + offsetX;
+            
+            // 绘制整数部分
+            for (let i = 0; i < whole; i++) {
+                const blockProgress = Math.min((safeProgress * 3 - i * 0.3), 1);
+                if (blockProgress > 0) {
+                    drawBlock(ctx, actualX + i * unitSize, startY, unitSize, unitSize, color, blockProgress);
+                }
+            }
+            
+            // 绘制小数部分
+            if (decimal > 0) {
+                const decimalWidth = decimal * unitSize;
+                const decimalProgress = Math.max(0, (safeProgress - 0.5) * 2);
+                if (decimalProgress > 0) {
+                    drawBlock(ctx, actualX + whole * unitSize, startY, decimalWidth, unitSize, color, Math.min(decimalProgress, 1));
+                }
+            }
+            
+            // 标注数值
+            ctx.fillStyle = COLORS.text;
+            ctx.font = 'bold 18px "Noto Sans SC"';
+            ctx.textAlign = 'left';
+            ctx.fillText(`${safeValue}`, actualX, startY - 10);
+        }
+        
+        function drawBlock(ctx, x, y, w, h, color, progress) {
+            const safeProgress = Math.max(0, Math.min(1, progress));
+            const safeW = Math.max(1, w * safeProgress);
+            const safeH = Math.max(1, h);
+            
+            ctx.fillStyle = color;
+            ctx.globalAlpha = 0.7;
+            ctx.fillRect(x, y, safeW, safeH);
+            ctx.globalAlpha = 1;
+            
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, safeW, safeH);
+        }
+        
+        function drawLegend(ctx, x, y) {
+            const items = [
+                { color: COLORS.primaryLight, label: '第一个数' },
+                { color: COLORS.secondary, label: '第二个数' },
+                { color: COLORS.success, label: '计算结果' }
+            ];
+            
+            ctx.font = '14px "Noto Sans SC"';
+            
+            items.forEach((item, index) => {
+                const itemX = x + index * 150;
+                ctx.fillStyle = item.color;
+                ctx.fillRect(itemX, y, 20, 20);
+                ctx.strokeStyle = item.color;
+                ctx.strokeRect(itemX, y, 20,

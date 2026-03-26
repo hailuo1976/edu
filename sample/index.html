@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>几何教学工具</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #1e40af;
+            --accent: #f59e0b;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Noto Sans SC", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 24px 32px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            gap: 24px;
+        }
+
+        .sidebar {
+            width: 280px;
+            flex-shrink: 0;
+        }
+
+        .shape-list {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .shape-list h2 {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--bg);
+        }
+
+        .shape-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 14px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--text);
+            transition: all 0.3s ease;
+            text-align: left;
+            margin-bottom: 4px;
+        }
+
+        .shape-btn:hover {
+            background: #eff6ff;
+        }
+
+        .shape-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .shape-btn svg {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .content-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .shape-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--bg);
+        }
+
+        .shape-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .shape-icon svg {
+            width: 36px;
+            height: 36px;
+        }
+
+        .shape-title h2 {
+            font-size: 1.75rem;
+        }
+
+        .shape-title p {
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+            }
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .shape-visual {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 280px;
+        }
+
+        .shape-visual svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: "";
+            width: 4px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .formula-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .formula-item {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 16px 20px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .formula-item .label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .formula-item .formula {
+            font-family: "Times New Roman", serif;
+            font-size: 1.25rem;
+            font-style: italic;
+        }
+
+        .formula-item .formula .var {
+            color: var(--primary-dark);
+        }
+
+        .calculator {
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 2px solid var(--bg);
+        }
+
+        .calc-title {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .calc-title svg {
+            color: var(--accent);
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .input-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-field label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .input-field label span {
+            color: var(--error);
+        }
+
+        .input-field input {
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .input-field input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .input-field input.error {
+            border-color: var(--error);
+        }
+
+        .input-hint {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 12px;
+            padding: 24px;
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .result-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .result-item {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .result-item .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: "Times New Roman", serif;
+        }
+
+        .result-item .unit {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .result-item .name {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: var(--error);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>几何教学工具</h1>
+        <p>探索几何图形、学习计算公式、动手实践计算</p>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="shape-list">
+                <h2>选择图形</h2>
+                <button class="shape-btn active" data-shape="square">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="1"/></svg>
+                    正方形
+                </button>
+                <button class="shape-btn" data-shape="rectangle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="1"/></svg>
+                    长方形
+                </button>
+                <button class="shape-btn" data-shape="circle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
+                    圆形
+                </button>
+                <button class="shape-btn" data-shape="triangle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,3 22,21 2,21"/></svg>
+                    三角形
+                </button>
+                <button class="shape-btn" data-shape="parallelogram">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="4,18 8,6 20,6 16,18"/></svg>
+                    平行四边形
+                </button>
+                <button class="shape-btn" data-shape="trapezoid">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="4,18 7,6 17,6 20,18"/></svg>
+                    梯形
+                </button>
+                <button class="shape-btn" data-shape="polygon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5"/></svg>
+                    正多边形
+                </button>
+                <button class="shape-btn" data-shape="sector">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 L12 22 A10 10 0 0 1 5.86 5.86 Z"/></svg>
+                    扇形
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-card" id="contentArea"></div>
+        </main>
+    </div>
+
+    <script>
+        const shapes = {
+            square: {
+                name: "正方形",
+                description: "四条边相等且四个角都是直角的四边形",
+                svg: `<svg viewBox="0 0 200 200" width="200" height="200">
+                    <rect x="40" y="40" width="120" height="120" fill="#3b82f6" fill-opacity="0.2" stroke="#1e40af" stroke-width="3"/>
+                    <line x1="40" y1="30" x2="160" y2="30" stroke="#1e40af" stroke-width="2"/>
+                    <line x1="170" y1="40" x2="170" y2="160" stroke="#1e40af" stroke-width="2"/>
+                    <text x="100" y="25" text-anchor="middle" fill="#1e40af" font-size="14">a</text>
+                    <text x="185" y="105" text-anchor="middle" fill="#1e40af" font-size="14">a</text>
+                </svg>`,
+                formulas: [
+                    { label: "面积", formula: "<span class='var'>S</span> = <span class='var'>a</span>²" },
+                    { label: "周长", formula: "<span class='var'>C</span> = 4<span class='var'>a</span>" },
+                    { label: "对角线", formula: "<span class='var'>d</span> = <span class='var'>a</span>√2" }
+                ],
+                inputs: [
+                    { name: "a", label: "边长 a", unit: "cm", hint: "正方形的边长" }
+                ],
+                calc: (vals) => {
+                    const a = vals.a;
+                    return [
+                        { name: "面积", value: (a * a).toFixed(2), unit: "cm²" },
+                        { name: "周长", value: (4 * a).toFixed(2), unit: "cm" },
+                        { name: "对角线", value: (a * Math.sqrt(2)).toFixed(2), unit: "cm" }
+                    ];
+                }
+            },
+            rectangle: {
+                name: "长方形",
+                description: "对边相等且四个角都是直角的四边形",
+                svg: `<svg viewBox="0 0 200 200" width="200" height="200">
+                    <rect x="30" y="50" width="140" height="100" fill="#3b82f6" fill-opacity="0.2" stroke="#1e40af" stroke-width="3"/>
+                    <line x1="30" y1="35" x2="170" y2="35" stroke="#1e40af" stroke-width="2"/>
+                    <line x1="185" y1="50" x2="185" y2="150" stroke="#1e40af" stroke-width="2"/>
+                    <text x="100" y="28" text-anchor="middle" fill="#1e40af" font-size="14">a (长)</text>
+                    <text x="198" y="105" text-anchor="start" fill="#1e40af" font-size="14">b (宽)</text>
+                </svg>`,
+                formulas: [
+                    { label: "面积", formula: "<span class='var'>S</span> = <span class='var'>a</span> × <span class='var'>b</span>" },
+                    { label: "周长", formula: "<span class='var'>C</span> = 2(<span class='var'>a</span> + <span class='var'>b</span>)" },
+                    { label: "对角线", formula: "<span class='var'>d</span> = √(<span class='var'>a</span>² + <span class='var'>b</span>²)" }
+                ],
+                inputs: [
+                    { name: "a", label: "长 a", unit: "cm", hint: "长方形的长度" },
+                    { name: "b", label: "宽 b", unit: "cm", hint: "长方形的宽度" }
+                ],
+                calc: (vals) => {
+                    const a = vals.a, b = vals.b;
+                    return [
+                        { name: "面积", value: (a * b).toFixed(2), unit: "cm²" },
+                        { name: "周长", value: (2 * (a + b)).toFixed(2), unit: "cm" },
+                        { name: "对角线", value: Math.sqrt(a*a + b*b).toFixed(2), unit: "cm" }
+                    ];
+                }
+            },
+            circle: {
+                name: "圆形",
+                description: "所有点到圆心的距离相等的平面图形",
+                svg: `<svg viewBox="0 0 200 200" width="200" height="200">
+                    <circle cx="100" cy="100" r="70" fill="#3b82f6" fill-opacity="0.2" stroke="#1e40af" stroke-width="3"/>
+                    <line x1="100" y1="100" x2="100" y2="30" stroke="#1e40af" stroke-width="2" stroke-dasharray="4"/>
+                    <circle cx="100" cy="100" r="4" fill="#1e40af"/>
+                    <text x="100" y="22" text-anchor="middle" fill="#1e40af" font-size="14">r (半径)</text>
+                    <text x="110" y="115" fill="#1e40af" font-size="12">O</text>
+                </svg>`,
+                formulas: [
+                    { label: "面积", formula: "<span class='var'>S</span> = π<span class='var'>r</span>²" },
+                    { label: "周长", formula: "<span class='var'>C</span> = 2π<span class='var'>r</span>" },
+                    { label: "直径", formula: "<span class='var'>d</span> = 2<span class='var'>r</span>" }
+                ],
+                inputs: [
+                    { name: "r", label: "半径 r", unit: "cm", hint: "圆的半径长度" }
+                ],
+                calc: (vals) => {
+                    const r = vals.r;
+                    return [
+                        { name: "面积", value: (Math.PI * r * r).toFixed(2), unit: "cm²" },
+                        { name: "周长", value: (2 * Math.PI * r).toFixed(2), unit: "cm" },
+                        { name: "直径", value: (2 * r).toFixed(2), unit: "cm" }
+                    ];
+                }
+            },
+            triangle: {
+                name: "三角形",
+                description: "三条边围成的平面图形",
+                svg: `<svg viewBox="0 0 200 200" width="200" height="200">
+                    <polygon points="100,30 30,170 170,170" fill="#3b82f6" fill-opacity="0.2" stroke="#1e40af" stroke-width="3"/>
+                    <line x1="100" y1="170" x2="100" y2="130" stroke="#1e40af" stroke-width="2"/>
+                    <text x="100" y="18" text-anchor="middle" fill="#1e40af" font-size="14">a</text>
+                    <text x="20" y="105" text-anchor="middle" fill="#1e40af" font-size="14">b</text>
+                    <text x="180" y="105" text-anchor="middle" fill="#1e40af" font-size="14">c</text>
+                    <text x="115" y="155" fill="#1e40af" font-size="12">h (高)</text>
+                </svg>`,
+                formulas: [
+                    { label: "面积", formula: "<span class='var'>S</span> = ½ × <span class='var'>b</span> × <span class='var'>h</span>" },
+                    { label: "周长", formula: "<span class='var'>C</span> = <span class='var'>a</span> + <span class='var'>b</span> + <span class='var'>c</span>" }
+                ],
+                inputs: [
+                    { name: "a", label: "边 a", unit: "cm", hint: "第一条边" },
+                    { name: "b", label: "边 b", unit: "cm", hint: "第二条边" },
+                    { name: "c", label: "边 c", unit: "cm", hint: "第三条边" },
+                    { name: "h", label: "高 h", unit: "cm", hint: "对应底边的高" }
+                ],
+                calc: (vals) => {
+                    const {a, b, c, h} = vals;
+                    return [
+                        { name: "面积", value: (0.5 * b * h).toFixed(2), unit: "cm²" },
+                        { name: "周长", value: (a + b + c).toFixed(2), unit: "cm" }
+                    ];
+                }
+            },
+            parallelogram: {
+                name: "平行四边形",
+                description: "两组对边平行的四边形",
+                svg: `<svg viewBox="0 0 200 200" width="200" height="200">
+                    <polygon points="40,140 70,40 180,40 150,140" fill="#3b82f6" fill-opacity="0.2" stroke="#1e40af" stroke-width="3"/>
+                    <line x1="70" y1="40" x2="70" y2="140" stroke="#1e40af" stroke-width="2" stroke-dasharray="4"/>
+                    <text x="115" y="28" text-anchor="middle" fill="#1e40af" font-size="14">a (底)</text>
+                    <text x="195" y="90" text-anchor="start" fill="#1e40af" font-size="14">b (腰)</text>
+                </svg>`,
+                formulas: [
+                    { label: "面积", formula: "<span class='var'>S</span> = <span class='var'>a</span> × <span class='var'>h</span>" },
+                    { label: "周长", formula: "<span class='var'>C</span> = 2(<span class='var'>a</span> + <span class='var'>b</span>)" }
+                ],
+                inputs: [
+                    { name: "a", label: "底 a", unit: "cm", hint: "平行四边形的底" },
+                    { name: "b", label: "腰 b", unit: "cm", hint: "平行四边形的腰" },
+                    { name: "h", label: "高 h", unit: "cm", hint: "对应底边的高" }
+                ],
+                calc: (vals) => {
+                    const {a, b, h} = vals;
+                    return [
+                        { name: "面积", value: (a * h).toFixed(2), unit: "cm²" },
+                        { name: "周长", value: (2 * (a + b)).toFixed(2), unit: "cm" }
+                    ];
+                }
+            },
+            trapezoid: {
+                name: "梯形",
+                description: "只有一组对边平行的四边形",
+                svg: `<svg viewBox="0 0 200 200" width="200" height="200">
+                    <polygon points="30,150 60,50 160,50 190,150" fill="#3b82f6" fill-opacity="0.2" stroke="#1e40af" stroke-width="3"/>
+                    <line x1="60" y1="50" x2="60" y2="150" stroke="#1e40af" stroke-width="2" stroke-dasharray="4"/>
+                    <text x="95" y="38" text-anchor="middle" fill="#1e40af" font-size="14">a (上底)</text>
+                    <text x="125" y="170" text-anchor="middle" fill="#1e40af" font-size="14">b (下底)</text>
+                </svg>`,
+                formulas: [
+                    { label: "面积", formula: "<span class='var'>S</span> = ½(<span class='var'>a</span> + <span class='var'>b</span>)<span class='var'>h</span>" },
+                    { label: "周长", formula: "<span class='var'>C</span> = <span class='var'>a</span> + <span class='var'>b</span> + <span class='var'>c</span> + <span class='var'>d</span>" }
+                ],
+                inputs: [
+                    { name: "a", label: "上底 a", unit: "cm", hint: "梯形的上底" },
+                    { name: "b", label: "下底 b", unit: "cm", hint: "梯形的下底" },
+                    { name: "h", label: "高 h", unit: "cm", hint: "梯形的高" },
+                    { name: "c", label: "腰 c", unit: "cm", hint: "梯形的左腰" },
+                    { name: "d", label: "腰 d", unit: "cm", hint: "梯形的右腰" }
+                ],
+                calc: (vals) => {
+                    const {a, b, h, c, d} = vals;
+                    return [
+                        { name: "面积", value: (0.5 * (a + b) * h).toFixed(2), unit: "cm²" },
+                        { name: "周长", value: (a + b + c + d).toFixed(2), unit: "cm" }
+                    ];
+                }
+            },
+            polygon: {
+                name: "正多边形",
+                description: "所有边相等且所有角相等的多边形",
+                svg: `<svg viewBox="0 0 200 200" width="200" height="200">
+                    <polygon points="100,25 167,62 167,138 100,175 33,138 33,62" fill="#3b82f6" fill-opacity="0.2" stroke="#1e40af" stroke-width="3"/>
+                    <circle cx="100" cy="100" r="4" fill="#1e40af"/>
+                    <text x="100" y="15" text-anchor="middle" fill="#1e40af" font-size="14">n = 6</text>
+                </svg>`,
+                formulas: [
+                    { label: "面积", formula: "<span class='var'>S</span> = (<span class='var'>n</span>×<span class='var'>a</span>²) / (4×tan(π/<span class='var'>n</span>))" },
+                    { label: "周长", formula: "<span class='var'>C</span> = <span class='var'>n</span> × <span class='var'>a</span>" },
+                    { label: "内角和", formula: "<span class='var'>∠</span> = (<span class='var'>n</span>-2) × 180°" }
+                ],
+                inputs: [
+                    { name: "n", label: "边数 n", unit: "", hint: "多边形的边数(≥3)", isInt: true },
+                    { name: "a", label: "边长 a", unit: "cm", hint: "每条边的长度" }
+                ],
+                calc: (vals) => {
+                    const n = vals.n, a = vals.a;
+                    const area = (n * a * a) / (4 * Math.tan(Math.PI / n));
+                    return [
+                        { name: "面积", value: area.toFixed(2), unit: "cm²" },
+                        { name: "周长", value: (n * a).toFixed(2), unit: "cm" },
+                        { name: "内角和", value: ((n - 2) * 180).toFixed(0), unit: "°" }
+                    ];
+                }
+            },
+            sector: {
+                name: "扇形",
+                description: "圆的一部分，由两条半径和一段弧围成",
+                svg: `<svg viewBox="0 0 200 200" width="200" height="200">
+                    <path d="M100,100 L100,30 A70,70 0 0,1 156,65 Z" fill="#3b82f6" fill-opacity="0.2" stroke="#1e40af" stroke-width="3"/>
+                    <line x1="100" y1="100" x2="100" y2="30" stroke="#1e40af" stroke-width="2"/>
+                    <line x1="100" y1="100" x2="156" y2="65" stroke="#1e40af" stroke-width="2"/>
+                    <circle cx="100" cy="100" r="4" fill="#1e40af"/>
+                    <text x="100" y="20" text-anchor="middle" fill="#1e40af" font-size="14">r (半径)</text>
+                    <text x="135" y="75" fill="#f59e0b" font-size="12">θ</text>
+                </svg>`,
+                formulas: [
+                    { label: "面积", formula: "<span class='var'>S</span> = (θ/360) × π<span class='var'>r</span>²" },
+                    { label: "弧长", formula: "<span class='var'>L</span> = (θ/360) × 2π<span class='var'>r</span>" }
+                ],
+                inputs: [
+                    { name: "r", label: "半径 r", unit: "cm", hint: "扇形的半径" },
+                    { name: "theta", label: "角度 θ", unit: "°", hint: "扇形的圆心角(度)" }
+                ],
+                calc: (vals) => {
+                    const r = vals.r, theta = vals.theta;
+                    const area = (theta / 360) * Math.PI * r * r;
+                    const arcLength = (theta / 360) * 2 * Math.PI * r;
+                    return [
+                        { name: "面积", value: area.toFixed(2), unit: "cm²" },
+                        { name: "弧长", value: arcLength.toFixed(2), unit: "cm" }
+                    ];
+                }
+            }
+        };
+
+        let currentShape = 'square';
+
+        function renderShape(shapeKey) {
+            const shape = shapes[shapeKey];
+            const contentArea = document.getElementById('contentArea');
+            
+            let inputsHtml = shape.inputs.map(inp => `
+                <div class="input-field">
+                    <label>${inp.label} <span>*</span></label>
+                    <input type="number" id="input_${inp.name}" placeholder="请输入${inp.label}" step="any" ${inp.isInt ? 'step="1"' : ''}>
+                    <span class="input-hint">${inp.hint}</span>
+                </div>
+            `).join('');
+
+            let formulasHtml = shape.formulas.map(f => `
+                <div class="formula-item">
+                    <div class="label">${f.label}</div>
+                    <div class="formula">${f.formula}</div>
+                </div>
+            `).join('');
+
+            contentArea.innerHTML = `
+                <div class="shape-header">
+                    <div class="shape-icon">${getShapeIcon(shapeKey)}</div>
+                    <div class="shape-title">
+                        <h2>${shape.name}</h2>
+                        <p>${shape.description}</p>
+                    </div>
+                </div>
+                <div class="content-grid">
+                    <div>
+                        <div class="section-title">图形可视化</div>
+                        <div class="shape-visual">${shape.svg}</div>
+                    </div>
+                    <div>
+                        <div class="section-title">计算公式</div>
+                        <div class="formula-list">${formulasHtml}</div>
+                    </div>
+                </div>
+                <div class="calculator">
+                    <div class="calc-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/>
+                            <line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/>
+                            <circle cx="12" cy="18" r="1" fill="currentColor"/>
+                        </svg>
+                        互动计算器
+                    </div>
+                    <div class="error-message" id="errorMsg"></div>
+                    <div class="input-group">${inputsHtml}</div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="calculate()">计算</button>
+                        <button class="btn btn-secondary" onclick="clearInputs()">清空</button>
+                    </div>
+                    <div class="result-box" id="resultBox">
+                        <div class="result-title">计算结果</div>
+                        <div class="result-items" id="resultItems"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getShapeIcon(shapeKey) {
+            const icons = {
+                square: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="1"/></svg>',
+                rectangle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="1"/></svg>',
+                circle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>',
+                triangle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,3 22,21 2,21"/></svg>',
+                parallelogram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="4,18 8,6 20,6 16,18"/></svg>',
+                trapezoid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="4,18 7,6 17,6 20,18"/></svg>',
+                polygon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5"/></svg>',
+                sector: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 L12 22 A10 10 0 0 1 5.86 5.86 Z"/></svg>'
+            };
+            return icons[shapeKey] || '';
+        }
+
+        function calculate() {
+            const shape = shapes[currentShape];
+            const vals = {};
+            let valid = true;
+            const errorMsg = document.getElementById('errorMsg');
+
+            for (const inp of shape.inputs) {
+                const el = document.getElementById(`input_${inp.name}`);
+                const val = parseFloat(el.value);
+                el.classList.remove('error');
+                
+                if (isNaN(val) || val <= 0) {
+                    el.classList.add('error');
+                    valid = false;
+                } else if (inp.isInt && !Number.isInteger(val)) {
+                    el.classList.add('error');
+                    valid = false;
+                } else {
+                    vals[inp.name] = val;
+                }
+            }
+
+            if (!valid) {
+                errorMsg.textContent = '请输入有效的正数值！';
+                errorMsg.classList.add('show');
+                document.getElementById('resultBox').classList.remove('show');
+                return;
+            }
+
+            errorMsg.classList.remove('show');
+            const results = shape.calc(vals);
+            
+            document.getElementById('resultItems').innerHTML = results.map(r => `
+                <div class="result-item">
+                    <div class="name">${r.name}</div>
+                    <div class="value">${r.value}</div>
+                    <div class="unit">${r.unit}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('resultBox').classList.add('show');
+        }
+
+        function clearInputs() {
+            const shape = shapes[currentShape];
+            for (const inp of shape.inputs) {
+                const el = document.getElementById(`input_${inp.name}`);
+                if (el) el.value = '';
+            }
+            document.getElementById('errorMsg').classList.remove('show');
+            document.getElementById('resultBox').classList.remove('show');
+        }
+
+        document.querySelectorAll('.shape-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentShape = this.dataset.shape;
+                renderShape(currentShape);
+            });
+        });
+
+        renderShape(currentShape);
+    </script>
+</body>
+</html>

@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三年级数学-分数加减法</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0d9488;
+            --primary-dark: #0f766e;
+            --primary-light: #5eead4;
+            --secondary: #f97316;
+            --accent: #fbbf24;
+            --success: #22c55e;
+            --error: #ef4444;
+            --bg: #f0fdfa;
+            --card-bg: #ffffff;
+            --text: #134e4a;
+            --text-secondary: #5f7470;
+            --border: #99f6e4;
+            --shadow: rgba(13, 148, 136, 0.15);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "Noto Sans SC", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        
+        .header { 
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); 
+            color: white; 
+            padding: 28px 32px; 
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: headerPulse 8s ease-in-out infinite;
+        }
+        @keyframes headerPulse {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(10%, 10%) scale(1.1); }
+        }
+        .header h1 { font-size: 2.2rem; margin-bottom: 8px; position: relative; z-index: 1; }
+        .header p { font-size: 1.1rem; opacity: 0.9; position: relative; z-index: 1; }
+        
+        .nav-tabs { 
+            display: flex; 
+            justify-content: center; 
+            gap: 12px; 
+            padding: 20px; 
+            background: white; 
+            border-bottom: 2px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .nav-tab { 
+            padding: 14px 28px; 
+            border: 2px solid var(--border); 
+            background: white; 
+            color: var(--text-secondary); 
+            border-radius: 12px; 
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .nav-tab:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+        .nav-tab.active { 
+            background: var(--primary); 
+            color: white; 
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+        
+        .main-content { max-width: 1000px; margin: 0 auto; padding: 24px; }
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card { 
+            background: var(--card-bg); 
+            border-radius: 20px; 
+            padding: 28px; 
+            margin-bottom: 24px; 
+            box-shadow: 0 4px 20px var(--shadow);
+            border: 1px solid var(--border);
+        }
+        .card h2 {
+            color: var(--primary-dark);
+            margin-bottom: 16px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .intro-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text);
+            margin-bottom: 20px;
+        }
+        .intro-text strong {
+            color: var(--primary);
+        }
+        
+        .formula-box { 
+            background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); 
+            border-left: 4px solid var(--primary); 
+            padding: 20px 24px; 
+            border-radius: 12px; 
+            text-align: center; 
+            font-size: 1.3rem;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .formula-box .big {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+        
+        .example-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin: 24px 0;
+            flex-wrap: wrap;
+        }
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .fraction .numerator {
+            border-bottom: 3px solid var(--text);
+            padding-bottom: 4px;
+            min-width: 50px;
+            text-align: center;
+        }
+        .fraction .denominator {
+            padding-top: 4px;
+            min-width: 50px;
+            text-align: center;
+        }
+        .operator {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+        
+        .rule-box {
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #fed7aa;
+        }
+        .rule-box h3 {
+            color: var(--secondary);
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+        }
+        .rule-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .rule-box li {
+            padding: 8px 0;
+            padding-left: 28px;
+            position: relative;
+            font-size: 1.05rem;
+        }
+        .rule-box li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--secondary);
+            font-weight: 700;
+        }
+        
+        .demo-section {
+            text-align: center;
+        }
+        .demo-section h3 {
+            color: var(--primary-dark);
+            margin-bottom: 16px;
+        }
+        canvas { 
+            background: white; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 16px var(--shadow);
+            max-width: 100%;
+            border: 2px solid var(--border);
+        }
+        .canvas-label {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-top: 16px;
+        }
+        
+        .demo-controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .demo-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .demo-btn.primary {
+            background: var(--primary);
+            color: white;
+        }
+        .demo-btn.primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        .demo-btn.secondary {
+            background: var(--secondary);
+            color: white;
+        }
+        .demo-btn.secondary:hover {
+            background: #ea580c;
+            transform: translateY(-2px);
+        }
+        
+        .exercise-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        .exercise-card:hover {
+            box-shadow: 0 8px 24px var(--shadow);
+        }
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .exercise-number {
+            background: var(--primary);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        .exercise-status {
+            font-size: 0.9rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .exercise-status.pending {
+            background: #f1f5f9;
+            color: var(--text-secondary);
+        }
+        .exercise-status.correct {
+            background: #dcfce7;
+            color: var(--success);
+        }
+        .exercise-status.wrong {
+            background: #fee2e2;
+            color: var(--error);
+        }
+        .exercise-question {
+            font-size: 1.5rem;
+            text-align: center;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .answer-input {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .answer-input input {
+            width: 60px;
+            height: 50px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border: 3px solid var(--border);
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .answer-input input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
+        }
+        .answer-input .frac-line {
+            width: 60px;
+            height: 4px;
+            background: var(--text);
+            border-radius: 2px;
+        }
+        .answer-input .input-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .check-btn {
+            padding: 12px 32px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-left: 16px;
+            transition: all 0.3s ease;
+        }
+        .check-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        .check-btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .feedback {
+            text-align: center;
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 500;
+            display: none;
+        }
+        .feedback.show { display: block; }
+        .feedback.success {
+            background: #dcfce7;
+            color: var(--success);
+        }
+        .feedback.error {
+            background: #fee2e2;
+            color: var(--error);
+        }
+        
+        .score-board {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 20px 32px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .score-item {
+            text-align: center;
+        }
+        .score-item .label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .score-item .value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+        
+        .mascot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: 0 4px 20px rgba(251, 191, 36, 0.4);
+            animation: bounce 2s ease-in-out infinite;
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+        .mascot:hover {
+            transform: scale(1.1);
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .mascot-tooltip {
+            position: absolute;
+            bottom: 90px;
+            right: 0;
+            background: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            font-size: 0.9rem;
+            white-space: nowrap;
+            display: none;
+        }
+        .mascot:hover .mascot-tooltip {
+            display: block;
+        }
+        
+        .finish-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        .finish-modal.show {
+            display: flex;
+        }
+        .finish-content {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            text-align: center;
+            max-width: 400px;
+            animation: popIn 0.4s ease;
+        }
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .finish-content h2 {
+            color: var(--primary-dark);
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+        }
+        .finish-content .stars {
+            font-size: 3rem;
+            margin: 20px 0;
+        }
+        .finish-content .score-text {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+        .restart-btn {
+            padding: 14px 36px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .restart-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .visual-frac {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0 8px;
+        }
+        .visual-frac .num {
+            border-bottom: 3px solid var(--text);
+            padding: 0 12px 4px;
+        }
+        .visual-frac .den {
+            padding: 4px 12px 0;
+        }
+        
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.6rem; }
+            .nav-tab { padding: 10px 16px; font-size: 0.9rem; }
+            .fraction { font-size: 1.5rem; }
+            .exercise-question { font-size: 1.2rem; }
+            .answer-input input { width: 50px; height: 40px; font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>分数加减法</h1>
+        <p>三年级数学 - 同分母分数的计算</p>
+    </div>
+    
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="switchTab('concept')">概念讲解</button>
+        <button class="nav-tab" onclick="switchTab('demo')">图形演示</button>
+        <button class="nav-tab" onclick="switchTab('exercise')">练习测试</button>
+    </div>
+    
+    <div class="main-content">
+        <div id="concept" class="tab-content active">
+            <div class="card">
+                <h2>什么是分数？</h2>
+                <p class="intro-text">
+                    小朋友们，你们有没有把一个蛋糕分成几块过呢？<br><br>
+                    <strong>分数</strong>就是用来表示"部分与整体"关系的数！<br>
+                    比如，把一个蛋糕平均分成<strong>4块</strong>，吃了其中的<strong>1块</strong>，就吃了这个蛋糕的
+                    <span class="visual-frac"><span class="num">1</span><span class="den">4</span></span>。
+                </p>
+                <div class="formula-box">
+                    <div class="fraction">
+                        <span class="numerator">分子</span>
+                        <span class="denominator">分母</span>
+                    </div>
+                    <p style="margin-top: 12px; font-size: 1rem; color: var(--text-secondary);">
+                        分母表示平均分成了几份，分子表示取了其中的几份
+                    </p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>同分母分数加法</h2>
+                <p class="intro-text">
+                    当两个分数的<strong>分母相同</strong>时，加法就变得很简单啦！
+                </p>
+                <div class="rule-box">
+                    <h3>加法口诀</h3>
+                    <ul>
+                        <li>分母相同不用变</li>
+                        <li>分子相加作答案</li>
+                        <li>结果能化简要化简</li>
+                    </ul>
+                </div>
+                <div class="example-row">
+                    <div class="fraction">
+                        <span class="numerator">1</span>
+                        <span class="denominator">5</span>
+                    </div>
+                    <span class="operator">+</span>
+                    <div class="fraction">
+                        <span class="numerator">2</span>
+                        <span class="denominator">5</span>
+                    </div>
+                    <span class="operator">=</span>
+                    <div class="fraction">
+                        <span class="numerator">1+2</span>
+                        <span class="denominator">5</span>
+                    </div>
+                    <span class="operator">=</span>
+                    <div class="fraction">
+                        <span class="numerator">3</span>
+                        <span class="denominator">5</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>同分母分数减法</h2>
+                <p class="intro-text">
+                    减法和加法类似，只是把"加"变成"减"！
+                </p>
+                <div class="rule-box">
+                    <h3>减法口诀</h3>
+                    <ul>
+                        <li>分母相同不变动</li>
+                        <li>分子相减得结果</li>
+                        <li>结果能化简要化简</li>
+                    </ul>
+                </div>
+                <div class="example-row">
+                    <div class="fraction">
+                        <span class="numerator">4</span>
+                        <span class="denominator">7</span>
+                    </div>
+                    <span class="operator">-</span>
+                    <div class="fraction">
+                        <span class="numerator">2</span>
+                        <span class="denominator">7</span>
+                    </div>
+                    <span class="operator">=</span>
+                    <div class="fraction">
+                        <span class="numerator">4-2</span>
+                        <span class="denominator">7</span>
+                    </div>
+                    <span class="operator">=</span>
+                    <div class="fraction">
+                        <span class="numerator">2</span>
+                        <span class="denominator">7</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="demo" class="tab-content">
+            <div class="card demo-section">
+                <h2>图形演示 - 分数加法</h2>
+                <p style="margin-bottom: 20px; color: var(--text-secondary);">点击"演示加法"按钮，观看分数相加的动画过程</p>
+                <canvas id="addCanvas" width="700" height="280"></canvas>
+                <p class="canvas-label" id="addLabel">准备演示 <span class="visual-frac"><span class="num">1</span><span class="den">4</span></span> + <span class="visual-frac"><span class="num">2</span><span class="den">4</span></span> = ?</p>
+                <div class="demo-controls">
+                    <button class="demo-btn primary" onclick="startAddDemo()">演示加法</button>
+                    <button class="demo-btn secondary" onclick="resetAddDemo()">重新演示</button>
+                </div>
+            </div>
+            
+            <div class="card demo-section">
+                <h2>图形演示 - 分数减法</h2>
+                <p style="margin-bottom: 20px; color: var(--text-secondary);">点击"演示减法"按钮，观看分数相减的动画过程</p>
+                <canvas id="subCanvas" width="700" height="280"></canvas>
+                <p class="canvas-label" id="subLabel">准备演示 <span class="visual-frac"><span class="num">5</span><span class="den">6</span></span> - <span class="visual-frac"><span class="num">2</span><span class="den">6</span></span> = ?</p>
+                <div class="demo-controls">
+                    <button class="demo-btn primary" onclick="startSubDemo()">演示减法</button>
+                    <button class="demo-btn secondary" onclick="resetSubDemo()">重新演示</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="exercise" class="tab-content">
+            <div class="score-board">
+                <div class="score-item">
+                    <div class="label">已完成</div>
+                    <div class="value" id="completed">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="label">正确数</div>
+                    <div class="value" id="correct">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="label">正确率</div>
+                    <div class="value" id="accuracy">0%</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div id="exerciseContainer"></div>
+        </div>
+    </div>
+    
+    <div class="mascot" onclick="showTip()">
+        <span style="position: absolute; font-size: 2.5rem;">🦊</span>
+        <div class="mascot-tooltip" id="mascotTip">点击我可以获得小提示哦！</div>
+    </div>
+    
+    <div class="finish-modal" id="finishModal">
+        <div class="finish-content">
+            <h2>太棒了！</h2>
+            <div class="stars" id="stars">⭐⭐⭐</div>
+            <p class="score-text" id="finalScore">你答对了 0/5 题！</p>
+            <button class="restart-btn" onclick="restartExercise()">再来一次</button>
+        </div>
+    </div>
+
+    <script>
+        // 初始化变量
+        var addAnimId = null;
+        var subAnimId = null;
+        var addProgress = 0;
+        var subProgress = 0;
+        var score = 0;
+        var completedCount = 0;
+        var totalExercises = 5;
+        
+        // 练习题数据
+        var exercises = [
+            { num1: 1, den: 4, num2: 2, op: '+', ansNum: 3, ansDen: 4 },
+            { num1: 2, den: 5, num2: 1, op: '+', ansNum: 3, ansDen: 5 },
+            { num1: 5, den: 8, num2: 2, op: '-', ansNum: 3, ansDen: 8 },
+            { num1: 3, den: 7, num2: 2, op: '+', ansNum: 5, ansDen: 7 },
+            { num1: 4, den: 9, num2: 1, op: '-', ansNum: 3, ansDen: 9 }
+        ];
+        var answered = [false, false, false, false, false];
+        
+        // Tab 切换
+        function switchTab(tabId) {
+            var tabs = document.querySelectorAll('.nav-tab');
+            var contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(function(tab) { tab.classList.remove('active'); });
+            contents.forEach(function(content) { content.classList.remove('active'); });
+            
+            var index = 0;
+            if (tabId === 'concept') index = 0;
+            else if (tabId === 'demo') index = 1;
+            else if (tabId === 'exercise') index = 2;
+            
+            tabs[index].classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+            
+            if (tabId === 'demo') {
+                setTimeout(function() {
+                    drawAddCanvas();
+                    drawSubCanvas();
+                }, 100);
+            }
+        }
+        
+        // 绘制分数圆形
+        function drawFractionCircle(ctx, x, y, radius, numerator, denominator, fillColor, emptyColor) {
+            fillColor = fillColor || '#0d9488';
+            emptyColor = emptyColor || '#e2e8f0';
+            
+            // 绘制空白圆
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = emptyColor;
+            ctx.fill();
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 绘制填充部分
+            if (numerator > 0) {
+                var startAngle = -Math.PI / 2;
+                var endAngle = startAngle + (Math.PI * 2 * numerator / denominator);
+                
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.arc(x, y, radius, startAngle, endAngle);
+                ctx.closePath();
+                ctx.fillStyle = fillColor;
+                ctx.fill();
+            }
+            
+            // 绘制分割线
+            for (var i = 0; i < denominator; i++) {
+                var angle = -Math.PI / 2 + (Math.PI * 2 * i / denominator);
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + radius * Math.cos(angle), y + radius * Math.sin(angle));
+                ctx.strokeStyle = '#64748b';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+            
+            // 中心点
+            ctx.beginPath();
+            ctx.arc(x, y, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#475569';
+            ctx.fill();
+        }
+        
+        // 绘制加法画布初始状态
+        function drawAddCanvas() {
+            var canvas = document.getElementById('addCanvas');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制三个圆
+            drawFractionCircle(ctx, 120, 140, 80, 0, 4, '#0d9488');
+            drawFractionCircle(ctx, 350, 140, 80, 0, 4, '#f97316');
+            drawFractionCircle(ctx, 580, 140, 80, 0, 4, '#0d9488');
+            
+            // 绘制标签
+            ctx.fillStyle = '#134e4a';
+            ctx.font = 'bold 18px "Noto Sans SC"';
+            ctx.textAlign = 'center';
+            ctx.fillText('第一个分数', 120, 250);
+            ctx.fillText('第二个分数', 350, 250);
+            ctx.fillText('相加结果', 580, 250);
+            
+            // 绘制运算符号
+            ctx.fillStyle = '#f97316';
+            ctx.font = 'bold 36px "Noto Sans SC"';
+            ctx.fillText('+', 235, 150);
+            ctx.fillText('=', 465, 150);
+        }
+        
+        // 加法动画
+        function animateAdd() {
+            var canvas = document.getElementById('addCanvas');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+            
+            addProgress += 0.015;
+            
+            if (addProgress > 1) addProgress = 1;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 计算动画进度
+            var progress1 = Math.min(addProgress * 2, 1);
+            var progress2 = Math.max(0, Math.min((addProgress - 0.3) * 2, 1));
+            var progress3 = Math.max(0, Math.min((addProgress - 0.6) * 2.5, 1));
+            
+            // 绘制三个圆
+            var fill1 = Math.floor(1 * progress1);
+            var fill2 = Math.floor(2 * progress2);
+            var fill3 = Math.floor(3 * progress3);
+            
+            drawFractionCircle(ctx, 120, 140, 80, fill1, 4, '#0d9488');
+            drawFractionCircle(ctx, 350, 140, 80, fill2, 4, '#f97316');
+            drawFractionCircle(ctx, 580, 140, 80, fill3, 4, '#0d9488');
+            
+            // 绘制标签
+            ctx.fillStyle = '#134e4a';
+            ctx.font = 'bold 18px "Noto Sans SC"';
+            ctx.textAlign = 'center';
+            ctx.fillText('第一个分数', 120, 250);
+            ctx.fillText('第二个分数', 350, 250);
+            ctx.fillText('相加结果', 580, 250);
+            
+            // 绘制分数数字
+            if (progress1 > 0.5) {
+                ctx.fillStyle = '#0d9488';
+                ctx.font = 'bold 24px "Noto Sans SC"';
+                ctx.fillText('1/4', 120, 55);
+            }
+            if (progress2 > 0.5) {
+                ctx.fillStyle = '#f97316';
+                ctx.font = 'bold 24px "Noto Sans SC"';
+                ctx.fillText('2/4', 350, 55);
+            }
+            if (progress3 > 0.9) {
+                ctx.fillStyle = '#0d9488';
+                ctx.font = 'bold 24px "Noto Sans SC"';
+                ctx.fillText('3/4', 580, 55);
+            }
+            
+            // 运算符号
+            ctx.fillStyle = '#f97316';
+            ctx.font = 'bold 36px "Noto Sans SC"';
+            ctx.fillText('+', 235, 150);
+            ctx.fillText('=', 465, 150);
+            
+            // 更新标签
+            var label = document.getElementById('addLabel');
+            if (addProgress >= 1) {
+                label.innerHTML = '结果：1/4 + 2/4 = 3/4（分母不变，分子相加）';
+            }
+            
+            if (addProgress < 1) {
+                addAnimId = requestAnimationFrame(animateAdd);
+            }
+        }
+        
+        function startAddDemo() {
+            if (addAnimId) cancelAnimationFrame(addAnimId);
+            addProgress = 0;
+            animateAdd();
+        }
+        
+        function resetAddDemo() {
+            if (addAnimId) cancelAnimationFrame(addAnimId);
+            addProgress = 0;
+            document.getElementById('addLabel').innerHTML = '准备演示 <span class="visual-frac"><span class="num">1</span><span class="den">4</span></span> + <span class="visual-frac"><span class="num">2</span><span class="den">4</span></span> = ?';
+            drawAddCanvas();
+        }
+        
+        // 绘制减法画布
+        function drawSubCanvas() {
+            var canvas = document.getElementById('subCanvas');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawFractionCircle(ctx, 120, 140, 80, 0, 6, '#0d9488');
+            drawFractionCircle(ctx, 350, 140, 80, 0, 6, '#ef4444');
+            drawFractionCircle(ctx, 580, 140, 80, 0, 6, '#0d9488');
+            
+            ctx.fillStyle = '#134e4a';
+            ctx.font = 'bold 18px "Noto Sans SC"';
+            ctx.textAlign = 'center';
+            ctx.fillText('第一个分数', 120, 250);
+            ctx.fillText('减去的部分', 350, 250);
+            ctx.fillText('剩余结果', 580, 250);
+            
+            ctx.fillStyle = '#f97316';
+            ctx.font = 'bold 36px "Noto Sans SC"';
+            ctx.fillText('-', 235, 150);
+            ctx.fillText('=', 465, 150);
+        }
+        
+        // 减法动画
+        function animateSub() {
+            var canvas = document.getElementById('subCanvas');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+            
+            subProgress += 0.015;
+            if (subProgress > 1) subProgress = 1;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            var progress1 = Math.min(subProgress * 2, 1);
+            var progress2 = Math.max(0, Math.min((subProgress - 0.3) * 2, 1));
+            var progress3 = Math.max(0, Math.min((subProgress - 0.6) * 2.5, 1));
+            
+            var fill1 = Math.floor(5 * progress1);
+            var fill2 = Math.floor(2 * progress2);
+            var fill3 = Math.floor(3 * progress3);
+            
+            drawFractionCircle(ctx, 120, 140, 80, fill1, 6, '#0d9488');

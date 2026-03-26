@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一年级数学-三角形面积</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #E85A24;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --success: #2ECC71;
+            --error: #E74C3C;
+            --bg: #FFF9F0;
+            --card-bg: #FFFFFF;
+            --text: #2D3436;
+            --text-secondary: #636E72;
+            --border: #DFE6E9;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: "Noto Sans SC", sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .bg-decoration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .floating-shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 8s ease-in-out infinite;
+        }
+        .floating-shape:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
+        .floating-shape:nth-child(2) { top: 60%; left: 85%; animation-delay: 2s; }
+        .floating-shape:nth-child(3) { top: 80%; left: 15%; animation-delay: 4s; }
+        .floating-shape:nth-child(4) { top: 20%; left: 90%; animation-delay: 1s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+        
+        .header { 
+            background: linear-gradient(135deg, var(--primary) 0%, #FF8C61 50%, var(--accent) 100%); 
+            color: white; 
+            padding: 28px 32px; 
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: shimmer 10s linear infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .header h1 { 
+            font-size: 2.2rem; 
+            font-weight: 900;
+            margin-bottom: 8px;
+            position: relative;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .header p { 
+            font-size: 1.1rem; 
+            opacity: 0.95;
+            position: relative;
+        }
+        
+        .nav-tabs { 
+            display: flex; 
+            justify-content: center; 
+            gap: 12px; 
+            padding: 20px; 
+            background: white; 
+            border-bottom: 2px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .nav-tab { 
+            padding: 14px 28px; 
+            border: none; 
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); 
+            color: var(--text-secondary); 
+            border-radius: 50px; 
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .nav-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+        .nav-tab.active { 
+            background: linear-gradient(135deg, var(--primary) 0%, #FF8C61 100%); 
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .main-content { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 24px; 
+        }
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card { 
+            background: var(--card-bg); 
+            border-radius: 20px; 
+            padding: 28px; 
+            margin-bottom: 24px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid rgba(255,107,53,0.1);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .card h2 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card p {
+            line-height: 1.8;
+            color: var(--text);
+            font-size: 1.05rem;
+        }
+        
+        .formula-box { 
+            background: linear-gradient(135deg, #FFF5EB 0%, #FFEDD5 100%); 
+            border-left: 5px solid var(--primary); 
+            padding: 20px 28px; 
+            border-radius: 12px; 
+            text-align: center; 
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(255,107,53,0.15);
+        }
+        
+        .formula-small {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+        
+        .step-container {
+            display: flex;
+            gap: 16px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .step-box {
+            flex: 1;
+            min-width: 200px;
+            background: linear-gradient(135deg, #E8F8F5 0%, #D1F2EB 100%);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .step-box:hover {
+            border-color: var(--secondary);
+            transform: scale(1.02);
+        }
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: var(--secondary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        .step-box h3 {
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        .step-box p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+        
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        canvas { 
+            background: white; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .btn {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 50px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, #FF8C61 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255,107,53,0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255,107,53,0.4);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary) 0%, #45B7AA 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(78,205,196,0.3);
+        }
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(78,205,196,0.4);
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .exercise-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        .exercise-card:hover {
+            border-color: var(--primary);
+        }
+        .exercise-number {
+            display: inline-block;
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 36px;
+            font-weight: 700;
+            margin-right: 12px;
+        }
+        .exercise-question {
+            font-size: 1.15rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .exercise-input {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .exercise-input input {
+            width: 100px;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 1.2rem;
+            text-align: center;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        .exercise-input input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255,107,53,0.2);
+        }
+        .exercise-input input.correct {
+            border-color: var(--success);
+            background: #E8F8F5;
+        }
+        .exercise-input input.wrong {
+            border-color: var(--error);
+            background: #FDEDEC;
+            animation: shake 0.5s ease;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        
+        .feedback {
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            display: none;
+            animation: popIn 0.3s ease;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .feedback.show { display: block; }
+        .feedback.success {
+            background: #E8F8F5;
+            color: var(--success);
+            border: 2px solid var(--success);
+        }
+        .feedback.error {
+            background: #FDEDEC;
+            color: var(--error);
+            border: 2px solid var(--error);
+        }
+        
+        .score-board {
+            background: linear-gradient(135deg, var(--accent) 0%, #FFD93D 100%);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .score-board h3 {
+            font-size: 1.2rem;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        .score-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--primary-dark);
+        }
+        
+        .example-visual {
+            display: flex;
+            justify-content: center;
+            margin: 24px 0;
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, var(--accent) 0%, var(--accent) 100%);
+            background-size: 100% 40%;
+            background-repeat: no-repeat;
+            background-position: 0 90%;
+        }
+        
+        .triangle-example {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin: 24px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #FAFAFA 0%, #F5F5F5 100%);
+            border-radius: 16px;
+        }
+        
+        .interactive-hint {
+            background: linear-gradient(135deg, #EBF5FB 0%, #D4E6F1 100%);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .interactive-hint svg {
+            flex-shrink: 0;
+        }
+        
+        .controls-panel {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .control-group label {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .control-group input[type="range"] {
+            width: 150px;
+            accent-color: var(--primary);
+        }
+        .control-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .demo-info {
+            text-align: center;
+            padding: 16px;
+            background: linear-gradient(135deg, #FEF9E7 0%, #FCF3CF 100%);
+            border-radius: 12px;
+            margin-top: 16px;
+        }
+        .demo-info p {
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+        
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.6rem; }
+            .nav-tab { padding: 10px 18px; font-size: 0.9rem; }
+            .formula-box { font-size: 1.3rem; padding: 16px 20px; }
+            .card { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-decoration">
+        <svg class="floating-shape" width="80" height="70" viewBox="0 0 80 70">
+            <polygon points="40,5 75,65 5,65" fill="#FF6B35"/>
+        </svg>
+        <svg class="floating-shape" width="60" height="52" viewBox="0 0 60 52">
+            <polygon points="30,5 55,47 5,47" fill="#4ECDC4"/>
+        </svg>
+        <svg class="floating-shape" width="70" height="61" viewBox="0 0 70 61">
+            <polygon points="35,5 65,56 5,56" fill="#FFE66D"/>
+        </svg>
+        <svg class="floating-shape" width="50" height="44" viewBox="0 0 50 44">
+            <polygon points="25,5 45,39 5,39" fill="#FF6B35"/>
+        </svg>
+    </div>
+
+    <div class="header">
+        <h1>三角形的面积</h1>
+        <p>一年级数学 · 一起探索三角形的秘密</p>
+    </div>
+    
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="switchTab('concept')">概念讲解</button>
+        <button class="nav-tab" onclick="switchTab('demo')">图形演示</button>
+        <button class="nav-tab" onclick="switchTab('exercise')">练习测试</button>
+    </div>
+    
+    <div class="main-content">
+        <div id="concept" class="tab-content active">
+            <div class="card">
+                <h2>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                    </svg>
+                    什么是三角形的面积？
+                </h2>
+                <p>
+                    小朋友们，我们已经认识三角形了，它有<span class="highlight">三条边</span>和<span class="highlight">三个角</span>。
+                    今天我们要学习怎么算出三角形有多大！
+                </p>
+                <p style="margin-top: 12px;">
+                    三角形的<span class="highlight">面积</span>就是三角形内部的大小，也就是它占了多大的地方。
+                </p>
+            </div>
+            
+            <div class="card">
+                <h2>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 22 20 2 20"></polygon>
+                    </svg>
+                    认识底和高
+                </h2>
+                <p>在计算三角形面积之前，我们要先认识两个好朋友：</p>
+                
+                <div class="triangle-example">
+                    <canvas id="conceptCanvas" width="280" height="200"></canvas>
+                </div>
+                
+                <div class="step-container">
+                    <div class="step-box">
+                        <div class="step-number">1</div>
+                        <h3>底边（底）</h3>
+                        <p>三角形下面的一条边，就像房子的地基</p>
+                    </div>
+                    <div class="step-box">
+                        <div class="step-number">2</div>
+                        <h3>高</h3>
+                        <p>从顶点到底边的垂直距离，就像房子的高度</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    面积公式
+                </h2>
+                <p>记住这个神奇的公式：</p>
+                
+                <div class="formula-box">
+                    三角形面积 = 底 × 高 ÷ 2
+                </div>
+                
+                <p class="formula-small">用字母表示：S = a × h ÷ 2</p>
+                
+                <div class="interactive-hint">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span><strong>小技巧：</strong>为什么要除以2呢？因为两个一模一样的三角形可以拼成一个长方形！三角形的面积正好是长方形的一半。</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                    </svg>
+                    计算步骤
+                </h2>
+                
+                <div class="step-container">
+                    <div class="step-box">
+                        <div class="step-number">1</div>
+                        <h3>找出底和高</h3>
+                        <p>看看三角形的底是几，高是几</p>
+                    </div>
+                    <div class="step-box">
+                        <div class="step-number">2</div>
+                        <h3>相乘</h3>
+                        <p>用底乘以高，算出结果</p>
+                    </div>
+                    <div class="step-box">
+                        <div class="step-number">3</div>
+                        <h3>除以2</h3>
+                        <p>把结果除以2，就得到面积啦</p>
+                    </div>
+                </div>
+                
+                <div class="example-visual">
+                    <canvas id="exampleCanvas" width="320" height="180"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div id="demo" class="tab-content">
+            <div class="card">
+                <h2>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    动画演示
+                </h2>
+                <p>点击按钮，看三角形如何变成两个一样的三角形拼成长方形！</p>
+                
+                <div class="canvas-container">
+                    <canvas id="mainCanvas" width="500" height="350"></canvas>
+                    
+                    <div class="controls-panel">
+                        <div class="control-group">
+                            <label>底边长度</label>
+                            <input type="range" id="baseSlider" min="40" max="160" value="100" oninput="updateDemo()">
+                            <span class="control-value" id="baseValue">100</span>
+                        </div>
+                        <div class="control-group">
+                            <label>高度</label>
+                            <input type="range" id="heightSlider" min="40" max="120" value="80" oninput="updateDemo()">
+                            <span class="control-value" id="heightValue">80</span>
+                        </div>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="playAnimation()">播放动画</button>
+                        <button class="btn btn-secondary" onclick="resetDemo()">重置</button>
+                    </div>
+                    
+                    <div class="demo-info">
+                        <p>面积 = <span id="demoBase">100</span> × <span id="demoHeight">80</span> ÷ 2 = <span id="demoResult">4000</span></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    为什么除以2？
+                </h2>
+                <p>看上面的动画：两个相同的三角形可以拼成一个长方形。</p>
+                <p style="margin-top: 12px;">长方形的面积 = 底 × 高</p>
+                <p>三角形的面积 = 长方形面积 ÷ 2 = 底 × 高 ÷ 2</p>
+            </div>
+        </div>
+        
+        <div id="exercise" class="tab-content">
+            <div class="score-board">
+                <h3>当前得分</h3>
+                <div class="score-value" id="scoreDisplay">0</div>
+            </div>
+            
+            <div class="card">
+                <h2>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    练习题
+                </h2>
+                <p>算出下面每个三角形的面积，加油！</p>
+            </div>
+            
+            <div class="exercise-card" id="q1">
+                <div class="exercise-question">
+                    <span class="exercise-number">1</span>
+                    <span>三角形的底是 <strong>6</strong> 厘米，高是 <strong>4</strong> 厘米，面积是多少？</span>
+                </div>
+                <div class="exercise-input">
+                    <input type="number" id="ans1" placeholder="面积" onkeypress="handleEnter(event, 1)">
+                    <span>平方厘米</span>
+                    <button class="btn btn-primary" onclick="checkAnswer(1, 12)">检查答案</button>
+                </div>
+                <div class="feedback" id="fb1"></div>
+            </div>
+            
+            <div class="exercise-card" id="q2">
+                <div class="exercise-question">
+                    <span class="exercise-number">2</span>
+                    <span>三角形的底是 <strong>8</strong> 厘米，高是 <strong>6</strong> 厘米，面积是多少？</span>
+                </div>
+                <div class="exercise-input">
+                    <input type="number" id="ans2" placeholder="面积" onkeypress="handleEnter(event, 2)">
+                    <span>平方厘米</span>
+                    <button class="btn btn-primary" onclick="checkAnswer(2, 24)">检查答案</button>
+                </div>
+                <div class="feedback" id="fb2"></div>
+            </div>
+            
+            <div class="exercise-card" id="q3">
+                <div class="exercise-question">
+                    <span class="exercise-number">3</span>
+                    <span>三角形的底是 <strong>10</strong> 厘米，高是 <strong>8</strong> 厘米，面积是多少？</span>
+                </div>
+                <div class="exercise-input">
+                    <input type="number" id="ans3" placeholder="面积" onkeypress="handleEnter(event, 3)">
+                    <span>平方厘米</span>
+                    <button class="btn btn-primary" onclick="checkAnswer(3, 40)">检查答案</button>
+                </div>
+                <div class="feedback" id="fb3"></div>
+            </div>
+            
+            <div class="exercise-card" id="q4">
+                <div class="exercise-question">
+                    <span class="exercise-number">4</span>
+                    <span>三角形的底是 <strong>12</strong> 厘米，高是 <strong>6</strong> 厘米，面积是多少？</span>
+                </div>
+                <div class="exercise-input">
+                    <input type="number" id="ans4" placeholder="面积" onkeypress="handleEnter(event, 4)">
+                    <span>平方厘米</span>
+                    <button class="btn btn-primary" onclick="checkAnswer(4, 36)">检查答案</button>
+                </div>
+                <div class="feedback" id="fb4"></div>
+            </div>
+            
+            <div class="exercise-card" id="q5">
+                <div class="exercise-question">
+                    <span class="exercise-number">5</span>
+                    <span>三角形的底是 <strong>14</strong> 厘米，高是 <strong>10</strong> 厘米，面积是多少？</span>
+                </div>
+                <div class="exercise-input">
+                    <input type="number" id="ans5" placeholder="面积" onkeypress="handleEnter(event, 5)">
+                    <span>平方厘米</span>
+                    <button class="btn btn-primary" onclick="checkAnswer(5, 70)">检查答案</button>
+                </div>
+                <div class="feedback" id="fb5"></div>
+            </div>
+            
+            <div class="btn-group" style="margin-top: 24px;">
+                <button class="btn btn-secondary" onclick="resetExercises()">重新开始</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 初始化变量
+        var score = 0;
+        var animationId = null;
+        var currentPhase = 0;
+        var animationProgress = 0;
+        
+        // 切换标签页
+        function switchTab(tabId) {
+            var tabs = document.querySelectorAll('.nav-tab');
+            var contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(function(tab) {
+                tab.classList.remove('active');
+            });
+            contents.forEach(function(content) {
+                content.classList.remove('active');
+            });
+            
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+            
+            if (tabId === 'demo') {
+                updateDemo();
+            }
+        }
+        
+        // 绘制概念页面的三角形（带标注）
+        function drawConceptTriangle() {
+            var canvas = document.getElementById('conceptCanvas');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            var base = 180;
+            var height = 120;
+            var startX = 50;
+            var startY = 160;
+            var topX = startX + base / 2;
+            var topY = startY - height;
+            
+            // 绘制三角形
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(startX + base, startY);
+            ctx.lineTo(topX, topY);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(255, 107, 53, 0.3)';
+            ctx.fill();
+            ctx.strokeStyle = '#FF6B35';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // 绘制底边标注
+            ctx.beginPath();
+            ctx.moveTo(startX - 10, startY + 15);
+            ctx.lineTo(startX + base + 10, startY + 15);
+            ctx.strokeStyle = '#4ECDC4';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 底边箭头
+            ctx.beginPath();
+            ctx.moveTo(startX - 10, startY + 15);
+            ctx.lineTo(startX, startY + 10);
+            ctx.moveTo(startX - 10, startY + 15);
+            ctx.lineTo(startX, startY + 20);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(startX + base + 10, startY + 15);
+            ctx.lineTo(startX + base, startY + 10);
+            ctx.moveTo(startX + base + 10, startY + 15);
+            ctx.lineTo(startX + base, startY + 20);
+            ctx.stroke();
+            
+            // 底边文字
+            ctx.font = 'bold 16px Noto Sans SC';
+            ctx.fillStyle = '#4ECDC4';
+            ctx.textAlign = 'center';
+            ctx.fillText('底边', startX + base / 2, startY + 38);
+            
+            // 绘制高
+            ctx.beginPath();
+            ctx.setLineDash([5, 5]);
+            ctx.moveTo(topX, topY);
+            ctx.lineTo(topX, startY);
+            ctx.strokeStyle = '#E74C3C';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 高的标注
+            ctx.beginPath();
+            ctx.moveTo(topX + 15, topY - 5);
+            ctx.lineTo(topX + 15, startY + 5);
+            ctx.strokeStyle = '#E74C3C';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 高的箭头
+            ctx.beginPath();
+            ctx.moveTo(topX + 15, topY - 5);
+            ctx.lineTo(topX + 10, topY + 5);
+            ctx.moveTo(topX + 15, topY - 5);
+            ctx.lineTo(topX + 20, topY + 5);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(topX + 15, startY + 5);
+            ctx.lineTo(topX + 10, startY - 5);
+            ctx.moveTo(topX + 15, startY + 5);
+            ctx.lineTo(topX + 20, startY - 5);
+            ctx.stroke();
+            
+            // 高的文字
+            ctx.font = 'bold 16px Noto Sans SC';
+            ctx.fillStyle = '#E74C3C';
+            ctx.textAlign = 'left';
+            ctx.fillText('高', topX + 25, (topY + startY) / 2 + 5);
+        }
+        
+        // 绘制示例
+        function drawExample() {
+            var canvas = document.getElementById('exampleCanvas');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 例题三角形
+            var base = 120;
+            var height = 80;
+            var startX = 40;
+            var startY = 150;
+            
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(startX + base, startY);
+            ctx.lineTo(startX + base / 2, startY - height);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(78, 205, 196, 0.3)';
+            ctx.fill();
+            ctx.strokeStyle = '#4ECDC4';
+            ctx.lineWidth =

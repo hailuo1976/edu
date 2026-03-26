@@ -1,0 +1,841 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一年级数学 - 正方形的面积</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f97316;
+            --primary-dark: #ea580c;
+            --primary-light: #fff7ed;
+            --secondary: #06b6d4;
+            --accent: #84cc16;
+            --success: #22c55e;
+            --error: #ef4444;
+            --bg: #fefce8;
+            --bg-gradient: linear-gradient(135deg, #fefce8 0%, #fff7ed 50%, #f0fdf4 100%);
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #fed7aa;
+            --shadow: 0 4px 20px rgba(249, 115, 22, 0.15);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: "Noto Sans SC", sans-serif; 
+            background: var(--bg-gradient); 
+            color: var(--text); 
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .header { 
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); 
+            color: white; 
+            padding: 28px 32px; 
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: shimmer 8s ease-in-out infinite;
+        }
+        @keyframes shimmer {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20%, 20%); }
+        }
+        .header h1 { 
+            font-size: 2.2rem; 
+            font-weight: 900;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        .header p { 
+            font-size: 1.1rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+        .nav-tabs { 
+            display: flex; 
+            justify-content: center; 
+            gap: 12px; 
+            padding: 20px; 
+            background: white; 
+            border-bottom: 2px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .nav-tab { 
+            padding: 14px 28px; 
+            border: 2px solid var(--border); 
+            background: white; 
+            color: var(--text-secondary); 
+            border-radius: 12px; 
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .nav-tab:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+        .nav-tab.active { 
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); 
+            color: white;
+            border-color: transparent;
+            box-shadow: var(--shadow);
+        }
+        .main-content { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 24px; 
+        }
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card { 
+            background: var(--card-bg); 
+            border-radius: 20px; 
+            padding: 28px; 
+            margin-bottom: 24px; 
+            box-shadow: var(--shadow);
+            border: 2px solid var(--border);
+        }
+        .card h2 {
+            color: var(--primary-dark);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card h2::before {
+            content: '';
+            width: 6px;
+            height: 28px;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 3px;
+        }
+        .story-box {
+            background: linear-gradient(135deg, #fff7ed 0%, #fef9c3 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 2px dashed var(--primary);
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+        .story-box .highlight {
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+        .formula-box { 
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); 
+            border-left: 5px solid var(--success); 
+            padding: 20px 24px; 
+            border-radius: 12px; 
+            text-align: center; 
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #166534;
+            margin: 20px 0;
+        }
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .example-item {
+            background: var(--primary-light);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            border: 2px solid var(--border);
+        }
+        .example-item canvas {
+            margin-bottom: 10px;
+        }
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        canvas { 
+            background: white; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            border: 2px solid var(--border);
+            max-width: 100%;
+        }
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .slider-group label {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        input[type="range"] {
+            width: 180px;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--border);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
+        }
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary) 0%, #0891b2 100%);
+            color: white;
+        }
+        .info-display {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            padding: 16px 24px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1e40af;
+        }
+        .exercise-item {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .exercise-question {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+        .exercise-question strong {
+            color: var(--primary-dark);
+        }
+        .answer-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .answer-area input[type="number"] {
+            width: 100px;
+            padding: 12px 16px;
+            border: 3px solid var(--border);
+            border-radius: 10px;
+            font-size: 1.2rem;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .answer-area input[type="number"]:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.2);
+        }
+        .feedback {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: none;
+        }
+        .feedback.correct {
+            display: inline-block;
+            background: #dcfce7;
+            color: #166534;
+        }
+        .feedback.wrong {
+            display: inline-block;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .score-board {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .score-board h3 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+        .score-value {
+            font-size: 3rem;
+            font-weight: 900;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 6px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: white;
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+        .unit {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-left: 4px;
+        }
+        .concept-visual {
+            display: flex;
+            justify-content: center;
+            margin: 24px 0;
+        }
+        .tip-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-top: 20px;
+            border: 2px dashed #f59e0b;
+        }
+        .tip-box h4 {
+            color: #b45309;
+            margin-bottom: 8px;
+        }
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.6rem; }
+            .nav-tab { padding: 10px 18px; font-size: 0.9rem; }
+            .card { padding: 20px; }
+            .formula-box { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>正方形的面积</h1>
+        <p>一年级数学 · 认识图形与计算</p>
+    </div>
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="switchTab('concept')">概念讲解</button>
+        <button class="nav-tab" onclick="switchTab('demo')">图形演示</button>
+        <button class="nav-tab" onclick="switchTab('exercise')">练习测试</button>
+    </div>
+    <div class="main-content">
+        <div id="concept" class="tab-content active">
+            <div class="card">
+                <h2>什么是正方形的面积？</h2>
+                <div class="story-box">
+                    小朋友们，想象一下：<span class="highlight">正方形</span>就像一块方方整整的手帕或瓷砖。<br>
+                    我们要算它的<span class="highlight">面积</span>，就是要知道<span class="highlight">这块手帕有多大</span>！<br><br>
+                    最简单的方法就是<span class="highlight">数格子</span>：看这个正方形里面能放多少个小方格。
+                </div>
+                <div class="concept-visual">
+                    <canvas id="conceptCanvas" width="300" height="300"></canvas>
+                </div>
+                <div class="tip-box">
+                    <h4>小贴士</h4>
+                    <p>边长就是正方形每条边的长度。四条边都一样长哦！</p>
+                </div>
+            </div>
+            <div class="card">
+                <h2>面积公式</h2>
+                <div class="formula-box">
+                    正方形面积 = 边长 × 边长
+                </div>
+                <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">
+                    比如：边长是 <strong style="color: var(--primary-dark);">3</strong> 厘米的正方形，面积就是 <strong style="color: var(--primary-dark);">3 × 3 = 9</strong> 平方厘米
+                </p>
+                <div class="example-grid">
+                    <div class="example-item">
+                        <canvas id="ex1" width="100" height="100"></canvas>
+                        <p>边长 2 厘米</p>
+                        <p><strong>面积 = 2×2 = 4</strong></p>
+                    </div>
+                    <div class="example-item">
+                        <canvas id="ex2" width="100" height="100"></canvas>
+                        <p>边长 4 厘米</p>
+                        <p><strong>面积 = 4×4 = 16</strong></p>
+                    </div>
+                    <div class="example-item">
+                        <canvas id="ex3" width="100" height="100"></canvas>
+                        <p>边长 5 厘米</p>
+                        <p><strong>面积 = 5×5 = 25</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="demo" class="tab-content">
+            <div class="card">
+                <h2>动动小手，试试看</h2>
+                <div class="canvas-container">
+                    <canvas id="mainCanvas" width="400" height="400"></canvas>
+                    <div class="controls">
+                        <div class="slider-group">
+                            <label>调整边长：<span id="sideDisplay">3</span> 厘米</label>
+                            <input type="range" id="sideSlider" min="1" max="8" value="3" step="1">
+                        </div>
+                        <button class="btn btn-secondary" onclick="playAnimation()">播放动画</button>
+                    </div>
+                    <div class="info-display">
+                        边长：<span id="calcSide">3</span> 厘米 × <span id="calcSide2">3</span> 厘米 = <span id="calcArea">9</span> 平方厘米
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="exercise" class="tab-content">
+            <div class="score-board">
+                <h3>我的得分</h3>
+                <div class="score-value" id="scoreDisplay">0</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <p style="margin-top: 8px; opacity: 0.9;">完成 <span id="completedCount">0</span>/5 题</p>
+            </div>
+            <div class="card">
+                <h2>练习题</h2>
+                <div id="exerciseList"></div>
+                <button class="btn btn-primary" onclick="resetExercises()" style="width: 100%; margin-top: 16px;">重新开始</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // 初始化变量
+        let score = 0;
+        let completed = 0;
+        const totalExercises = 5;
+        let animationId = null;
+        let animProgress = 0;
+        let isAnimating = false;
+        
+        // 练习题数据
+        const exercises = [
+            { question: "一个正方形的边长是 2 厘米，它的面积是多少平方厘米？", answer: 4, hint: "2 × 2 = ?" },
+            { question: "一个正方形的边长是 5 厘米，它的面积是多少平方厘米？", answer: 25, hint: "5 × 5 = ?" },
+            { question: "一个正方形的边长是 3 厘米，它的面积是多少平方厘米？", answer: 9, hint: "3 × 3 = ?" },
+            { question: "一个正方形的边长是 6 厘米，它的面积是多少平方厘米？", answer: 36, hint: "6 × 6 = ?" },
+            { question: "一个正方形的边长是 4 厘米，它的面积是多少平方厘米？", answer: 16, hint: "4 × 4 = ?" }
+        ];
+        
+        // 切换标签页
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabId === 'demo') {
+                drawMainCanvas();
+            }
+        }
+        
+        // 绘制带格子的正方形
+        function drawGriddedSquare(ctx, x, y, sideLength, cellSize, showGrid, animateCells) {
+            const totalSize = sideLength * cellSize;
+            
+            // 绘制填充
+            ctx.fillStyle = '#ffedd5';
+            ctx.fillRect(x, y, totalSize, totalSize);
+            
+            // 绘制格子
+            if (showGrid) {
+                ctx.strokeStyle = '#fdba74';
+                ctx.lineWidth = 1;
+                for (let i = 0; i <= sideLength; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(x + i * cellSize, y);
+                    ctx.lineTo(x + i * cellSize, y + totalSize);
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(x, y + i * cellSize);
+                    ctx.lineTo(x + totalSize, y + i * cellSize);
+                    ctx.stroke();
+                }
+            }
+            
+            // 绘制边框
+            ctx.strokeStyle = '#ea580c';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(x, y, totalSize, totalSize);
+            
+            // 标注边长
+            ctx.fillStyle = '#c2410c';
+            ctx.font = 'bold 16px "Noto Sans SC"';
+            ctx.textAlign = 'center';
+            ctx.fillText(sideLength + '厘米', x + totalSize / 2, y + totalSize + 25);
+        }
+        
+        // 概念页画布
+        function drawConceptCanvas() {
+            const canvas = document.getElementById('conceptCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const side = 4;
+            const cellSize = 50;
+            const startX = (canvas.width - side * cellSize) / 2;
+            const startY = 30;
+            
+            // 绘制带格子的正方形
+            ctx.fillStyle = '#fff7ed';
+            ctx.fillRect(startX, startY, side * cellSize, side * cellSize);
+            
+            // 绘制格子
+            ctx.strokeStyle = '#fdba74';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= side; i++) {
+                ctx.beginPath();
+                ctx.moveTo(startX + i * cellSize, startY);
+                ctx.lineTo(startX + i * cellSize, startY + side * cellSize);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(startX, startY + i * cellSize);
+                ctx.lineTo(startX + side * cellSize, startY + i * cellSize);
+                ctx.stroke();
+            }
+            
+            // 在每个格子里编号
+            ctx.fillStyle = '#ea580c';
+            ctx.font = 'bold 18px "Noto Sans SC"';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            let num = 1;
+            for (let row = 0; row < side; row++) {
+                for (let col = 0; col < side; col++) {
+                    const cx = startX + col * cellSize + cellSize / 2;
+                    const cy = startY + row * cellSize + cellSize / 2;
+                    ctx.fillText(num.toString(), cx, cy);
+                    num++;
+                }
+            }
+            
+            // 绘制边框
+            ctx.strokeStyle = '#c2410c';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(startX, startY, side * cellSize, side * cellSize);
+            
+            // 标注边长
+            ctx.fillStyle = '#c2410c';
+            ctx.font = 'bold 14px "Noto Sans SC"';
+            ctx.textAlign = 'center';
+            ctx.fillText('4厘米', startX + side * cellSize / 2, startY + side * cellSize + 20);
+            
+            // 显示公式
+            ctx.fillStyle = '#1e293b';
+            ctx.font = 'bold 18px "Noto Sans SC"';
+            ctx.fillText('面积 = 4 × 4 = 16 平方厘米', canvas.width / 2, canvas.height - 25);
+        }
+        
+        // 绘制示例
+        function drawExample(canvasId, side) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const cellSize = Math.floor(80 / side);
+            const totalSize = side * cellSize;
+            const startX = (canvas.width - totalSize) / 2;
+            const startY = 10;
+            
+            ctx.fillStyle = '#fff7ed';
+            ctx.fillRect(startX, startY, totalSize, totalSize);
+            
+            ctx.strokeStyle = '#fdba74';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= side; i++) {
+                ctx.beginPath();
+                ctx.moveTo(startX + i * cellSize, startY);
+                ctx.lineTo(startX + i * cellSize, startY + totalSize);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(startX, startY + i * cellSize);
+                ctx.lineTo(startX + totalSize, startY + i * cellSize);
+                ctx.stroke();
+            }
+            
+            ctx.strokeStyle = '#ea580c';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(startX, startY, totalSize, totalSize);
+        }
+        
+        // 主画布
+        function drawMainCanvas() {
+            const canvas = document.getElementById('mainCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            const side = parseInt(document.getElementById('sideSlider').value);
+            const cellSize = 40;
+            const totalSize = side * cellSize;
+            const startX = (canvas.width - totalSize) / 2;
+            const startY = (canvas.height - totalSize) / 2 - 30;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制背景格子
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制主正方形
+            ctx.fillStyle = '#fff7ed';
+            ctx.fillRect(startX, startY, totalSize, totalSize);
+            
+            // 绘制内部格子
+            ctx.strokeStyle = '#fed7aa';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= side; i++) {
+                ctx.beginPath();
+                ctx.moveTo(startX + i * cellSize, startY);
+                ctx.lineTo(startX + i * cellSize, startY + totalSize);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(startX, startY + i * cellSize);
+                ctx.lineTo(startX + totalSize, startY + i * cellSize);
+                ctx.stroke();
+            }
+            
+            // 绘制边框
+            ctx.strokeStyle = '#ea580c';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(startX, startY, totalSize, totalSize);
+            
+            // 标注边长
+            ctx.fillStyle = '#c2410c';
+            ctx.font = 'bold 18px "Noto Sans SC"';
+            ctx.textAlign = 'center';
+            ctx.fillText(side + ' 厘米', startX + totalSize / 2, startY + totalSize + 30);
+            
+            // 更新计算显示
+            document.getElementById('sideDisplay').textContent = side;
+            document.getElementById('calcSide').textContent = side;
+            document.getElementById('calcSide2').textContent = side;
+            document.getElementById('calcArea').textContent = side * side;
+        }
+        
+        // 播放动画
+        function playAnimation() {
+            if (isAnimating) return;
+            
+            const canvas = document.getElementById('mainCanvas');
+            const ctx = canvas.getContext('2d');
+            const side = parseInt(document.getElementById('sideSlider').value);
+            const cellSize = 40;
+            const totalSize = side * cellSize;
+            const startX = (canvas.width - totalSize) / 2;
+            const startY = (canvas.height - totalSize) / 2 - 30;
+            
+            isAnimating = true;
+            animProgress = 0;
+            let currentCell = 0;
+            const totalCells = side * side;
+            
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // 绘制背景
+                ctx.fillStyle = '#fff7ed';
+                ctx.fillRect(startX, startY, totalSize, totalSize);
+                
+                // 绘制格子线
+                ctx.strokeStyle = '#fed7aa';
+                ctx.lineWidth = 1;
+                for (let i = 0; i <= side; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(startX + i * cellSize, startY);
+                    ctx.lineTo(startX + i * cellSize, startY + totalSize);
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY + i * cellSize);
+                    ctx.lineTo(startX + totalSize, startY + i * cellSize);
+                    ctx.stroke();
+                }
+                
+                // 逐格填充动画
+                for (let i = 0; i < Math.min(currentCell, totalCells); i++) {
+                    const row = Math.floor(i / side);
+                    const col = i % side;
+                    ctx.fillStyle = '#fdba74';
+                    ctx.fillRect(startX + col * cellSize + 2, startY + row * cellSize + 2, cellSize - 4, cellSize - 4);
+                }
+                
+                // 绘制边框
+                ctx.strokeStyle = '#ea580c';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(startX, startY, totalSize, totalSize);
+                
+                // 显示计数
+                ctx.fillStyle = '#c2410c';
+                ctx.font = 'bold 24px "Noto Sans SC"';
+                ctx.textAlign = 'center';
+                ctx.fillText(Math.min(currentCell, totalCells) + ' 格', canvas.width / 2, canvas.height - 20);
+                
+                // 标注边长
+                ctx.font = 'bold 18px "Noto Sans SC"';
+                ctx.fillText(side + ' 厘米', startX + totalSize / 2, startY + totalSize + 30);
+                
+                if (currentCell <= totalCells) {
+                    currentCell++;
+                    animationId = requestAnimationFrame(() => {
+                        setTimeout(animate, 150);
+                    });
+                } else {
+                    isAnimating = false;
+                    // 显示最终结果
+                    ctx.fillStyle = '#c2410c';
+                    ctx.font = 'bold 24px "Noto Sans SC"';
+                    ctx.fillText('面积 = ' + (side * side) + ' 平方厘米', canvas.width / 2, canvas.height - 20);
+                }
+            }
+            
+            animate();
+        }
+        
+        // 初始化练习题
+        function initExercises() {
+            const container = document.getElementById('exerciseList');
+            container.innerHTML = '';
+            
+            exercises.forEach((ex, index) => {
+                const div = document.createElement('div');
+                div.className = 'exercise-item';
+                div.innerHTML = `
+                    <p class="exercise-question">
+                        <strong>第${index + 1}题：</strong>${ex.question}
+                    </p>
+                    <p style="color: var(--text-secondary); margin-bottom: 12px;">提示：${ex.hint}</p>
+                    <div class="answer-area">
+                        <span>答案：</span>
+                        <input type="number" id="answer${index}" placeholder="?" onkeypress="if(event.key==='Enter') checkAnswer(${index})">
+                        <span class="unit">平方厘米</span>
+                        <button class="btn btn-primary" onclick="checkAnswer(${index})">提交</button>
+                        <span class="feedback" id="feedback${index}"></span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        // 检查答案
+        function checkAnswer(index) {
+            const input = document.getElementById('answer' + index);
+            const feedback = document.getElementById('feedback' + index);
+            const userAnswer = parseInt(input.value);
+            
+            if (isNaN(userAnswer)) {
+                return;
+            }
+            
+            feedback.style.display = 'inline-block';
+            
+            if (userAnswer === exercises[index].answer) {
+                feedback.className = 'feedback correct';
+                feedback.textContent = '正确！太棒了！';
+                input.disabled = true;
+                if (!input.dataset.scored) {
+                    score += 20;
+                    completed++;
+                    input.dataset.scored = 'true';
+                    updateScore();
+                }
+            } else {
+                feedback.className = 'feedback wrong';
+                feedback.textContent = '再想想，试试看！';
+                input.value = '';
+            }
+        }
+        
+        // 更新分数
+        function updateScore() {
+            document.getElementById('scoreDisplay').textContent = score;
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('progressFill').style.width = (completed / totalExercises * 100) + '%';
+        }
+        
+        // 重置练习
+        function resetExercises() {
+            score = 0;
+            completed = 0;
+            updateScore();
+            initExercises();
+        }
+        
+        // 滑块事件
+        document.getElementById('sideSlider').addEventListener('input', function() {
+            if (!isAnimating) {
+                drawMainCanvas();
+            }
+        });
+        
+        // 初始化
+        window.onload = function() {
+            drawConceptCanvas();
+            drawExample('ex1', 2);
+            drawExample('ex2', 4);
+            drawExample('ex3', 5);
+            drawMainCanvas();
+            initExercises();
+        };
+    </script>
+</body>
+</html>
