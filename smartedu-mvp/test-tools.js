@@ -4,7 +4,7 @@ const postData = JSON.stringify({
   user_question: "正方形的面积怎么算？",
   subject: "数学",
   grade_level: 3,
-  enable_refinement: true
+  use_tools: true
 });
 
 const options = {
@@ -18,7 +18,8 @@ const options = {
   }
 };
 
-console.log('开始测试课件生成（多轮调优模式）...\n');
+console.log('开始测试工具调用模式课件生成...\n');
+console.log('使用OpenAI兼容接口 + qwen-plus模型\n');
 
 const req = http.request(options, (res) => {
   let data = '';
@@ -31,14 +32,11 @@ const req = http.request(options, (res) => {
         console.log('✅ 课件生成成功!');
         console.log('Course ID:', result.course_id);
         console.log('HTML长度:', result.html_content?.length || 0, '字符');
-        if (result.quality_score) {
-          console.log('质量评分:', result.quality_score.overall || 'N/A', '/100');
-        }
       } else {
         console.log('❌ 生成失败:', result.error);
       }
     } catch (e) {
-      console.log('Response:', data.substring(0, 500));
+      console.log('Response:', data.substring(0, 1000));
     }
   });
 });

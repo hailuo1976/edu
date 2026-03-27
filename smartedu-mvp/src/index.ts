@@ -121,6 +121,7 @@ app.get('/api', (req, res) => {
       'GET /api/course/list': '列出所有课程',
       'GET /api/course/:courseId': '获取课程',
       'GET /api/course/health': '健康检查',
+      'POST /api/course/agent/execute': '工具调用Agent执行',
     },
   });
 });
@@ -142,10 +143,11 @@ app.listen(PORT, () => {
 ║     日志文件:      ${LOG_FILE.split('/').pop()}              ║
 ║                                                          ║
 ║     API Endpoints:                                       ║
-║     • POST /api/course/generate  - 生成课程              ║
-║     • GET  /api/course/list     - 列出课程               ║
-║     • GET  /api/course/:id      - 获取课程               ║
-║     • GET  /api/course/health   - 健康检查               ║
+║     • POST /api/course/generate   - 生成课程              ║
+║     • GET  /api/course/list      - 列出课程               ║
+║     • GET  /api/course/:id       - 获取课程               ║
+║     • GET  /api/course/health    - 健康检查               ║
+║     • POST /api/course/agent/execute - 工具调用Agent     ║
 ║                                                          ║
 ╚══════════════════════════════════════════════════════════╝
   `);

@@ -7,9 +7,21 @@ export interface CourseMetadata {
 }
 
 export interface CourseSection {
-  type: 'intro' | 'concept' | 'formula' | 'example' | 'calculator' | 'exercise' | 'summary';
+  id?: string;
+  type: 'intro' | 'concept' | 'formula' | 'example' | 'calculator' | 'exercise' | 'summary' | 'demo';
   title: string;
   content: string;
+}
+
+export interface Course {
+  id: string;
+  topic: string;
+  subject: string;
+  gradeLevel: number;
+  createdAt: string;
+  html: string;
+  toolCalls: any[];
+  sections: CourseSection[];
 }
 
 export interface CourseContent {

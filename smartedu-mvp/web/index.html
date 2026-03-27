@@ -166,6 +166,57 @@
 
     .checkbox-wrapper span { font-size: 0.95rem; font-weight: 600; color: #92400e; }
 
+    /* Mode Selection */
+    .mode-selection {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .mode-option {
+      flex: 1;
+      min-width: 150px;
+      padding: 16px;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: white;
+      text-align: center;
+    }
+
+    .mode-option:hover {
+      border-color: var(--primary);
+      background: #f8fafc;
+    }
+
+    .mode-option.active {
+      border-color: var(--primary);
+      background: #eff6ff;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    }
+
+    .mode-option input {
+      display: none;
+    }
+
+    .mode-icon {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+
+    .mode-title {
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .mode-desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
     .btn {
       padding: 16px 36px;
       border: none;
@@ -718,7 +769,31 @@
         <span class="example-btn" data-question="圆形的周长怎么算？">圆形周长</span>
       </div>
 
-      <div class="options" style="margin-top: 20px;">
+      <div class="form-group" style="margin-top: 20px;">
+        <label>生成模式</label>
+        <div class="mode-selection">
+          <label class="mode-option active" data-mode="tool">
+            <input type="radio" name="genMode" value="tool" checked>
+            <div class="mode-icon">🔧</div>
+            <div class="mode-title">工具调用</div>
+            <div class="mode-desc">智能工具组合生成</div>
+          </label>
+          <label class="mode-option" data-mode="refine">
+            <input type="radio" name="genMode" value="refine">
+            <div class="mode-icon">🎯</div>
+            <div class="mode-title">多轮调优</div>
+            <div class="mode-desc">质量门禁优化</div>
+          </label>
+          <label class="mode-option" data-mode="normal">
+            <input type="radio" name="genMode" value="normal">
+            <div class="mode-icon">⚡</div>
+            <div class="mode-title">快速生成</div>
+            <div class="mode-desc">直接生成模式</div>
+          </label>
+        </div>
+      </div>
+
+      <div class="options">
         <div class="select-wrapper">
           <label>学科</label>
           <select id="subject">
@@ -740,11 +815,6 @@
             <option value="6">6年级</option>
           </select>
         </div>
-
-        <label class="checkbox-wrapper">
-          <input type="checkbox" id="enableRefine" checked>
-          <span>🎯 启用多轮调优 (质量门禁)</span>
-        </label>
 
         <button id="generateBtn" class="btn btn-primary">
           <span>✨</span> 生成课件
@@ -857,14 +927,14 @@
     const API_BASE = 'http://localhost:3000';
     let currentHtmlContent = null;
     let currentCourseId = null;
-    let enableRefine = true;
+    let currentMode = 'tool'; // tool, refine, normal
 
     const questionInput = document.getElementById('question');
     const subjectSelect = document.getElementById('subject');
     const gradeSelect = document.getElementById('grade');
-    const enableRefineCheckbox = document.getElementById('enableRefine');
     const generateBtn = document.getElementById('generateBtn');
     const modeBadge = document.getElementById('modeBadge');
+    const modeOptions = document.querySelectorAll('.mode-option');
 
     const loadingState = document.getElementById('loadingState');
     const loadingText = document.getElementById('loadingText');
@@ -892,6 +962,27 @@
       error: { text: '生成失败', hint: '' }
     };
 
+    // 模式选择切换
+    modeOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        modeOptions.forEach(o => o.classList.remove('active'));
+        option.classList.add('active');
+        currentMode = option.dataset.mode;
+        updateModeBadge();
+      });
+    });
+
+    function updateModeBadge() {
+      const modeNames = {
+        tool: { text: '工具调用', class: 'badge-mode' },
+        refine: { text: '多轮调优', class: 'badge-refine' },
+        normal: { text: '快速生成', class: 'badge-mode' }
+      };
+      const mode = modeNames[currentMode];
+      modeBadge.className = `badge ${mode.class}`;
+      modeBadge.textContent = mode.text;
+    }
+
     promptToggle.addEventListener('click', () => {
       if (promptContent.style.maxHeight === '150px') {
         promptContent.style.maxHeight = '500px';
@@ -900,12 +991,6 @@
         promptContent.style.maxHeight = '150px';
         promptToggle.textContent = '展开 ▼';
       }
-    });
-
-    enableRefineCheckbox.addEventListener('change', (e) => {
-      enableRefine = e.target.checked;
-      modeBadge.className = enableRefine ? 'badge badge-refine' : 'badge badge-mode';
-      modeBadge.textContent = enableRefine ? '多轮调优' : 'AI 模式';
     });
 
     document.querySelectorAll('.example-btn').forEach(btn => {
@@ -927,15 +1012,21 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
       try {
+        // 根据模式设置参数
+        const requestBody = {
+          user_question: question,
+          subject: subjectSelect.value,
+          grade_level: parseInt(gradeSelect.value),
+          use_tools: currentMode === 'tool',
+          enable_refinement: currentMode === 'refine'
+        };
+
+        console.log('[Frontend] 生成模式:', currentMode, requestBody);
+
         const response = await fetch(`${API_BASE}/api/course/generate?stream=true`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json; charset=utf-8' },
-          body: JSON.stringify({
-            user_question: question,
-            subject: subjectSelect.value,
-            grade_level: parseInt(gradeSelect.value),
-            enable_refinement: enableRefine
-          })
+          body: JSON.stringify(requestBody)
         });
 
         if (!response.ok) {
@@ -968,7 +1059,7 @@
         if (currentCourseId) {
           const courseRes = await fetch(`${API_BASE}/api/course/${currentCourseId}`);
           const courseData = await courseRes.json();
-          currentHtmlContent = courseData.course.html_content;
+          currentHtmlContent = courseData.course.html;
           showSuccessState();
         }
 
