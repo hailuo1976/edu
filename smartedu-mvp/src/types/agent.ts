@@ -75,7 +75,7 @@ export const DEFAULT_AGENT_CONFIG: AgentConfig = {
 
 export interface AgentProgress {
   iteration: number;
-  stage: 'thinking' | 'tool_call' | 'tool_result' | 'complete' | 'error';
+  stage: 'thinking' | 'tool_call' | 'tool_result' | 'complete' | 'error' | 'retry';
   message: string;
   toolCalls?: ToolCall[];
   toolResults?: ToolResult[];

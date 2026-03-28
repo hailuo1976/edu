@@ -60,7 +60,7 @@ export class CourseToolCallAgent {
       baseUrl: this.baseUrl,
     });
 
-    const messages: Array<{ role: string; content: string }> = [
+    let messages: Array<{ role: string; content: string }> = [
       { role: 'system', content: this.buildSystemPrompt(subject, gradeLevel, courseId) },
       { role: 'user', content: prompt },
     ];
