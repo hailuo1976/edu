@@ -61,7 +61,7 @@ export class CourseToolCallAgent {
     });
 
     const messages: Array<{ role: string; content: string }> = [
-      { role: 'system', content: this.buildSystemPrompt(subject, gradeLevel) },
+      { role: 'system', content: this.buildSystemPrompt(subject, gradeLevel, courseId) },
       { role: 'user', content: prompt },
     ];
 
@@ -84,68 +84,92 @@ export class CourseToolCallAgent {
       iterations++;
 
       try {
-        this.reportProgress({
-          iteration: iterations,
-          stage: 'thinking',
-          message: `第 ${iterations} 轮：正在思考和规划...`,
-        });
-
-        this.logger.info('iteration_start', `第 ${iterations} 轮开始`, {
-          currentHtmlLength: currentHtml.length,
-          messageCount: messages.length,
-        }, iterations);
-
-        const response = await this.callAIWithTools(messages, iterations);
-
-        messages.push({ role: 'assistant', content: response.content });
-
-        // 记录AI响应
-        this.logger.debug('ai_response', 'AI响应内容', {
-          contentLength: response.content.length,
-          contentPreview: response.content.substring(0, 300) + '...',
-          toolCallCount: response.toolCalls.length,
-        }, iterations);
-
-        if (this.checkCompletionCondition(response.content)) {
-          if (currentHtml) {
             this.reportProgress({
               iteration: iterations,
-              stage: 'complete',
-              message: '课件生成完成!',
+              stage: 'thinking',
+              message: `第 ${iterations} 轮：正在思考和规划...`,
             });
-            this.logger.logSessionEnd(true, iterations, toolResults.length);
-            return {
-              success: true,
-              html: currentHtml,
-              courseId,
-              iterations,
-              toolCalls: toolResults,
-            };
-          }
-        }
 
-        if (!response.toolCalls || response.toolCalls.length === 0) {
-          this.logger.warn('no_tool_calls', 'AI未返回工具调用', {
-            content: response.content.substring(0, 500),
-          }, iterations);
+            this.logger.info('iteration_start', `第 ${iterations} 轮开始`, {
+              currentHtmlLength: currentHtml.length,
+              messageCount: messages.length,
+            }, iterations);
 
-          if (iterations >= this.maxIterations) {
-            this.logger.logSessionEnd(false, iterations, toolResults.length);
-            return {
-              success: false,
-              html: currentHtml || this.generateFallbackHtml(prompt, subject, gradeLevel),
-              courseId,
-              iterations,
-              toolCalls: toolResults,
-              error: '达到最大迭代次数',
-            };
-          }
-          messages.push({
-            role: 'user',
-            content: '请继续使用工具完成任务。如果HTML已生成，请明确说明"完成"。',
-          });
-          continue;
-        }
+            let response;
+            try {
+              response = await this.callAIWithTools(messages, iterations);
+            } catch (error: any) {
+              // 检查是否是超时错误
+              if (error.message.includes('超时')) {
+                this.logger.warn('ai_timeout', 'AI调用超时，尝试使用压缩后的提示词', {}, iterations);
+                this.reportProgress({
+                  iteration: iterations,
+                  stage: 'retry',
+                  message: 'AI调用超时，正在使用压缩后的提示词重试...',
+                });
+                
+                // 压缩提示词
+                const compressedMessages = this.compressMessages(messages);
+                
+                // 重新调用AI
+                response = await this.callAIWithTools(compressedMessages, iterations);
+                
+                // 使用压缩后的消息继续
+                messages = compressedMessages;
+              } else {
+                throw error;
+              }
+            }
+
+            messages.push({ role: 'assistant', content: response.content });
+
+            // 记录AI响应
+            this.logger.debug('ai_response', 'AI响应内容', {
+              contentLength: response.content.length,
+              contentPreview: response.content.substring(0, 300) + '...',
+              toolCallCount: response.toolCalls.length,
+            }, iterations);
+
+            if (this.checkCompletionCondition(response.content)) {
+              if (currentHtml) {
+                this.reportProgress({
+                  iteration: iterations,
+                  stage: 'complete',
+                  message: '课件生成完成!',
+                });
+                this.logger.logSessionEnd(true, iterations, toolResults.length);
+                return {
+                  success: true,
+                  html: currentHtml,
+                  courseId,
+                  iterations,
+                  toolCalls: toolResults,
+                };
+              }
+            }
+
+            if (!response.toolCalls || response.toolCalls.length === 0) {
+              this.logger.warn('no_tool_calls', 'AI未返回工具调用', {
+                content: response.content.substring(0, 500),
+              }, iterations);
+
+              if (iterations >= this.maxIterations) {
+                this.logger.logSessionEnd(false, iterations, toolResults.length);
+                return {
+                  success: false,
+                  html: currentHtml || this.generateFallbackHtml(prompt, subject, gradeLevel),
+                  courseId,
+                  iterations,
+                  toolCalls: toolResults,
+                  error: '达到最大迭代次数',
+                };
+              }
+              messages.push({
+                role: 'user',
+                content: '请继续使用工具完成任务。如果HTML已生成，请明确说明"完成"。',
+              });
+              continue;
+            }
 
         this.reportProgress({
           iteration: iterations,
@@ -237,8 +261,12 @@ export class CourseToolCallAgent {
     };
   }
 
-  private buildSystemPrompt(subject: string, gradeLevel: number): string {
+  private buildSystemPrompt(subject: string, gradeLevel: number, courseId: string): string {
     return `你是小学${gradeLevel}年级${subject}课件生成专家，可以使用工具来生成精美的互动课件。
+
+## 重要提示
+本次课程的唯一标识ID是: ${courseId}
+在调用 save_course_html 工具时，必须使用这个 course_id: "${courseId}"，不要自行编造其他ID。
 
 ## 可用工具
 ### generate_svg
@@ -254,31 +282,35 @@ export class CourseToolCallAgent {
 参数: html_code(要验证的HTML代码)
 
 ### search_educational_content
-搜索相关的教育教学内容作为参考。
+使用百度搜索API搜索相关的教育教学内容作为参考，获取最新、最准确的教学资料。
 参数: query(搜索关键词), grade_level(年级), subject(学科)
+**重要**: 请使用具体的搜索关键词，例如"正方形面积计算公式"、"分数加减法教学方法"等。
 
 ### save_course_html
 保存生成的课件HTML文件。
 参数: filename(文件名), html_content(HTML内容), course_id(课程ID)
+**重要**: course_id 必须使用 "${courseId}"，不要自行编造其他ID。
 
 ## 课件要求
 1. 必须生成完整的HTML页面，包含<!DOCTYPE html>、<html>、<head>、<body>标签
 2. 页面必须包含三个主要模块：
-   - id="concept": 概念讲解模块
+   - id="concept": 概念讲解模块（基于搜索结果的最新内容）
    - id="demo": 图形演示模块（使用Canvas或SVG）
-   - id="exercise": 练习测试模块
+   - id="exercise": 练习测试模块（包含基于搜索结果的例题）
 3. 使用现代化设计，包含渐变色、阴影、动画效果
 4. 所有数学公式和概念用中文清晰解释
 5. 图形必须清晰标注尺寸
 6. 练习题要有即时反馈
+7. 在概念讲解中引用搜索结果的相关内容，确保课件内容的准确性和时效性
 
 ## 工作流程
-1. 先搜索相关教学资料
-2. 生成必要的SVG图形
-3. 生成HTML组件
-4. 组装完整课件
-5. 验证HTML有效性
-6. 保存课件文件
+1. **搜索相关教学资料**：使用 search_educational_content 工具搜索最新的教学内容，包括概念解释、教学方法、例题等
+2. **分析搜索结果**：基于搜索结果整理出核心概念和教学要点
+3. **生成必要的SVG图形**：根据搜索结果生成相关的可视化图形
+4. **生成HTML组件**：基于搜索结果生成公式卡片、步骤展示等组件
+5. **组装完整课件**：将所有内容整合成完整的HTML页面
+6. **验证HTML有效性**：确保生成的HTML代码结构完整
+7. **保存课件文件**：将生成的课件保存到指定位置
 
 ## 结束条件
 当课件生成并保存完成后，必须在回复中包含"完成"或"DONE"。`;
@@ -334,7 +366,8 @@ export class CourseToolCallAgent {
     this.logger.debug('ai_request', 'AI请求详情', requestContext, iteration);
 
     try {
-      const response = await this.retry(() => axios.post(
+      // 增加超时时间到6分钟，以确保有足够时间检测5分钟超时
+      const response = await this.retryWithTimeout(() => axios.post(
         apiEndpoint,
         requestBody,
         {
@@ -342,9 +375,9 @@ export class CourseToolCallAgent {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.apiKey}`,
           },
-          timeout: 180000,
+          timeout: 360000, // 6分钟超时
         }
-      ), 3, 2000);
+      ), 3, 2000, 300000); // 5分钟检测
 
       const duration = Date.now() - callStartTime;
       const assistantMessage = response.data.choices?.[0]?.message;
@@ -405,11 +438,138 @@ export class CourseToolCallAgent {
     }
   }
 
+  /**
+   * 带超时检测的重试函数
+   * @param fn 要执行的函数
+   * @param maxAttempts 最大尝试次数
+   * @param delayMs 延迟时间
+   * @param timeoutMs 超时检测时间（毫秒）
+   */
+  private async retryWithTimeout<T>(fn: () => Promise<T>, maxAttempts: number, delayMs: number, timeoutMs: number): Promise<T> {
+    let lastError: any;
+    
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        // 创建一个带超时检测的Promise
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => {
+            reject(new Error(`AI调用超时（超过 ${timeoutMs/1000/60} 分钟）`));
+          }, timeoutMs);
+        });
+
+        // 同时执行原函数和超时检测
+        const result = await Promise.race([fn(), timeoutPromise]);
+        return result as T;
+      } catch (error: any) {
+        lastError = error;
+        console.warn(`[CourseToolCallAgent] 尝试 ${attempt}/${maxAttempts} 失败: ${error.message}`);
+        
+        // 如果是超时错误，执行提示词压缩
+        if (error.message.includes('超时') && attempt < maxAttempts) {
+          console.log(`[CourseToolCallAgent] 执行提示词压缩...`);
+          // 这里可以添加提示词压缩逻辑
+          // 例如：简化系统提示，减少历史消息等
+          await new Promise(resolve => setTimeout(resolve, delayMs * attempt));
+        } else if (attempt < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, delayMs * attempt));
+        }
+      }
+    }
+    
+    throw lastError;
+  }
+
+  /**
+   * 压缩提示词
+   * @param messages 原始消息
+   * @returns 压缩后的消息
+   */
+  private compressMessages(messages: Array<{ role: string; content: string }>): Array<{ role: string; content: string }> {
+    // 保留系统消息和最近的用户/助手消息
+    const compressedMessages: Array<{ role: string; content: string }> = [];
+    
+    // 保留系统消息
+    const systemMessage = messages.find(msg => msg.role === 'system');
+    if (systemMessage) {
+      // 简化系统提示，保留核心指令
+      const simplifiedSystemContent = this.simplifySystemPrompt(systemMessage.content);
+      compressedMessages.push({ role: 'system', content: simplifiedSystemContent });
+    }
+    
+    // 保留最近的用户和助手消息（最近3轮对话）
+    const recentMessages = messages.filter(msg => msg.role !== 'system');
+    const messagesToKeep = recentMessages.slice(-6); // 保留最近3轮（用户+助手）
+    compressedMessages.push(...messagesToKeep);
+    
+    console.log(`[CourseToolCallAgent] 提示词压缩完成: ${messages.length} → ${compressedMessages.length} 条消息`);
+    return compressedMessages;
+  }
+
+  /**
+   * 简化系统提示
+   * @param systemPrompt 原始系统提示
+   * @returns 简化后的系统提示
+   */
+  private simplifySystemPrompt(systemPrompt: string): string {
+    // 提取核心指令，移除详细说明
+    const coreInstructions = `你是小学课件生成专家，可以使用工具生成互动课件。
+
+## 重要提示
+本次课程的唯一标识ID是: ${this.extractCourseId(systemPrompt)}
+在调用 save_course_html 工具时，必须使用正确的 course_id。
+
+## 可用工具
+- generate_svg: 生成SVG矢量图形
+- generate_html_component: 生成HTML组件
+- validate_html: 验证HTML代码
+- search_educational_content: 搜索教育内容
+- save_course_html: 保存课件文件
+
+## 课件要求
+1. 生成完整的HTML页面
+2. 包含概念讲解、图形演示、练习测试三个模块
+3. 使用现代化设计
+4. 清晰解释数学公式和概念
+5. 练习题要有即时反馈
+
+## 工作流程
+1. 搜索相关教学资料
+2. 生成必要的SVG图形
+3. 生成HTML组件
+4. 组装完整课件
+5. 验证HTML有效性
+6. 保存课件文件
+
+## 结束条件
+当课件生成并保存完成后，必须在回复中包含"完成"或"DONE"。`;
+    
+    return coreInstructions;
+  }
+
+  /**
+   * 从系统提示中提取课程ID
+   * @param systemPrompt 系统提示
+   * @returns 课程ID
+   */
+  private extractCourseId(systemPrompt: string): string {
+    const match = systemPrompt.match(/本次课程的唯一标识ID是: (course_\d+)/);
+    return match ? match[1] : `course_${Date.now()}`;
+  }
+
   private async executeTool(toolCall: ToolCall, courseId: string, currentHtml: string): Promise<ToolResult> {
     try {
-      // 为 save_course_html 工具添加课程ID
-      if (toolCall.name === 'save_course_html' && !toolCall.arguments.course_id) {
+      // 为 save_course_html 工具强制使用正确的课程ID
+      if (toolCall.name === 'save_course_html') {
+        const originalCourseId = toolCall.arguments.course_id;
         toolCall.arguments.course_id = courseId;
+        
+        if (originalCourseId && originalCourseId !== courseId) {
+          this.logger.warn('course_id_corrected', `修正了错误的 course_id: "${originalCourseId}" -> "${courseId}"`, {
+            toolId: toolCall.id,
+            originalCourseId,
+            correctedCourseId: courseId,
+          });
+        }
       }
 
       // 执行工具

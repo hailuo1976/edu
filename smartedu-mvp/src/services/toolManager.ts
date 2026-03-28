@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { AgentLogger } from '../utils/agentLogger';
 
 // 工具定义接口
 export interface ToolDefinition {
@@ -44,9 +45,14 @@ export class ToolManager {
     failures: number;
     avgTime: number;
   }> = new Map();
+  private static logger: AgentLogger;
 
   constructor(workDir: string = './') {
     this.workDir = path.resolve(workDir);
+    // 使用单例 logger
+    if (!ToolManager.logger) {
+      ToolManager.logger = new AgentLogger('ToolManager');
+    }
     this.registerDefaultTools();
   }
 
@@ -108,14 +114,28 @@ export class ToolManager {
     const tool = this.tools.get(toolCall.name);
     let retries = 0;
 
+    // 记录工具调用开始
+    ToolManager.logger.info('tool_call_start', `开始执行工具: ${toolCall.name}`, {
+      toolCallId: toolCall.id,
+      toolName: toolCall.name,
+      arguments: toolCall.arguments,
+    });
+
     if (!tool) {
-      this.updateToolStats(toolCall.name, false, Date.now() - startTime);
+      const executionTime = Date.now() - startTime;
+      this.updateToolStats(toolCall.name, false, executionTime);
+      
+      ToolManager.logger.error('tool_not_found', `工具不存在: ${toolCall.name}`, {
+        toolCallId: toolCall.id,
+        executionTime,
+      });
+      
       return {
         toolCallId: toolCall.id,
         toolName: toolCall.name,
         success: false,
         error: `工具不存在: ${toolCall.name}`,
-        executionTime: Date.now() - startTime,
+        executionTime,
       };
     }
 
@@ -123,21 +143,46 @@ export class ToolManager {
       // 验证参数
       const validationError = this.validateToolParameters(tool, toolCall.arguments);
       if (validationError) {
-        this.updateToolStats(toolCall.name, false, Date.now() - startTime);
+        const executionTime = Date.now() - startTime;
+        this.updateToolStats(toolCall.name, false, executionTime);
+        
+        ToolManager.logger.warn('tool_validation_failed', `参数验证失败: ${validationError}`, {
+          toolCallId: toolCall.id,
+          toolName: toolCall.name,
+          arguments: toolCall.arguments,
+          error: validationError,
+          executionTime,
+        });
+        
         return {
           toolCallId: toolCall.id,
           toolName: toolCall.name,
           success: false,
           error: validationError,
-          executionTime: Date.now() - startTime,
+          executionTime,
         };
       }
 
       // 执行工具（带重试）
+      ToolManager.logger.debug('tool_executing', `正在执行工具: ${toolCall.name}`, {
+        toolCallId: toolCall.id,
+        arguments: toolCall.arguments,
+      });
+
       const result = await this.retry(() => this.executeToolWithTimeout(tool, toolCall.arguments), 3, 1000);
       
       const executionTime = Date.now() - startTime;
       this.updateToolStats(toolCall.name, true, executionTime);
+      
+      // 记录工具执行成功
+      ToolManager.logger.info('tool_call_success', `工具执行成功: ${toolCall.name}`, {
+        toolCallId: toolCall.id,
+        toolName: toolCall.name,
+        resultType: typeof result,
+        resultPreview: typeof result === 'object' ? JSON.stringify(result).substring(0, 500) : String(result).substring(0, 500),
+        executionTime,
+        retries,
+      });
       
       return {
         toolCallId: toolCall.id,
@@ -150,6 +195,16 @@ export class ToolManager {
     } catch (error: any) {
       const executionTime = Date.now() - startTime;
       this.updateToolStats(toolCall.name, false, executionTime);
+      
+      // 记录工具执行失败
+      ToolManager.logger.error('tool_call_failed', `工具执行失败: ${toolCall.name}`, {
+        toolCallId: toolCall.id,
+        toolName: toolCall.name,
+        error: error.message,
+        stack: error.stack,
+        executionTime,
+        retries,
+      });
       
       return {
         toolCallId: toolCall.id,
@@ -420,7 +475,7 @@ export class ToolManager {
     // 搜索教育内容工具
     this.registerTool({
       name: 'search_educational_content',
-      description: '搜索相关的教育教学内容作为参考',
+      description: '使用百度搜索API搜索相关的教育教学内容作为参考',
       parameters: {
         type: 'object',
         properties: {
@@ -442,9 +497,74 @@ export class ToolManager {
       execute: async (args, workDir) => {
         const { query, grade_level, subject } = args;
         
-        // 模拟搜索结果
-        const mockContent: Record<string, string> = {
-          '正方形面积': `
+        try {
+          const axios = require('axios');
+          const apiKey = 'bce-v3/ALTAK-LNU3yjGmY72rkB8V1f9wz/83b8cfd5e83bf6467ca5328134274971f49faa0d';
+          
+          const response = await axios.post(
+            'https://qianfan.baidubce.com/v2/ai_search/web_search',
+            {
+              messages: [
+                { role: 'user', content: `${query} ${subject} ${grade_level}年级` }
+              ]
+            },
+            {
+              headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+          
+          const results = response.data.references || [];
+          
+          // 构建搜索结果内容
+          let content = `# ${query}
+
+## 搜索结果
+`;
+          
+          results.forEach((result: any, index: number) => {
+            content += `### 结果 ${index + 1}
+`;
+            content += `**标题**: ${result.title || '无标题'}
+`;
+            content += `**链接**: ${result.url || '无链接'}
+`;
+            content += `**日期**: ${result.date || '未知'}
+`;
+            content += `**内容**: ${result.content || '无内容'}
+
+`;
+          });
+          
+          content += `## 教学要点
+1. 理解${query}的基本概念
+2. 掌握${query}的计算方法或应用
+3. 能够解决与${query}相关的实际问题
+
+## 例题
+请根据搜索结果和教学内容添加相关例题。`;
+          
+          return { 
+            content, 
+            query, 
+            grade_level, 
+            subject,
+            results: results.map((r: any) => ({
+              title: r.title,
+              url: r.url,
+              date: r.date,
+              content: r.content
+            })),
+            total: results.length
+          };
+        } catch (error: any) {
+          console.error('百度搜索API调用失败:', error.message);
+          
+          // 模拟搜索结果作为备用
+          const mockContent: Record<string, string> = {
+            '正方形面积': `
 # 正方形面积
 
 ## 概念
@@ -462,7 +582,7 @@ S = a²
 边长为5cm的正方形，面积是多少？
 解：S = 5² = 25 (cm²)
           `,
-          '分数加减法': `
+            '分数加减法': `
 # 分数加减法
 
 ## 概念
@@ -478,7 +598,7 @@ S = a²
 ## 例题
 1/2 + 1/4 = 2/4 + 1/4 = 3/4
           `,
-          '圆的周长': `
+            '圆的周长': `
 # 圆的周长
 
 ## 概念
@@ -496,9 +616,9 @@ C = πd 或 C = 2πr
 半径为5cm的圆，周长是多少？
 解：C = 2 × 3.14 × 5 = 31.4 (cm)
           `,
-        };
+          };
 
-        const content = mockContent[query as string] || `
+          const content = mockContent[query as string] || `
 # ${query}
 
 ## 概念
@@ -513,7 +633,8 @@ ${query}是${subject}学科中的重要概念。
 请根据具体内容添加例题。
           `;
 
-        return { content, query, grade_level, subject };
+          return { content, query, grade_level, subject };
+        }
       },
     });
 
@@ -559,6 +680,351 @@ ${query}是${subject}学科中的重要概念。
         };
       },
     });
+
+    // 注册文件操作工具
+    this.registerFileTools();
+  }
+
+  /**
+   * 注册文件操作工具
+   */
+  private registerFileTools(): void {
+    // 创建文件工具
+    this.registerTool({
+      name: 'create_file',
+      description: '创建新文件。如果文件已存在，会返回错误。适用于首次创建文件。',
+      parameters: {
+        type: 'object',
+        properties: {
+          file_path: {
+            type: 'string',
+            description: '文件路径，可以是绝对路径或相对于当前工作目录的路径',
+          },
+          content: {
+            type: 'string',
+            description: '文件内容',
+          },
+        },
+        required: ['file_path', 'content'],
+      },
+      execute: async (args, workDir) => {
+        const filePath = path.isAbsolute(args.file_path) 
+          ? args.file_path 
+          : path.join(workDir, args.file_path);
+
+        if (fs.existsSync(filePath)) {
+          throw new Error(`文件已存在: ${filePath}`);
+        }
+
+        const dir = path.dirname(filePath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+
+        fs.writeFileSync(filePath, args.content, 'utf-8');
+
+        return {
+          message: '文件创建成功',
+          path: filePath,
+          size: args.content.length,
+        };
+      },
+    });
+
+    // 写入文件工具
+    this.registerTool({
+      name: 'write_file',
+      description: '写入或覆盖文件。如果文件不存在会创建，如果存在会覆盖。适用于更新已有文件。',
+      parameters: {
+        type: 'object',
+        properties: {
+          file_path: {
+            type: 'string',
+            description: '文件路径，可以是绝对路径或相对于当前工作目录的路径',
+          },
+          content: {
+            type: 'string',
+            description: '文件内容',
+          },
+          append: {
+            type: 'boolean',
+            description: '是否追加模式，默认为false（覆盖）',
+          },
+        },
+        required: ['file_path', 'content'],
+      },
+      execute: async (args, workDir) => {
+        const filePath = path.isAbsolute(args.file_path) 
+          ? args.file_path 
+          : path.join(workDir, args.file_path);
+
+        const dir = path.dirname(filePath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+
+        if (args.append) {
+          fs.appendFileSync(filePath, args.content, 'utf-8');
+        } else {
+          fs.writeFileSync(filePath, args.content, 'utf-8');
+        }
+
+        const stats = fs.statSync(filePath);
+
+        return {
+          message: args.append ? '内容追加成功' : '文件写入成功',
+          path: filePath,
+          size: stats.size,
+          append: args.append || false,
+        };
+      },
+    });
+
+    // 读取文件工具
+    this.registerTool({
+      name: 'read_file',
+      description: '读取文件内容。返回文件的完整内容。',
+      parameters: {
+        type: 'object',
+        properties: {
+          file_path: {
+            type: 'string',
+            description: '文件路径，可以是绝对路径或相对于当前工作目录的路径',
+          },
+          encoding: {
+            type: 'string',
+            description: '文件编码，默认utf-8',
+          },
+          max_length: {
+            type: 'number',
+            description: '最大读取长度（字符数），超过会被截断，默认50000',
+          },
+        },
+        required: ['file_path'],
+      },
+      execute: async (args, workDir) => {
+        const filePath = path.isAbsolute(args.file_path) 
+          ? args.file_path 
+          : path.join(workDir, args.file_path);
+
+        if (!fs.existsSync(filePath)) {
+          throw new Error(`文件不存在: ${filePath}`);
+        }
+
+        let content: string = fs.readFileSync(filePath, args.encoding || 'utf-8') as any;
+        const maxLength = args.max_length || 50000;
+
+        if (content.length > maxLength) {
+          content = content.substring(0, maxLength) + `\n\n[内容已截断，原始长度: ${content.length} 字符]`;
+        }
+
+        const stats = fs.statSync(filePath);
+
+        return {
+          content,
+          path: filePath,
+          size: stats.size,
+          truncated: content.length > maxLength,
+        };
+      },
+    });
+
+    // 列出文件工具
+    this.registerTool({
+      name: 'list_files',
+      description: '列出目录下的文件。返回文件列表。',
+      parameters: {
+        type: 'object',
+        properties: {
+          directory: {
+            type: 'string',
+            description: '目录路径，默认为当前工作目录',
+          },
+          pattern: {
+            type: 'string',
+            description: '文件匹配模式，如*.html, *.json',
+          },
+        },
+        required: [],
+      },
+      execute: async (args, workDir) => {
+        const directory = args.directory 
+          ? (path.isAbsolute(args.directory) ? args.directory : path.join(workDir, args.directory))
+          : workDir;
+
+        if (!fs.existsSync(directory)) {
+          throw new Error(`目录不存在: ${directory}`);
+        }
+
+        let files = fs.readdirSync(directory);
+
+        if (args.pattern) {
+          const regex = new RegExp(args.pattern.replace(/\*/g, '.*').replace(/\?/g, '.'));
+          files = files.filter(f => regex.test(f));
+        }
+
+        const fileInfos = files.map(f => {
+          const fullPath = path.join(directory, f);
+          const stats = fs.statSync(fullPath);
+          return {
+            name: f,
+            type: stats.isDirectory() ? 'directory' : 'file',
+            size: stats.size,
+            modified: stats.mtime.toISOString(),
+          };
+        });
+
+        return {
+          directory,
+          files: fileInfos,
+          total: fileInfos.length,
+        };
+      },
+    });
+
+    // 检查文件存在工具
+    this.registerTool({
+      name: 'file_exists',
+      description: '检查文件或目录是否存在。',
+      parameters: {
+        type: 'object',
+        properties: {
+          file_path: {
+            type: 'string',
+            description: '文件或目录路径',
+          },
+        },
+        required: ['file_path'],
+      },
+      execute: async (args, workDir) => {
+        const filePath = path.isAbsolute(args.file_path) 
+          ? args.file_path 
+          : path.join(workDir, args.file_path);
+
+        const exists = fs.existsSync(filePath);
+
+        return {
+          exists,
+          path: filePath,
+          type: exists ? (fs.statSync(filePath).isDirectory() ? 'directory' : 'file') : null,
+        };
+      },
+    });
+
+    // 创建目录工具
+    this.registerTool({
+      name: 'create_directory',
+      description: '创建目录。如果父目录不存在，会自动创建。',
+      parameters: {
+        type: 'object',
+        properties: {
+          directory_path: {
+            type: 'string',
+            description: '目录路径',
+          },
+        },
+        required: ['directory_path'],
+      },
+      execute: async (args, workDir) => {
+        const dirPath = path.isAbsolute(args.directory_path) 
+          ? args.directory_path 
+          : path.join(workDir, args.directory_path);
+
+        if (fs.existsSync(dirPath)) {
+          throw new Error(`目录已存在: ${dirPath}`);
+        }
+
+        fs.mkdirSync(dirPath, { recursive: true });
+
+        return {
+          message: '目录创建成功',
+          path: dirPath,
+        };
+      },
+    });
+
+    // 删除文件工具
+    this.registerTool({
+      name: 'delete_file',
+      description: '删除文件。注意：此操作不可逆。',
+      parameters: {
+        type: 'object',
+        properties: {
+          file_path: {
+            type: 'string',
+            description: '要删除的文件路径',
+          },
+        },
+        required: ['file_path'],
+      },
+      execute: async (args, workDir) => {
+        const filePath = path.isAbsolute(args.file_path) 
+          ? args.file_path 
+          : path.join(workDir, args.file_path);
+
+        if (!fs.existsSync(filePath)) {
+          throw new Error(`文件不存在: ${filePath}`);
+        }
+
+        if (fs.statSync(filePath).isDirectory()) {
+          throw new Error(`路径是目录，不是文件: ${filePath}`);
+        }
+
+        fs.unlinkSync(filePath);
+
+        return {
+          message: '文件删除成功',
+          path: filePath,
+        };
+      },
+    });
+
+    // 复制文件工具
+    this.registerTool({
+      name: 'copy_file',
+      description: '复制文件到新位置。',
+      parameters: {
+        type: 'object',
+        properties: {
+          source_path: {
+            type: 'string',
+            description: '源文件路径',
+          },
+          destination_path: {
+            type: 'string',
+            description: '目标文件路径',
+          },
+        },
+        required: ['source_path', 'destination_path'],
+      },
+      execute: async (args, workDir) => {
+        const sourcePath = path.isAbsolute(args.source_path) 
+          ? args.source_path 
+          : path.join(workDir, args.source_path);
+        const destPath = path.isAbsolute(args.destination_path) 
+          ? args.destination_path 
+          : path.join(workDir, args.destination_path);
+
+        if (!fs.existsSync(sourcePath)) {
+          throw new Error(`源文件不存在: ${sourcePath}`);
+        }
+
+        const destDir = path.dirname(destPath);
+        if (!fs.existsSync(destDir)) {
+          fs.mkdirSync(destDir, { recursive: true });
+        }
+
+        fs.copyFileSync(sourcePath, destPath);
+
+        return {
+          message: '文件复制成功',
+          source: sourcePath,
+          destination: destPath,
+        };
+      },
+    });
+
+    console.log(`[ToolManager] 已注册 ${this.tools.size} 个工具`);
   }
 }
 

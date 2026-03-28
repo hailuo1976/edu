@@ -65,7 +65,7 @@ export class OpenCodeClient {
 
   constructor() {
     this.apiKey = process.env.OPENCODE_API_KEY || '';
-    this.baseUrl = process.env.OPENCODE_BASE_URL || 'https://coding.dashscope.aliyuncs.com/apps/anthropic';
+    this.baseUrl = process.env.OPENCODE_BASE_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1';
   }
 
   async generate(messages: OpenCodeMessage[], tools?: OpenCodeTool[]): Promise<OpenCodeResponse> {
