@@ -365,6 +365,15 @@ export class CourseToolCallAgent {
 
     this.logger.debug('ai_request', 'AI请求详情', requestContext, iteration);
 
+    // 推送AI输入到前端
+    const aiInput = messages.map(m => `${m.role}: ${m.content}`).join('\n\n');
+    this.reportProgress({
+      iteration,
+      stage: 'thinking',
+      message: '正在调用AI...',
+      ai_input: aiInput,
+    });
+
     try {
       // 增加超时时间到6分钟，以确保有足够时间检测5分钟超时
       const response = await this.retryWithTimeout(() => axios.post(
@@ -413,6 +422,14 @@ export class CourseToolCallAgent {
       });
 
       console.log(`[CourseToolCallAgent] 响应: 内容长度=${content.length}, 工具调用=${toolCalls.length}`);
+
+      // 推送AI输出到前端
+      this.reportProgress({
+        iteration,
+        stage: 'thinking',
+        message: 'AI响应已接收',
+        ai_output: content.substring(0, 2000) + (content.length > 2000 ? '...' : ''),
+      });
 
       return { content, toolCalls };
     } catch (error: any) {
@@ -572,10 +589,92 @@ export class CourseToolCallAgent {
         }
       }
 
+      // 推送工具调用开始信息
+      this.reportProgress({
+        iteration: 0,
+        stage: 'tool_call',
+        message: `正在执行工具: ${toolCall.name}`,
+        tool_call: {
+          name: toolCall.name,
+          arguments: toolCall.arguments,
+          success: false,
+        },
+      });
+
       // 执行工具
       const result = await this.retry(() => this.toolManager.executeTool(toolCall), 2, 1000);
+      
+      // 推送工具调用结果
+      this.reportProgress({
+        iteration: 0,
+        stage: 'tool_result',
+        message: `工具执行完成: ${toolCall.name}`,
+        tool_call: {
+          name: toolCall.name,
+          arguments: toolCall.arguments,
+          result: result.result,
+          success: result.success,
+          error: result.error,
+        },
+      });
+
+      // 如果工具返回了草稿内容，推送草稿内容
+      if (result.result && typeof result.result === 'object') {
+        if (result.result.svg_code) {
+          this.reportProgress({
+            iteration: 0,
+            stage: 'tool_result',
+            message: '生成了SVG图形草稿',
+            draft_content: {
+              type: 'svg',
+              title: 'SVG图形',
+              content: result.result.svg_code,
+            },
+          });
+        }
+        
+        if (result.result.html_content) {
+          this.reportProgress({
+            iteration: 0,
+            stage: 'tool_result',
+            message: '生成了HTML内容草稿',
+            draft_content: {
+              type: 'html',
+              title: 'HTML内容',
+              content: result.result.html_content,
+            },
+          });
+        }
+        
+        if (result.result.content) {
+          this.reportProgress({
+            iteration: 0,
+            stage: 'tool_result',
+            message: '生成了内容草稿',
+            draft_content: {
+              type: 'html',
+              title: '内容草稿',
+              content: result.result.content,
+            },
+          });
+        }
+      }
+
       return result;
     } catch (error: any) {
+      // 推送工具调用错误
+      this.reportProgress({
+        iteration: 0,
+        stage: 'tool_result',
+        message: `工具执行失败: ${toolCall.name}`,
+        tool_call: {
+          name: toolCall.name,
+          arguments: toolCall.arguments,
+          error: error.message,
+          success: false,
+        },
+      });
+
       return {
         toolCallId: toolCall.id,
         toolName: toolCall.name,

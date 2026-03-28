@@ -79,6 +79,20 @@ export interface AgentProgress {
   message: string;
   toolCalls?: ToolCall[];
   toolResults?: ToolResult[];
+  ai_input?: string;
+  ai_output?: string;
+  tool_call?: {
+    name: string;
+    arguments?: any;
+    result?: any;
+    error?: string;
+    success: boolean;
+  };
+  draft_content?: {
+    type?: 'svg' | 'html' | 'search';
+    title?: string;
+    content: string;
+  };
 }
 
 export type AgentProgressCallback = (progress: AgentProgress) => void;

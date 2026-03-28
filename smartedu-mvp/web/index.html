@@ -334,6 +334,8 @@
     .timeline {
       position: relative;
       padding-left: 30px;
+      max-height: 400px;
+      overflow-y: auto;
     }
 
     .timeline::before {
@@ -432,6 +434,241 @@
     .timeline-score.high { background: #dcfce7; color: var(--success); }
     .timeline-score.medium { background: #fef3c7; color: #d97706; }
     .timeline-score.low { background: #fee2e2; color: var(--error); }
+
+    /* AI Interaction Panel */
+    .ai-interaction {
+      display: none;
+      margin-top: 20px;
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+
+    .ai-interaction.show { display: block; }
+
+    .interaction-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .interaction-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .interaction-toggle {
+      font-size: 0.85rem;
+      color: var(--primary);
+      cursor: pointer;
+      padding: 8px 16px;
+      background: #eff6ff;
+      border-radius: 8px;
+      border: 1px solid var(--primary);
+    }
+
+    .interaction-toggle:hover {
+      background: #dbeafe;
+    }
+
+    .interaction-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .interaction-panel {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid var(--border);
+    }
+
+    .panel-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .panel-content {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+    }
+
+    .panel-content pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .panel-content code {
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.8rem;
+    }
+
+    /* Tool Call Display */
+    .tool-call {
+      background: white;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 8px;
+      border-left: 3px solid var(--primary);
+    }
+
+    .tool-call-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .tool-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tool-status {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .tool-status.success { background: #dcfce7; color: var(--success); }
+    .tool-status.error { background: #fee2e2; color: var(--error); }
+    .tool-status.running { background: #dbeafe; color: var(--primary); }
+
+    .tool-input {
+      background: #fef3c7;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+    }
+
+    .tool-input-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 6px;
+    }
+
+    .tool-input-content {
+      background: white;
+      border-radius: 6px;
+      padding: 8px;
+      font-family: monospace;
+      font-size: 0.75rem;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .tool-output {
+      background: #f0fdf4;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 0.8rem;
+    }
+
+    .tool-output-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--success);
+      margin-bottom: 6px;
+    }
+
+    .tool-output-content {
+      background: white;
+      border-radius: 6px;
+      padding: 8px;
+      font-family: monospace;
+      font-size: 0.75rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    /* Draft Content Display */
+    .draft-content {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      margin-top: 12px;
+    }
+
+    .draft-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .draft-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .draft-type {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .draft-type.svg { background: #dbeafe; color: #1d4ed8; }
+    .draft-type.html { background: #dcfce7; color: var(--success); }
+    .draft-type.search { background: #f3e8ff; color: #7c3aed; }
+
+    .draft-preview {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+    }
+
+    .draft-preview svg {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .draft-preview pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: monospace;
+      font-size: 0.8rem;
+    }
 
     /* Prompt Preview Panel */
     .prompt-panel {
@@ -999,6 +1236,49 @@
         <div class="prompt-content" id="promptContent">加载中...</div>
       </div>
 
+      <div id="aiInteraction" class="ai-interaction">
+        <div class="interaction-header">
+          <span class="interaction-title">
+            <span>🤖</span> AI 交互详情
+          </span>
+          <button class="interaction-toggle" id="interactionToggle">收起面板</button>
+        </div>
+        <div class="interaction-content">
+          <div class="interaction-panel">
+            <div class="panel-title">
+              <span>📤</span> AI 输入
+            </div>
+            <div class="panel-content" id="aiInput">
+              <pre>等待AI调用...</pre>
+            </div>
+          </div>
+          <div class="interaction-panel">
+            <div class="panel-title">
+              <span>📥</span> AI 输出
+            </div>
+            <div class="panel-content" id="aiOutput">
+              <pre>等待AI响应...</pre>
+            </div>
+          </div>
+        </div>
+        <div class="interaction-panel" style="margin-top: 16px;">
+          <div class="panel-title">
+            <span>🔧</span> 工具调用记录
+          </div>
+          <div class="panel-content" id="toolCalls">
+            <div class="text-center text-secondary">暂无工具调用</div>
+          </div>
+        </div>
+        <div class="interaction-panel" style="margin-top: 16px;">
+          <div class="panel-title">
+            <span>📄</span> 生成草稿内容
+          </div>
+          <div class="panel-content" id="draftContent">
+            <div class="text-center text-secondary">暂无草稿内容</div>
+          </div>
+        </div>
+      </div>
+
       <div class="loading-animation show">
         <div class="ai-brain">
           <div class="brain-circle"></div>
@@ -1117,6 +1397,12 @@
     const promptPanel = document.getElementById('promptPanel');
     const promptContent = document.getElementById('promptContent');
     const promptToggle = document.getElementById('promptToggle');
+    const aiInteraction = document.getElementById('aiInteraction');
+    const interactionToggle = document.getElementById('interactionToggle');
+    const aiInput = document.getElementById('aiInput');
+    const aiOutput = document.getElementById('aiOutput');
+    const toolCalls = document.getElementById('toolCalls');
+    const draftContent = document.getElementById('draftContent');
     const courseListContainer = document.getElementById('courseListContainer');
     const refreshListBtn = document.getElementById('refreshListBtn');
 
@@ -1160,6 +1446,16 @@
       } else {
         promptContent.style.maxHeight = '150px';
         promptToggle.textContent = '展开 ▼';
+      }
+    });
+
+    interactionToggle.addEventListener('click', () => {
+      if (aiInteraction.classList.contains('show')) {
+        aiInteraction.classList.remove('show');
+        interactionToggle.textContent = '展开面板';
+      } else {
+        aiInteraction.classList.add('show');
+        interactionToggle.textContent = '收起面板';
       }
     });
 
@@ -1242,7 +1538,32 @@
     }
 
     function handleProgress(data) {
-      const { stage, message, retryCount, qualityScore, promptPreview, issues, totalDuration } = data;
+      const { stage, message, retryCount, qualityScore, promptPreview, issues, totalDuration, ai_input, ai_output, tool_call, draft_content } = data;
+
+      // 显示AI交互面板
+      if (ai_input || ai_output) {
+        aiInteraction.classList.add('show');
+        
+        if (ai_input) {
+          aiInput.innerHTML = `<pre>${escapeHtml(ai_input)}</pre>`;
+        }
+        
+        if (ai_output) {
+          aiOutput.innerHTML = `<pre>${escapeHtml(ai_output)}</pre>`;
+        }
+      }
+
+      // 处理工具调用
+      if (tool_call) {
+        aiInteraction.classList.add('show');
+        displayToolCall(tool_call);
+      }
+
+      // 处理草稿内容
+      if (draft_content) {
+        aiInteraction.classList.add('show');
+        displayDraftContent(draft_content);
+      }
 
       if (promptPreview) {
         promptPanel.classList.add('show');
@@ -1285,6 +1606,89 @@
       if (issues && issues.length > 0) {
         showIssues(issues);
       }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function displayToolCall(toolCall) {
+      const toolCallElement = document.createElement('div');
+      toolCallElement.className = 'tool-call';
+      
+      const statusClass = toolCall.success ? 'success' : 'error';
+      const statusText = toolCall.success ? '成功' : '失败';
+      
+      toolCallElement.innerHTML = `
+        <div class="tool-call-header">
+          <span class="tool-name">
+            <span>🔧</span> ${toolCall.name}
+          </span>
+          <span class="tool-status ${statusClass}">${statusText}</span>
+        </div>
+        ${toolCall.arguments ? `
+          <div class="tool-input">
+            <div class="tool-input-title">输入参数</div>
+            <div class="tool-input-content">
+              <pre>${escapeHtml(JSON.stringify(toolCall.arguments, null, 2))}</pre>
+            </div>
+          </div>
+        ` : ''}
+        ${toolCall.result ? `
+          <div class="tool-output">
+            <div class="tool-output-title">输出结果</div>
+            <div class="tool-output-content">
+              <pre>${escapeHtml(typeof toolCall.result === 'string' ? toolCall.result : JSON.stringify(toolCall.result, null, 2))}</pre>
+            </div>
+          </div>
+        ` : ''}
+        ${toolCall.error ? `
+          <div class="tool-output" style="background: #fef2f2;">
+            <div class="tool-output-title" style="color: var(--error);">错误信息</div>
+            <div class="tool-output-content">
+              <pre>${escapeHtml(toolCall.error)}</pre>
+            </div>
+          </div>
+        ` : ''}
+      `;
+      
+      // 移除"暂无工具调用"提示
+      if (toolCalls.querySelector('.text-center')) {
+        toolCalls.innerHTML = '';
+      }
+      
+      toolCalls.appendChild(toolCallElement);
+      toolCalls.scrollTop = toolCalls.scrollHeight;
+    }
+
+    function displayDraftContent(draft) {
+      const draftElement = document.createElement('div');
+      draftElement.className = 'draft-content';
+      
+      const typeClass = draft.type || 'html';
+      const typeName = draft.type === 'svg' ? 'SVG图形' : draft.type === 'search' ? '搜索结果' : 'HTML内容';
+      
+      draftElement.innerHTML = `
+        <div class="draft-header">
+          <span class="draft-title">
+            <span>📄</span> ${draft.title || '草稿内容'}
+          </span>
+          <span class="draft-type ${typeClass}">${typeName}</span>
+        </div>
+        <div class="draft-preview">
+          ${draft.type === 'svg' ? draft.content : `<pre>${escapeHtml(draft.content)}</pre>`}
+        </div>
+      `;
+      
+      // 移除"暂无草稿内容"提示
+      if (draftContent.querySelector('.text-center')) {
+        draftContent.innerHTML = '';
+      }
+      
+      draftContent.appendChild(draftElement);
+      draftContent.scrollTop = draftContent.scrollHeight;
     }
 
     function showIssues(issues) {
