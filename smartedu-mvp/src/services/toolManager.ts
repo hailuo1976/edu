@@ -735,14 +735,16 @@ ${query}是${subject}学科中的重要概念。
       },
       execute: async (args, workDir) => {
         const { filename, html_content, course_id } = args;
-        const courseDir = path.join(workDir, course_id);
-
-        // 确保课程目录存在
-        if (!fs.existsSync(courseDir)) {
-          fs.mkdirSync(courseDir, { recursive: true });
+        
+        // 直接在当前工作目录保存，因为工作目录已经是课程专用目录
+        const filePath = path.join(workDir, filename);
+        
+        // 确保目录存在
+        const dir = path.dirname(filePath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
         }
 
-        const filePath = path.join(courseDir, filename);
         fs.writeFileSync(filePath, html_content);
 
         return {
@@ -856,13 +858,13 @@ ${query}是${subject}学科中的重要概念。
     // 读取文件工具
     this.registerTool({
       name: 'read_file',
-      description: '读取文件内容。返回文件的完整内容。',
+      description: '读取文件内容。返回文件的完整内容。请使用list_files工具返回的文件名，确保文件清单的一致性。',
       parameters: {
         type: 'object',
         properties: {
           file_path: {
             type: 'string',
-            description: '文件路径，可以是绝对路径或相对于当前工作目录的路径',
+            description: '文件路径，请使用list_files返回的文件名。可以是绝对路径或相对于当前工作目录的路径。',
           },
           encoding: {
             type: 'string',
@@ -881,7 +883,8 @@ ${query}是${subject}学科中的重要概念。
           : path.join(workDir, args.file_path);
 
         if (!fs.existsSync(filePath)) {
-          throw new Error(`文件不存在: ${filePath}`);
+          // 提供更友好的错误提示
+          throw new Error(`文件不存在: ${args.file_path}。请先使用list_files工具查看可用的文件列表。`);
         }
 
         let content: string = fs.readFileSync(filePath, args.encoding || 'utf-8') as any;
@@ -1151,9 +1154,13 @@ ${query}是${subject}学科中的重要概念。
           updatedAt: new Date(),
         };
         
-        // 保存到工作目录
-        const filePath = path.join(workDir, `file_${fileId}.json`);
-        fs.writeFileSync(filePath, JSON.stringify(fileObj, null, 2));
+        // 保存到工作目录，使用实际的文件名
+        const filePath = path.join(workDir, file_name);
+        fs.writeFileSync(filePath, html_content);
+        
+        // 同时保存元数据文件
+        const metaFilePath = path.join(workDir, `file_${fileId}.json`);
+        fs.writeFileSync(metaFilePath, JSON.stringify(fileObj, null, 2));
         
         return {
           success: true,
@@ -1162,6 +1169,7 @@ ${query}是${subject}学科中的重要概念。
           file_type,
           size: html_content.length,
           message: `文件 ${file_name} 保存成功`,
+          file: fileObj,
         };
       },
     });
@@ -1196,17 +1204,32 @@ ${query}是${subject}学科中的重要概念。
         const { file_id, split_points, strategy } = args;
         
         // 模拟拆分结果
-        const newFiles = split_points.map((point: string, index: number) => ({
-          id: `file_${Date.now()}_${index}`,
-          name: `${point}.html`,
-          type: 'section',
-          html: `<!-- ${point} 的内容 -->\n<div class="section" id="${point}">\n  <!-- 内容占位 -->\n</div>`,
-          description: `拆分出的文件: ${point}`,
-          order: index + 1,
-          size: 100,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }));
+        const newFiles = split_points.map((point: string, index: number) => {
+          const fileId = `file_${Date.now()}_${index}`;
+          const fileName = `${point}.html`;
+          
+          const fileObj = {
+            id: fileId,
+            name: fileName,
+            type: 'section',
+            html: `<!-- ${point} 的内容 -->\n<div class="section" id="${point}">\n  <!-- 内容占位 -->\n</div>`,
+            description: `拆分出的文件: ${point}`,
+            order: index + 1,
+            size: 100,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+          
+          // 保存实际文件
+          const filePath = path.join(workDir, fileName);
+          fs.writeFileSync(filePath, fileObj.html);
+          
+          // 保存元数据
+          const metaFilePath = path.join(workDir, `file_${fileId}.json`);
+          fs.writeFileSync(metaFilePath, JSON.stringify(fileObj, null, 2));
+          
+          return fileObj;
+        });
         
         return {
           success: true,
@@ -1245,12 +1268,27 @@ ${query}是${subject}学科中的重要概念。
         // 模拟合并结果
         const mergedHtml = `<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <title>${output_name}</title>\n</head>\n<body>\n  ${file_ids.map((id: string, index: number) => `<!-- 文件 ${index + 1}: ${id} -->\n<div class="merged-section">\n  <!-- 内容占位 -->\n</div>\n`).join('\n')}\n</body>\n</html>`;
         
+        // 保存实际文件
+        const filePath = path.join(workDir, output_name);
+        fs.writeFileSync(filePath, mergedHtml);
+        
         return {
           success: true,
           merged_file_ids: file_ids,
           output_name,
           html_length: mergedHtml.length,
           message: `${file_ids.length} 个文件已成功合并为 ${output_name}`,
+          file: {
+            id: `file_${Date.now()}`,
+            name: output_name,
+            type: 'main',
+            html: mergedHtml,
+            description: '合并后的文件',
+            order: 0,
+            size: mergedHtml.length,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
         };
       },
     });
@@ -1258,7 +1296,7 @@ ${query}是${subject}学科中的重要概念。
     // 列出文件工具
     this.registerTool({
       name: 'list_files',
-      description: '列出当前课件的所有文件',
+      description: '列出当前课件的所有文件。返回文件列表，包含文件名、类型、大小等信息。这些文件名可以直接用于read_file工具。',
       parameters: {
         type: 'object',
         properties: {
@@ -1272,30 +1310,69 @@ ${query}是${subject}学科中的重要概念。
       execute: async (args, workDir) => {
         const { file_type = 'all' } = args;
         
-        // 模拟文件列表
-        const files = [
-          {
-            id: 'main_001',
-            name: 'index.html',
-            type: 'main',
-            description: '主课件文件',
-            order: 0,
-            size: 2500,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ];
+        // 读取实际文件
+        let files: any[] = [];
         
-        const filteredFiles = file_type === 'all' 
-          ? files 
-          : files.filter(f => f.type === file_type);
+        try {
+          const fileList = fs.readdirSync(workDir);
+          
+          for (const file of fileList) {
+            const filePath = path.join(workDir, file);
+            const stats = fs.statSync(filePath);
+            
+            if (stats.isFile() && !file.startsWith('file_') && !file.endsWith('.json')) {
+              // 推断文件类型
+              let type = 'main';
+              if (file.endsWith('.css')) {
+                type = 'style';
+              } else if (file.endsWith('.js')) {
+                type = 'script';
+              } else if (file.includes('_section_') || file.includes('section_')) {
+                type = 'section';
+              }
+              
+              // 过滤文件类型
+              if (file_type !== 'all' && file_type !== type) {
+                continue;
+              }
+              
+              // 尝试读取文件内容
+              let html = '';
+              try {
+                html = fs.readFileSync(filePath, 'utf-8');
+              } catch (e) {
+                html = '';
+              }
+              
+              files.push({
+                id: `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                name: file,
+                type: type,
+                html: html,
+                description: `文件: ${file}`,
+                order: files.length + 1,
+                size: stats.size,
+                createdAt: stats.birthtime,
+                updatedAt: stats.mtime,
+              });
+            }
+          }
+        } catch (e) {
+          console.error('读取文件列表失败:', e);
+        }
         
         return {
           success: true,
-          files: filteredFiles,
-          total: filteredFiles.length,
+          files: files,
+          total: files.length,
           filter: file_type,
-          message: `找到 ${filteredFiles.length} 个文件`,
+          message: `找到 ${files.length} 个文件。这些文件名可以直接用于read_file工具。`,
+          available_files: files.map(f => ({
+            name: f.name,
+            type: f.type,
+            size: f.size,
+            description: f.description,
+          })),
         };
       },
     });

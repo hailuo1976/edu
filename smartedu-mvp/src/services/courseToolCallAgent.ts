@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as path from 'path';
+import * as fs from 'fs';
 import { AgentProgress, AgentProgressCallback } from '../types/agent';
 import { ToolManager, toolManager, ToolCall, ToolResult } from './toolManager';
 import { AgentLogger } from '../utils/agentLogger';
@@ -52,6 +53,15 @@ export class CourseToolCallAgent {
     let currentHtml = '';
     let files: CourseFile[] = [];
 
+    // 创建课程专用目录
+    const courseDir = path.join(this.workDir, courseId);
+    if (!fs.existsSync(courseDir)) {
+      fs.mkdirSync(courseDir, { recursive: true });
+    }
+    
+    // 更新工具管理器的工作目录到课程专用目录
+    this.toolManager.setWorkDir(courseDir);
+
     // 记录会话开始
     this.logger.info('generate_start', '开始生成课件', {
       courseId,
@@ -61,6 +71,7 @@ export class CourseToolCallAgent {
       maxIterations: this.maxIterations,
       model: this.model,
       baseUrl: this.baseUrl,
+      courseDir: courseDir,
     });
 
     let messages: Array<{ role: string; content: string }> = [
@@ -309,18 +320,22 @@ export class CourseToolCallAgent {
       console.log(`[CourseToolCallAgent] 从文件构建HTML，文件数: ${files.length}`);
       // 按顺序合并文件内容
       const mainFile = files.find(f => f.type === 'main');
-      if (mainFile) {
+      if (mainFile && mainFile.html) {
         currentHtml = mainFile.html;
         success = true;
         console.log(`[CourseToolCallAgent] 从主文件构建HTML，长度: ${currentHtml.length}`);
       } else {
         // 如果没有主文件，尝试合并所有文件
-        currentHtml = files.sort((a, b) => (a.order || 0) - (b.order || 0))
-          .map(f => f.html)
-          .join('\n');
+        const fileContents = files.sort((a, b) => (a.order || 0) - (b.order || 0))
+          .map(f => f.html || '')
+          .filter(content => content.length > 0);
+        
+        currentHtml = fileContents.join('\n');
         success = currentHtml.length > 0;
         if (success) {
           console.log(`[CourseToolCallAgent] 合并所有文件构建HTML，长度: ${currentHtml.length}`);
+        } else {
+          console.warn(`[CourseToolCallAgent] 所有文件内容为空`);
         }
       }
     }
@@ -373,9 +388,20 @@ export class CourseToolCallAgent {
 ## 多文件工作流程示例
 1. 首先使用 'save_file' 保存初始课件为单个文件
 2. 检查文件大小，如果超过3000字符，使用 'split_file' 工具拆分
-3. 对每个拆分的文件进行单独修改
-4. 最后使用 'merge_files' 合并为完整课件
-5. 使用 'save_course_html' 保存最终结果
+3. 使用 'list_files' 工具查看当前文件状态
+4. 使用 'read_file' 工具读取需要修改的文件内容
+5. 对每个拆分的文件进行单独修改
+6. 最后使用 'merge_files' 合并为完整课件
+7. 使用 'save_course_html' 保存最终结果
+
+## 文件操作说明
+- **list_files**: 查看所有可用文件的列表和基本信息
+- **read_file**: 读取特定文件的完整内容（使用list_files返回的文件名）
+- **save_file**: 保存或更新文件内容
+- **split_file**: 拆分大文件为多个小文件
+- **merge_files**: 合并多个文件为一个文件
+
+**重要**: 使用 'read_file' 时，请使用 'list_files' 返回的文件名，确保文件清单的一致性。
 
 ## 可用工具
 ### generate_svg
