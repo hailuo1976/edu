@@ -1,7 +1,19 @@
 /**
  * 课件调整系统类型定义
- * 支持多轮交互式课件修改
+ * 支持多轮交互式课件修改和多文件管理
  */
+
+export interface CourseFile {
+  id: string;              // 文件ID
+  name: string;            // 文件名
+  type: 'main' | 'section' | 'style' | 'script'; // 文件类型
+  html: string;            // HTML内容
+  description?: string;     // 文件描述
+  order: number;           // 文件顺序
+  size: number;           // 文件大小（字符数）
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export interface CourseInfo {
   id: string;
@@ -11,6 +23,7 @@ export interface CourseInfo {
   createdAt: string;
   filePath: string;
   preview?: string;
+  files?: CourseFile[];  // 支持多文件
 }
 
 export interface AdjustmentSession {
@@ -19,6 +32,8 @@ export interface AdjustmentSession {
   courseInfo: CourseInfo;
   originalHtml: string;
   currentHtml: string;
+  files: CourseFile[];      // 课件文件列表
+  activeFileId?: string;   // 当前操作的文件ID
   conversationHistory: ConversationMessage[];
   adjustmentHistory: AdjustmentRecord[];
   createdAt: Date;
@@ -35,7 +50,19 @@ export interface ConversationMessage {
     toolCalls?: ToolCallInfo[];
     processingTime?: number;
     tokensUsed?: number;
+    isSummary?: boolean;  // 标记是否为摘要消息
+    summaryOf?: string[]; // 摘要涵盖的消息ID
   };
+}
+
+/**
+ * 上下文管理配置
+ */
+export interface ContextManagementConfig {
+  maxMessages: number;        // 最大保留消息数
+  maxTokens: number;          // 最大token数
+  summaryThreshold: number;   // 触发摘要的消息数阈值
+  keepRecentMessages: number; // 始终保留的最近消息数
 }
 
 export interface ToolCallInfo {
@@ -43,6 +70,17 @@ export interface ToolCallInfo {
   input: any;
   output: any;
   timestamp: Date;
+  fileId?: string;  // 关联的文件ID
+}
+
+export interface FileSplitRequest {
+  fileId: string;
+  splitPoints: string[];  // 拆分点（section ID或描述）
+}
+
+export interface FileMergeRequest {
+  fileIds: string[];  // 要合并的文件ID
+  outputName: string;  // 输出文件名
 }
 
 export interface AdjustmentRecord {

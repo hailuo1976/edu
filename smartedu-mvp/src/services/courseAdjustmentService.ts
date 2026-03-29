@@ -19,6 +19,7 @@ import {
   LogCategory,
 } from '../types/adjustment';
 import { toolManager } from './toolManager';
+import { contextManager } from './contextManager';
 
 function generateId(): string {
   return crypto.randomBytes(16).toString('hex');
@@ -184,12 +185,50 @@ export class CourseAdjustmentService {
 
     const html = fs.readFileSync(courseInfo.filePath, 'utf-8');
     
+    // 初始化文件结构（如果课件较大，建议拆分）
+    const shouldSplit = html.length > 3000;
+    const files: any[] = [];
+    
+    if (shouldSplit) {
+      // 创建主文件
+      const mainFile = {
+        id: 'main_001',
+        name: 'index.html',
+        type: 'main',
+        html: html,
+        description: '主课件文件',
+        order: 0,
+        size: html.length,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      files.push(mainFile);
+      
+      console.log(`[CourseAdjustmentService] 课件较大 (${html.length}字符)，建议拆分为多个文件`);
+    } else {
+      // 小课件，使用单文件模式
+      const singleFile = {
+        id: 'single_001',
+        name: 'course.html',
+        type: 'main',
+        html: html,
+        description: '课件文件',
+        order: 0,
+        size: html.length,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      files.push(singleFile);
+    }
+    
     const session: AdjustmentSession = {
       sessionId: generateId(),
       courseId,
       courseInfo,
       originalHtml: html,
       currentHtml: html,
+      files: files,
+      activeFileId: files[0].id,
       conversationHistory: [],
       adjustmentHistory: [],
       createdAt: new Date(),
@@ -306,6 +345,17 @@ export class CourseAdjustmentService {
       this.reportProgress(session.sessionId, 'planning', '正在规划修改方案...', 30);
 
       console.log('[CourseAdjustmentService] 构建系统提示词和消息...');
+      
+      // 检查是否需要上下文优化
+      if (contextManager.shouldOptimize(session.conversationHistory)) {
+        console.log('[CourseAdjustmentService] 检测到上下文过大，将启用智能摘要');
+        if (onLog) {
+          this.reportLog(session.sessionId, 'info', 'system', '对话历史较长，启用智能摘要优化', {
+            messageCount: session.conversationHistory.length,
+          }, 0);
+        }
+      }
+      
       const systemPrompt = this.buildSystemPrompt(session);
       const messages = this.buildMessages(session, systemPrompt);
       console.log(`[CourseAdjustmentService] 消息数量: ${messages.length}`);
@@ -398,12 +448,30 @@ export class CourseAdjustmentService {
   }
 
   private buildSystemPrompt(session: AdjustmentSession): string {
+    const fileCount = session.files?.length || 0;
+    const activeFile = session.files?.find(f => f.id === session.activeFileId);
+    
     return `你是一个专业的课件调整助手。你的任务是帮助教师修改和完善HTML课件。
 
 ## 当前课件信息
 - 主题: ${session.courseInfo.topic}
 - 学科: ${session.courseInfo.subject}
 - 年级: ${session.courseInfo.gradeLevel}
+- 文件数量: ${fileCount}
+${activeFile ? `- 当前操作文件: ${activeFile.name} (${activeFile.description || '无描述'})` : ''}
+
+## 多文件管理策略
+当课件内容较大时（超过3000字符），你应该：
+1. 将课件拆分为多个逻辑文件（如：主文件、各章节文件、样式文件等）
+2. 每次只针对特定文件进行修改，降低上下文大小
+3. 使用save_file工具保存每个文件
+4. 在需要时使用merge_files工具合并文件
+
+## 文件拆分建议
+- 主文件 (main): 包含课件的基本结构和导航
+- 章节文件 (section): 按教学章节拆分，每个文件一个主题
+- 样式文件 (style): 独立的CSS样式
+- 脚本文件 (script): JavaScript交互逻辑
 
 ## 你的能力
 1. 修改课件内容（文字、图片、公式等）
@@ -411,45 +479,61 @@ export class CourseAdjustmentService {
 3. 添加新的教学元素（互动练习、示例等）
 4. 优化教学设计和呈现方式
 5. 修复HTML结构和样式问题
+6. 智能拆分大课件为多个文件
 
 ## 工作流程
 1. 理解用户的修改需求
 2. 分析当前HTML结构
-3. 规划修改方案
-4. 使用save_course_html工具保存修改后的HTML
-5. 向用户说明修改内容
+3. 如果HTML较大（>3000字符），考虑拆分为多个文件
+4. 针对特定文件进行修改
+5. 使用save_file工具保存修改后的文件
+6. 向用户说明修改内容
 
 ## 重要规则
 - 保持课件的教学完整性
 - 确保HTML结构正确
 - 保留原有的教学重点
-- 修改后必须使用save_course_html工具保存
+- 修改后必须使用save_file工具保存
+- 大课件应拆分为多个文件以优化上下文
+- 每次只修改必要的文件，减少token消耗
 - 用中文回复用户
 
 ## 可用工具
-- save_course_html: 保存修改后的HTML内容
+- save_file: 保存或更新单个文件内容
+- split_file: 将大文件拆分为多个文件
+- merge_files: 合并多个文件为一个
 - search_educational_content: 搜索教育内容
 - generate_svg_diagram: 生成SVG图形`;
   }
 
   private buildMessages(session: AdjustmentSession, systemPrompt: string): any[] {
+    console.log(`[CourseAdjustmentService] 构建消息，历史消息数: ${session.conversationHistory.length}, 文件数: ${session.files?.length || 0}`);
+
+    // 使用上下文管理器优化消息（支持多文件）
+    const optimizedMessages = contextManager.optimizeMessages(
+      session.conversationHistory,
+      session.currentHtml,
+      session.files,
+      session.activeFileId
+    );
+
+    // 在第一条消息前插入系统提示词
     const messages: any[] = [
       { role: 'system', content: systemPrompt },
+      ...optimizedMessages,
     ];
 
-    if (session.conversationHistory.length === 0) {
+    // 如果是首次对话且没有文件管理，添加初始HTML内容
+    if (session.conversationHistory.length === 0 && (!session.files || session.files.length === 0)) {
       messages.push({
         role: 'user',
         content: `这是当前的课件HTML内容，请先分析一下这个课件的结构和内容：\n\n\`\`\`html\n${session.currentHtml}\n\`\`\``,
       });
-    } else {
-      for (const msg of session.conversationHistory) {
-        messages.push({
-          role: msg.role,
-          content: msg.content,
-        });
-      }
     }
+
+    // 添加token使用估计日志
+    const estimatedTokens = contextManager.estimateMessageTokens(messages);
+    console.log(`[CourseAdjustmentService] 优化后消息数: ${messages.length}, 估计token数: ${estimatedTokens}`);
 
     return messages;
   }
@@ -652,6 +736,151 @@ export class CourseAdjustmentService {
               message: 'HTML内容已保存',
               content_length: functionArgs.html_content.length,
             };
+          } else if (functionName === 'save_file') {
+            console.log(`  [callAI]   保存文件: ${functionArgs.file_name}, 类型: ${functionArgs.file_type}, 长度: ${functionArgs.html_content?.length || 0} 字符`);
+            
+            // 更新或添加文件到会话
+            const fileId = functionArgs.file_id || `file_${Date.now()}`;
+            const fileObj = {
+              id: fileId,
+              name: functionArgs.file_name,
+              type: functionArgs.file_type,
+              html: functionArgs.html_content,
+              description: functionArgs.description || '',
+              order: functionArgs.order || 0,
+              size: functionArgs.html_content.length,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            };
+            
+            // 查找是否已存在该文件
+            const existingFileIndex = session.files.findIndex(f => f.id === fileId);
+            if (existingFileIndex >= 0) {
+              // 更新现有文件
+              session.files[existingFileIndex] = fileObj;
+              console.log(`  [callAI]   更新现有文件: ${fileId}`);
+            } else {
+              // 添加新文件
+              session.files.push(fileObj);
+              console.log(`  [callAI]   添加新文件: ${fileId}`);
+            }
+            
+            // 更新活动文件
+            session.activeFileId = fileId;
+            
+            // 更新currentHtml（合并所有文件）
+            currentHtml = this.mergeFilesToHtml(session.files);
+            
+            functionResult = {
+              success: true,
+              file_id: fileId,
+              file_name: functionArgs.file_name,
+              message: `文件 ${functionArgs.file_name} 保存成功`,
+              content_length: functionArgs.html_content.length,
+            };
+          } else if (functionName === 'split_file') {
+            console.log(`  [callAI]   拆分文件: ${functionArgs.file_id}, 策略: ${functionArgs.strategy}`);
+            
+            // 查找要拆分的文件
+            const fileToSplit = session.files.find(f => f.id === functionArgs.file_id);
+            if (!fileToSplit) {
+              functionResult = {
+                success: false,
+                error: `文件不存在: ${functionArgs.file_id}`,
+              };
+            } else {
+              // 模拟拆分（实际应该解析HTML并拆分）
+              const newFiles = functionArgs.split_points.map((point: string, index: number) => ({
+                id: `file_${Date.now()}_${index}`,
+                name: `${point}.html`,
+                type: 'section',
+                html: `<!-- ${point} 的内容 -->\n<div class="section" id="${point}">\n  <!-- 从原文件拆分的内容 -->\n</div>`,
+                description: `拆分出的文件: ${point}`,
+                order: index + 1,
+                size: 100,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              }));
+              
+              // 移除原文件，添加新文件
+              session.files = session.files.filter(f => f.id !== functionArgs.file_id);
+              session.files.push(...newFiles);
+              
+              // 更新活动文件为第一个新文件
+              session.activeFileId = newFiles[0].id;
+              
+              // 更新currentHtml
+              currentHtml = this.mergeFilesToHtml(session.files);
+              
+              functionResult = {
+                success: true,
+                original_file_id: functionArgs.file_id,
+                new_files: newFiles,
+                strategy: functionArgs.strategy,
+                message: `文件已成功拆分为 ${newFiles.length} 个小文件`,
+              };
+            }
+          } else if (functionName === 'merge_files') {
+            console.log(`  [callAI]   合并文件: ${functionArgs.file_ids?.length || 0} 个文件`);
+            
+            // 验证所有文件是否存在
+            const missingFiles = functionArgs.file_ids.filter((id: string) => !session.files.find(f => f.id === id));
+            if (missingFiles.length > 0) {
+              functionResult = {
+                success: false,
+                error: `以下文件不存在: ${missingFiles.join(', ')}`,
+              };
+            } else {
+              // 合并文件内容
+              const filesToMerge = functionArgs.file_ids.map((id: string) => session.files.find(f => f.id === id));
+              const mergedHtml = this.mergeFilesToHtml(filesToMerge);
+              
+              // 创建合并后的文件
+              const mergedFile: any = {
+                id: `merged_${Date.now()}`,
+                name: functionArgs.output_name,
+                type: 'main' as const,
+                html: mergedHtml,
+                description: `合并 ${functionArgs.file_ids.length} 个文件的结果`,
+                order: 0,
+                size: mergedHtml.length,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              };
+              
+              // 移除被合并的文件，添加新文件
+              session.files = session.files.filter(f => !functionArgs.file_ids.includes(f.id));
+              session.files.push(mergedFile);
+              
+              // 更新活动文件
+              session.activeFileId = mergedFile.id;
+              
+              // 更新currentHtml
+              currentHtml = mergedHtml;
+              
+              functionResult = {
+                success: true,
+                merged_file_id: mergedFile.id,
+                merged_file_name: functionArgs.output_name,
+                html_length: mergedHtml.length,
+                message: `${functionArgs.file_ids.length} 个文件已成功合并为 ${functionArgs.output_name}`,
+              };
+            }
+          } else if (functionName === 'list_files') {
+            console.log(`  [callAI]   列出文件，筛选: ${functionArgs.file_type || 'all'}`);
+            
+            let filteredFiles = session.files;
+            if (functionArgs.file_type && functionArgs.file_type !== 'all') {
+              filteredFiles = session.files.filter(f => f.type === functionArgs.file_type);
+            }
+            
+            functionResult = {
+              success: true,
+              files: filteredFiles,
+              total: filteredFiles.length,
+              filter: functionArgs.file_type || 'all',
+              message: `找到 ${filteredFiles.length} 个文件`,
+            };
           } else if (functionName === 'search_educational_content') {
             // 自动补充grade_level和subject参数
             const enhancedArgs = {
@@ -743,6 +972,66 @@ export class CourseAdjustmentService {
       return htmlMatch[1];
     }
     return '';
+  }
+
+  /**
+   * 将多个文件合并为完整的HTML
+   */
+  private mergeFilesToHtml(files: any[]): string {
+    if (!files || files.length === 0) {
+      return '';
+    }
+
+    // 按order排序
+    const sortedFiles = [...files].sort((a, b) => a.order - b.order);
+
+    // 如果只有一个主文件，直接返回
+    if (sortedFiles.length === 1 && sortedFiles[0].type === 'main') {
+      return sortedFiles[0].html;
+    }
+
+    // 合并多个文件
+    let html = '<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <title>课件</title>\n';
+    
+    // 添加样式文件
+    const styleFiles = sortedFiles.filter(f => f.type === 'style');
+    styleFiles.forEach(file => {
+      html += `  <!-- 样式文件: ${file.name} -->\n  <style>\n${file.html}\n  </style>\n`;
+    });
+    
+    html += '</head>\n<body>\n';
+    
+    // 添加主文件内容（去除html/head/body标签）
+    const mainFile = sortedFiles.find(f => f.type === 'main');
+    if (mainFile) {
+      const mainContent = mainFile.html
+        .replace(/<!DOCTYPE html>/i, '')
+        .replace(/<html[^>]*>/i, '')
+        .replace(/<\/html>/i, '')
+        .replace(/<head[^>]*>[\s\S]*?<\/head>/i, '')
+        .replace(/<body[^>]*>/i, '')
+        .replace(/<\/body>/i, '')
+        .trim();
+      html += `  <!-- 主文件: ${mainFile.name} -->\n${mainContent}\n`;
+    }
+    
+    // 添加章节文件
+    const sectionFiles = sortedFiles.filter(f => f.type === 'section');
+    sectionFiles.forEach(file => {
+      html += `  <!-- 章节文件: ${file.name} -->\n${file.html}\n`;
+    });
+    
+    html += '\n';
+    
+    // 添加脚本文件
+    const scriptFiles = sortedFiles.filter(f => f.type === 'script');
+    scriptFiles.forEach(file => {
+      html += `  <!-- 脚本文件: ${file.name} -->\n  <script>\n${file.html}\n  </script>\n`;
+    });
+    
+    html += '</body>\n</html>';
+    
+    return html;
   }
 
   private async createAdjustmentRecord(

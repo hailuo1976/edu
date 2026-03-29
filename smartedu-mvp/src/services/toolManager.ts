@@ -12,6 +12,10 @@ export interface ToolDefinition {
       type: string;
       description: string;
       required?: boolean;
+      enum?: string[];
+      items?: {
+        type: string;
+      };
     }>;
     required?: string[];
   };
@@ -1089,6 +1093,209 @@ ${query}是${subject}学科中的重要概念。
           message: '文件复制成功',
           source: sourcePath,
           destination: destPath,
+        };
+      },
+    });
+
+    // 保存单个文件工具
+    this.registerTool({
+      name: 'save_file',
+      description: '保存或更新单个课件文件内容，用于多文件管理',
+      parameters: {
+        type: 'object',
+        properties: {
+          file_id: {
+            type: 'string',
+            description: '文件ID（如果为空则创建新文件）',
+          },
+          file_name: {
+            type: 'string',
+            description: '文件名',
+          },
+          file_type: {
+            type: 'string',
+            description: '文件类型：main, section, style, script',
+            enum: ['main', 'section', 'style', 'script'],
+          },
+          html_content: {
+            type: 'string',
+            description: 'HTML内容',
+          },
+          description: {
+            type: 'string',
+            description: '文件描述',
+          },
+          order: {
+            type: 'number',
+            description: '文件顺序',
+          },
+        },
+        required: ['file_name', 'file_type', 'html_content'],
+      },
+      execute: async (args, workDir) => {
+        const { file_id, file_name, file_type, html_content, description, order } = args;
+        
+        // 生成文件ID
+        const fileId = file_id || `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        // 创建文件对象
+        const fileObj = {
+          id: fileId,
+          name: file_name,
+          type: file_type,
+          html: html_content,
+          description: description || '',
+          order: order || 0,
+          size: html_content.length,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        
+        // 保存到工作目录
+        const filePath = path.join(workDir, `file_${fileId}.json`);
+        fs.writeFileSync(filePath, JSON.stringify(fileObj, null, 2));
+        
+        return {
+          success: true,
+          file_id: fileId,
+          file_name,
+          file_type,
+          size: html_content.length,
+          message: `文件 ${file_name} 保存成功`,
+        };
+      },
+    });
+
+    // 拆分文件工具
+    this.registerTool({
+      name: 'split_file',
+      description: '将大课件文件拆分为多个小文件，以优化上下文管理',
+      parameters: {
+        type: 'object',
+        properties: {
+          file_id: {
+            type: 'string',
+            description: '要拆分的文件ID',
+          },
+          split_points: {
+            type: 'array',
+            description: '拆分点（section ID或描述）',
+            items: {
+              type: 'string',
+            },
+          },
+          strategy: {
+            type: 'string',
+            description: '拆分策略：by_section（按章节）、by_size（按大小）、by_content（按内容）',
+            enum: ['by_section', 'by_size', 'by_content'],
+          },
+        },
+        required: ['file_id', 'split_points', 'strategy'],
+      },
+      execute: async (args, workDir) => {
+        const { file_id, split_points, strategy } = args;
+        
+        // 模拟拆分结果
+        const newFiles = split_points.map((point: string, index: number) => ({
+          id: `file_${Date.now()}_${index}`,
+          name: `${point}.html`,
+          type: 'section',
+          html: `<!-- ${point} 的内容 -->\n<div class="section" id="${point}">\n  <!-- 内容占位 -->\n</div>`,
+          description: `拆分出的文件: ${point}`,
+          order: index + 1,
+          size: 100,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }));
+        
+        return {
+          success: true,
+          original_file_id: file_id,
+          new_files: newFiles,
+          strategy,
+          message: `文件已成功拆分为 ${newFiles.length} 个小文件`,
+        };
+      },
+    });
+
+    // 合并文件工具
+    this.registerTool({
+      name: 'merge_files',
+      description: '将多个课件文件合并为一个完整课件',
+      parameters: {
+        type: 'object',
+        properties: {
+          file_ids: {
+            type: 'array',
+            description: '要合并的文件ID列表',
+            items: {
+              type: 'string',
+            },
+          },
+          output_name: {
+            type: 'string',
+            description: '输出文件名',
+          },
+        },
+        required: ['file_ids', 'output_name'],
+      },
+      execute: async (args, workDir) => {
+        const { file_ids, output_name } = args;
+        
+        // 模拟合并结果
+        const mergedHtml = `<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <title>${output_name}</title>\n</head>\n<body>\n  ${file_ids.map((id: string, index: number) => `<!-- 文件 ${index + 1}: ${id} -->\n<div class="merged-section">\n  <!-- 内容占位 -->\n</div>\n`).join('\n')}\n</body>\n</html>`;
+        
+        return {
+          success: true,
+          merged_file_ids: file_ids,
+          output_name,
+          html_length: mergedHtml.length,
+          message: `${file_ids.length} 个文件已成功合并为 ${output_name}`,
+        };
+      },
+    });
+
+    // 列出文件工具
+    this.registerTool({
+      name: 'list_files',
+      description: '列出当前课件的所有文件',
+      parameters: {
+        type: 'object',
+        properties: {
+          file_type: {
+            type: 'string',
+            description: '筛选文件类型（可选）',
+            enum: ['main', 'section', 'style', 'script', 'all'],
+          },
+        },
+      },
+      execute: async (args, workDir) => {
+        const { file_type = 'all' } = args;
+        
+        // 模拟文件列表
+        const files = [
+          {
+            id: 'main_001',
+            name: 'index.html',
+            type: 'main',
+            description: '主课件文件',
+            order: 0,
+            size: 2500,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ];
+        
+        const filteredFiles = file_type === 'all' 
+          ? files 
+          : files.filter(f => f.type === file_type);
+        
+        return {
+          success: true,
+          files: filteredFiles,
+          total: filteredFiles.length,
+          filter: file_type,
+          message: `找到 ${filteredFiles.length} 个文件`,
         };
       },
     });

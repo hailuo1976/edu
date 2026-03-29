@@ -3,6 +3,8 @@ import * as path from 'path';
 import { AgentProgress, AgentProgressCallback } from '../types/agent';
 import { ToolManager, toolManager, ToolCall, ToolResult } from './toolManager';
 import { AgentLogger } from '../utils/agentLogger';
+import { ContextManager, contextManager } from './contextManager';
+import { CourseFile } from '../types/adjustment';
 
 export interface CourseToolResult {
   success: boolean;
@@ -48,6 +50,7 @@ export class CourseToolCallAgent {
     const toolResults: ToolResult[] = [];
     let iterations = 0;
     let currentHtml = '';
+    let files: CourseFile[] = [];
 
     // 记录会话开始
     this.logger.info('generate_start', '开始生成课件', {
@@ -95,9 +98,24 @@ export class CourseToolCallAgent {
               messageCount: messages.length,
             }, iterations);
 
+            // 优化消息上下文，减少token消耗
+            const optimizedMessages = contextManager.optimizeMessages(
+              messages.map(m => ({ id: `msg_${iterations}_${Date.now()}`, role: m.role as any, content: m.content, timestamp: new Date() })),
+              currentHtml,
+              files
+            );
+
+            // 记录优化效果
+            const originalTokens = contextManager.estimateMessageTokens(messages);
+            const optimizedTokens = contextManager.estimateMessageTokens(optimizedMessages);
+            const reduction = ((originalTokens - optimizedTokens) / originalTokens * 100).toFixed(1);
+            
+            console.log(`[CourseToolCallAgent] 上下文优化: ${messages.length}条消息 -> ${optimizedMessages.length}条消息`);
+            console.log(`[CourseToolCallAgent] Token优化: ${originalTokens} -> ${optimizedTokens} (减少${reduction}%)`);
+
             let response;
             try {
-              response = await this.callAIWithTools(messages, iterations);
+              response = await this.callAIWithTools(optimizedMessages, iterations);
             } catch (error: any) {
               // 检查是否是超时错误
               if (error.message.includes('超时')) {
@@ -229,6 +247,30 @@ export class CourseToolCallAgent {
           if (result.toolName === 'save_course_html' && result.success && result.result?.html) {
             currentHtml = result.result.html;
           }
+
+          // 更新文件状态
+          if (result.success) {
+            if (result.toolName === 'save_file' && result.result?.file) {
+              const existingFileIndex = files.findIndex(f => f.id === result.result.file.id);
+              if (existingFileIndex >= 0) {
+                files[existingFileIndex] = result.result.file;
+              } else {
+                files.push(result.result.file);
+              }
+              console.log(`[CourseToolCallAgent] 文件保存成功: ${result.result.file.name}, 大小: ${result.result.file.size}字符`);
+            } else if (result.toolName === 'split_file' && result.result?.files) {
+              files = files.filter(f => !result.result.files.some((newFile: CourseFile) => newFile.id === f.id));
+              files.push(...result.result.files);
+              console.log(`[CourseToolCallAgent] 文件拆分成功: ${result.result.files.length}个文件`);
+            } else if (result.toolName === 'merge_files' && result.result?.file) {
+              files = files.filter(f => f.id !== result.result.file.id);
+              files.push(result.result.file);
+              console.log(`[CourseToolCallAgent] 文件合并成功: ${result.result.file.name}`);
+            } else if (result.toolName === 'list_files' && result.result?.files) {
+              files = result.result.files;
+              console.log(`[CourseToolCallAgent] 文件列表更新: ${result.result.files.length}个文件`);
+            }
+          }
         }
 
         this.reportProgress({
@@ -260,7 +302,28 @@ export class CourseToolCallAgent {
     }
 
     // 检查是否成功生成了课件
-    const success = currentHtml.length > 0;
+    let success = currentHtml.length > 0;
+    
+    // 如果没有currentHtml但有文件，尝试从文件构建
+    if (!success && files.length > 0) {
+      console.log(`[CourseToolCallAgent] 从文件构建HTML，文件数: ${files.length}`);
+      // 按顺序合并文件内容
+      const mainFile = files.find(f => f.type === 'main');
+      if (mainFile) {
+        currentHtml = mainFile.html;
+        success = true;
+        console.log(`[CourseToolCallAgent] 从主文件构建HTML，长度: ${currentHtml.length}`);
+      } else {
+        // 如果没有主文件，尝试合并所有文件
+        currentHtml = files.sort((a, b) => (a.order || 0) - (b.order || 0))
+          .map(f => f.html)
+          .join('\n');
+        success = currentHtml.length > 0;
+        if (success) {
+          console.log(`[CourseToolCallAgent] 合并所有文件构建HTML，长度: ${currentHtml.length}`);
+        }
+      }
+    }
     
     if (success) {
       console.log(`[CourseToolCallAgent] 课件生成成功，HTML长度: ${currentHtml.length}`);
@@ -285,6 +348,35 @@ export class CourseToolCallAgent {
 本次课程的唯一标识ID是: ${courseId}
 在调用 save_course_html 工具时，必须使用这个 course_id: "${courseId}"，不要自行编造其他ID。
 
+## 上下文优化策略
+为了提高效率和降低token消耗，请注意：
+1. 搜索结果的内容会被自动压缩，只保留关键信息
+2. 不要在回复中重复完整的搜索结果，只需引用关键点
+3. 历史消息会被智能压缩，避免重复内容
+4. 专注于当前任务，避免不必要的上下文扩展
+
+## 多文件管理策略
+**重要强制要求**：当课件内容较大时（超过3000字符），你**必须**：
+1. **使用split_file工具**将大文件拆分为多个逻辑文件（如：主文件、各章节文件、样式文件等）
+2. **使用save_file工具**保存每个拆分后的文件
+3. **在需要时使用merge_files工具**合并文件
+4. **每次只针对特定文件**进行修改，降低上下文大小
+
+**如果你不进行文件拆分**，系统会因为上下文过大而失败。
+
+## 文件拆分建议
+- 主文件 (main): 包含课件的基本结构和导航
+- 章节文件 (section): 按教学章节拆分，每个文件一个主题
+- 样式文件 (style): 独立的CSS样式
+- 脚本文件 (script): JavaScript交互逻辑
+
+## 多文件工作流程示例
+1. 首先使用 'save_file' 保存初始课件为单个文件
+2. 检查文件大小，如果超过3000字符，使用 'split_file' 工具拆分
+3. 对每个拆分的文件进行单独修改
+4. 最后使用 'merge_files' 合并为完整课件
+5. 使用 'save_course_html' 保存最终结果
+
 ## 可用工具
 ### generate_svg
 生成SVG矢量图形，用于可视化数学概念。
@@ -307,6 +399,22 @@ export class CourseToolCallAgent {
 保存生成的课件HTML文件。
 参数: filename(文件名), html_content(HTML内容), course_id(课程ID)
 **重要**: course_id 必须使用 "${courseId}"，不要自行编造其他ID。
+
+### save_file
+保存或更新单个课件文件内容，用于多文件管理。
+参数: file_name(文件名), file_type(文件类型), html_content(HTML内容), description(文件描述), order(文件顺序)
+
+### split_file
+将大课件文件拆分为多个小文件，以优化上下文管理。
+参数: file_id(文件ID), split_points(拆分点), strategy(拆分策略)
+
+### merge_files
+将多个课件文件合并为一个完整课件。
+参数: file_ids(文件ID列表), output_name(输出文件名)
+
+### list_files
+列出当前课件的所有文件。
+参数: file_type(文件类型筛选，可选)
 
 ## 课件要求
 1. 必须生成完整的HTML页面，包含<!DOCTYPE html>、<html>、<head>、<body>标签
@@ -604,6 +712,21 @@ export class CourseToolCallAgent {
             correctedCourseId: courseId,
           });
         }
+      }
+
+      // 处理多文件管理工具
+      if (toolCall.name === 'save_file') {
+        console.log(`[CourseToolCallAgent] 保存文件: ${toolCall.arguments.file_name}, 类型: ${toolCall.arguments.file_type}`);
+        // save_file 工具已经在 toolManager 中实现，直接执行即可
+      } else if (toolCall.name === 'split_file') {
+        console.log(`[CourseToolCallAgent] 拆分文件: ${toolCall.arguments.file_id}, 策略: ${toolCall.arguments.strategy}`);
+        // split_file 工具已经在 toolManager 中实现，直接执行即可
+      } else if (toolCall.name === 'merge_files') {
+        console.log(`[CourseToolCallAgent] 合并文件: ${toolCall.arguments.file_ids?.length || 0} 个文件`);
+        // merge_files 工具已经在 toolManager 中实现，直接执行即可
+      } else if (toolCall.name === 'list_files') {
+        console.log(`[CourseToolCallAgent] 列出文件，筛选: ${toolCall.arguments.file_type || 'all'}`);
+        // list_files 工具已经在 toolManager 中实现，直接执行即可
       }
 
       // 推送工具调用开始信息
