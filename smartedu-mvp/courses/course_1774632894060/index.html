@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>认识图形 - 小学一年级数学</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: bounce 1s ease infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .section-title {
+            font-size: 1.8em;
+            color: #4f46e5;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* 概念模块 */
+        #concept .shape-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        
+        .shape-card {
+            background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+        
+        .shape-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        
+        .shape-card.circle { border-color: #ef4444; }
+        .shape-card.square { border-color: #3b82f6; }
+        .shape-card.triangle { border-color: #10b981; }
+        
+        .shape-card svg {
+            margin-bottom: 15px;
+        }
+        
+        .shape-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .shape-card.circle .shape-name { color: #ef4444; }
+        .shape-card.square .shape-name { color: #3b82f6; }
+        .shape-card.triangle .shape-name { color: #10b981; }
+        
+        .shape-desc {
+            color: #64748b;
+            line-height: 1.6;
+        }
+        
+        /* 演示模块 */
+        #demo canvas {
+            border: 2px dashed #cbd5e1;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+        
+        .demo-instructions {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 1.1em;
+        }
+        
+        /* 练习模块 */
+        #exercise .questions {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .question-item {
+            background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #4f46e5;
+        }
+        
+        .question-text {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+        
+        .options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .option-btn {
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(145deg, #6366f1, #4f46e5);
+            color: white;
+        }
+        
+        .option-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+        }
+        
+        .option-btn.correct {
+            background: linear-gradient(145deg, #10b981, #059669) !important;
+            animation: pulse 0.5s ease;
+        }
+        
+        .option-btn.wrong {
+            background: linear-gradient(145deg, #ef4444, #dc2626) !important;
+            animation: shake 0.5s ease;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .feedback {
+            margin-top: 15px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .feedback.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .feedback.correct {
+            background: linear-gradient(145deg, #d1fae5, #a7f3d0);
+            color: #047857;
+        }
+        
+        .feedback.wrong {
+            background: linear-gradient(145deg, #fee2e2, #fecaca);
+            color: #b91c1c;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .score-board {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #c4b5fd, #a78bfa);
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        
+        .score-board h3 {
+            color: white;
+            font-size: 1.5em;
+        }
+        
+        .score {
+            font-size: 3em;
+            color: #fbbf24;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔷 认识图形 🔷</h1>
+        
+        <!-- 概念讲解模块 -->
+        <div id="concept" class="section">
+            <h2 class="section-title">📖 学习概念</h2>
+            <div class="shape-cards">
+                <div class="shape-card circle">
+                    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="45" fill="#ef4444" stroke="#dc2626" stroke-width="3"/>
+                    </svg>
+                    <div class="shape-name">🔴 圆形</div>
+                    <div class="shape-desc">
+                        圆圆的，没有角<br>
+                        像太阳 ☀️、车轮 🛞
+                    </div>
+                </div>
+                
+                <div class="shape-card square">
+                    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="5" y="5" width="90" height="90" fill="#3b82f6" stroke="#2563eb" stroke-width="3" rx="5"/>
+                    </svg>
+                    <div class="shape-name">🟦 正方形</div>
+                    <div class="shape-desc">
+                        四条边一样长<br>
+                        四个角都是直角<br>
+                        像手帕、饼干 🍪
+                    </div>
+                </div>
+                
+                <div class="shape-card triangle">
+                    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="50,5 95,95 5,95" fill="#10b981" stroke="#059669" stroke-width="3"/>
+                    </svg>
+                    <div class="shape-name">🔺 三角形</div>
+                    <div class="shape-desc">
+                        三条边，三个角<br>
+                        像小旗子 🚩、三角尺
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 图形演示模块 -->
+        <div id="demo" class="section">
+            <h2 class="section-title">🎨 图形演示</h2>
+            <canvas id="shapeCanvas" width="800" height="400"></canvas>
+            <div class="demo-instructions">
+                👆 点击画布上的图形，听老师讲解！再点击可以画出新图形哦！
+            </div>
+        </div>
+        
+        <!-- 练习测试模块 -->
+        <div id="exercise" class="section">
+            <h2 class="section-title">✏️ 小练习</h2>
+            <div class="questions" id="questionsContainer">
+                <!-- 题目将由JavaScript生成 -->
+            </div>
+            <div class="score-board">
+                <h3>🏆 得分</h3>
+                <div class="score" id="score">0</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 演示模块 - Canvas绘图
+        const canvas = document.getElementById('shapeCanvas');
+        const ctx = canvas.getContext('2d');
+        let currentShapeIndex = 0;
+        const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+        
+        function drawShapes() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制圆形
+            ctx.beginPath();
+            ctx.arc(120, 120, 80, 0, Math.PI * 2);
+            ctx.fillStyle = '#ef4444';
+            ctx.fill();
+            ctx.strokeStyle = '#dc2626';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px Microsoft YaHei';
+            ctx.textAlign = 'center';
+            ctx.fillText('圆形', 120, 130);
+            ctx.fillText('r=80', 120, 160);
+            
+            // 绘制正方形
+            ctx.fillStyle = '#3b82f6';
+            ctx.fillRect(280, 40, 160, 160);
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(280, 40, 160, 160);
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px Microsoft YaHei';
+            ctx.textAlign = 'center';
+            ctx.fillText('正方形', 360, 110);
+            ctx.fillText('边长=160', 360, 145);
+            
+            // 绘制三角形
+            ctx.beginPath();
+            ctx.moveTo(600, 40);
+            ctx.lineTo(700, 200);
+            ctx.lineTo(500, 200);
+            ctx.closePath();
+            ctx.fillStyle = '#10b981';
+            ctx.fill();
+            ctx.strokeStyle = '#059669';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px Microsoft YaHei';
+            ctx.textAlign = 'center';
+            ctx.fillText('三角形', 600, 140);
+            
+            // 绘制动态图形区域
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(50, 250, 700, 120);
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.strokeRect(50, 250, 700, 120);
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#64748b';
+            ctx.font = '20px Microsoft YaHei';
+            ctx.textAlign = 'center';
+            ctx.fillText('👆 点击这里绘制随机图形', 400, 320);
+        }
+        
+        canvas.addEventListener('click', function(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (y > 250) {
+                // 在动态区域绘制随机图形
+                const shapeType = Math.floor(Math.random() * 3);
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const size = 30 + Math.random() * 40;
+                
+                ctx.fillStyle = color;
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                
+                if (shapeType === 0) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                } else if (shapeType === 1) {
+                    ctx.fillRect(x - size, y - size, size * 2, size * 2);
+                    ctx.strokeRect(x - size, y - size, size * 2, size * 2);
+                } else {
+                    ctx.beginPath();
+                    ctx.moveTo(x, y - size);
+                    ctx.lineTo(x + size, y + size);
+                    ctx.lineTo(x - size, y + size);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                }
+            }
+        });
+        
+        drawShapes();
+        
+        // 练习模块
+        const questions = [
+            {
+                question: "下面哪个是圆形？",
+                options: ["正方形", "圆形", "三角形"],
+                answer: "圆形"
+            },
+            {
+                question: "三角形有几个角？",
+                options: ["2个", "3个", "4个"],
+                answer: "3个"
+            },
+            {
+                question: "正方形有几条边？",
+                options: ["3条", "4条", "5条"],
+                answer: "4条"
+            },
+            {
+                question: "车轮是什么形状？",
+                options: ["正方形", "三角形", "圆形"],
+                answer: "圆形"
+            },
+            {
+                question: "红领巾是什么形状？",
+                options: ["圆形", "三角形", "正方形"],
+                answer: "三角形"
+            }
+        ];
+        
+        let score = 0;
+        const container = document.getElementById('questionsContainer');
+        
+        questions.forEach((q, index) => {
+            const div = document.createElement('div');
+            div.className = 'question-item';
+            div.innerHTML = `
+                <div class="question-text">${index + 1}. ${q.question}</div>
+                <div class="options">
+                    ${q.options.map(opt => `
+                        <button class="option-btn" data-answer="${opt}" data-correct="${q.answer}">
+                            ${opt}
+                        </button>
+                    `).join('')}
+                </div>
+                <div class="feedback"></div>
+            `;
+            container.appendChild(div);
+        });
+        
+        // 点击选项处理
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const answer = this.dataset.answer;
+                const correct = this.dataset.correct;
+                const feedback = this.parentElement.nextElementSibling;
+                const allBtns = this.parentElement.querySelectorAll('.option-btn');
+                
+                // 禁用所有按钮
+                allBtns.forEach(b => b.disabled = true);
+                
+                if (answer === correct) {
+                    this.classList.add('correct');
+                    feedback.className = 'feedback show correct';
+                    feedback.textContent = '✅ 太棒了！回答正确！';
+                    score += 20;
+                } else {
+                    this.classList.add('wrong');
+                    feedback.className = 'feedback show wrong';
+                    feedback.textContent = `❌ 再想想哦！正确答案是：${correct}`;
+                    // 高亮正确答案
+                    allBtns.forEach(b => {
+                        if (b.dataset.answer === correct) {
+                            b.classList.add('correct');
+                        }
+                    });
+                }
+                
+                document.getElementById('score').textContent = score;
+            });
+        });
+    </script>
+</body>
+</html>

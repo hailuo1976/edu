@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartEdu AI 课件调整系统</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #1e40af;
+      --secondary: #8b5cf6;
+      --accent: #f59e0b;
+      --success: #22c55e;
+      --error: #ef4444;
+      --warning: #eab308;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Noto Sans SC", sans-serif;
+      background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: var(--text);
+    }
+
+    .container { max-width: 1400px; margin: 0 auto; }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p { opacity: 0.8; font-size: 1rem; }
+
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+
+    .nav-tab {
+      padding: 12px 24px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+
+    .nav-tab:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .nav-tab.active {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+    }
+
+    .main-layout {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 1024px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 20px;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+    }
+
+    .course-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .course-item {
+      padding: 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .course-item:hover {
+      border-color: var(--primary);
+      background: #f0f9ff;
+    }
+
+    .course-item.selected {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+    }
+
+    .course-item-title {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .course-item-meta {
+      display: flex;
+      gap: 12px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .course-item-preview {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .search-box {
+      margin-bottom: 16px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      transition: border-color 0.3s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .workspace {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .selected-course-info {
+      padding: 16px;
+      background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .selected-course-info h3 {
+      color: var(--primary-dark);
+      margin-bottom: 8px;
+    }
+
+    .selected-course-info p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 16px;
+      background: #f8fafc;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .chat-message {
+      padding: 12px 16px;
+      border-radius: 12px;
+      max-width: 85%;
+    }
+
+    .chat-message.user {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      align-self: flex-end;
+    }
+
+    .chat-message.assistant {
+      background: white;
+      border: 1px solid var(--border);
+      align-self: flex-start;
+    }
+
+    .chat-message.system {
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      align-self: center;
+      font-size: 0.9rem;
+    }
+
+    .chat-message.log {
+      background: #f0f9ff;
+      border: 1px solid #bfdbfe;
+      align-self: flex-start;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .chat-message.log .log-header {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 4px;
+      font-size: 0.75rem;
+    }
+
+    .log-badge {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.7rem;
+    }
+
+    .log-badge.info {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .log-badge.debug {
+      background: #f3e8ff;
+      color: #7c3aed;
+    }
+
+    .log-badge.warn {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .log-badge.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .log-badge.ai {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .log-badge.tool {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .log-badge.system {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .log-content {
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .log-indent {
+      padding-left: 16px;
+    }
+
+    .log-details {
+      margin-top: 8px;
+      padding: 8px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      max-height: 200px;
+      overflow: auto;
+    }
+
+    .progress-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .progress-dots {
+      display: flex;
+      gap: 4px;
+    }
+
+    .progress-dots span {
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .progress-dots span:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+
+    .progress-dots span:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes bounce {
+      0%, 80%, 100% {
+        transform: scale(0);
+      }
+      40% {
+        transform: scale(1);
+      }
+    }
+
+    .chat-message-header {
+      font-size: 0.75rem;
+      opacity: 0.7;
+      margin-bottom: 4px;
+    }
+
+    .adjustment-input-area {
+      display: flex;
+      gap: 12px;
+    }
+
+    .adjustment-input {
+      flex: 1;
+      padding: 14px 18px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 1rem;
+      resize: none;
+      min-height: 50px;
+      max-height: 150px;
+      transition: border-color 0.3s;
+    }
+
+    .adjustment-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text);
+      border: 2px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--success), #16a34a);
+      color: white;
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, var(--warning), #f97316);
+      color: white;
+    }
+
+    .preview-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .preview-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .preview-box {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .preview-header {
+      padding: 12px 16px;
+      background: var(--bg);
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .preview-content {
+      height: 400px;
+      overflow: auto;
+    }
+
+    .preview-content iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .history-panel {
+      margin-top: 16px;
+    }
+
+    .history-item {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .history-item:hover {
+      background: var(--bg);
+    }
+
+    .history-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .history-item-time {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .history-item-request {
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .validation-results {
+      margin-top: 16px;
+      padding: 16px;
+      background: #f0fdf4;
+      border-radius: 12px;
+      border: 1px solid #86efac;
+    }
+
+    .validation-results.has-errors {
+      background: #fef2f2;
+      border-color: #fca5a5;
+    }
+
+    .validation-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+
+    .validation-icon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+    }
+
+    .validation-icon.error {
+      background: var(--error);
+      color: white;
+    }
+
+    .validation-icon.warning {
+      background: var(--warning);
+      color: white;
+    }
+
+    .validation-icon.success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .loading-skeleton {
+      background: linear-gradient(90deg, var(--border) 25%, #f1f5f9 50%, var(--border) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🛠️ AI 课件调整系统</h1>
+      <p>选择课件，通过自然语言描述您的修改需求，AI将帮您完成调整</p>
+    </div>
+
+    <div class="nav-tabs">
+      <a href="/" class="nav-tab">📝 生成课件</a>
+      <a href="/adjustment.html" class="nav-tab active">🛠️ 调整课件</a>
+    </div>
+
+    <div class="main-layout">
+      <div class="sidebar">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📚 可用课件</div>
+            <span id="courseCount" class="badge badge-mode">0</span>
+          </div>
+          
+          <div class="search-box">
+            <input type="text" class="search-input" id="searchInput" placeholder="🔍 搜索课件...">
+          </div>
+          
+          <div class="course-list" id="courseList">
+            <div class="empty-state">
+              <div class="empty-state-icon">📚</div>
+              <p>加载中...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="workspace">
+        <div class="card" id="workspaceCard">
+          <div class="card-header">
+            <div class="card-title">💬 调整工作区</div>
+            <span id="sessionStatus" class="badge badge-mode">未选择课件</span>
+          </div>
+
+          <div id="noSelectionState" class="empty-state">
+            <div class="empty-state-icon">👈</div>
+            <p>请从左侧选择一个课件开始调整</p>
+          </div>
+
+          <div id="workspaceContent" style="display: none;">
+            <div class="selected-course-info" id="selectedCourseInfo">
+              <h3 id="selectedCourseTitle">-</h3>
+              <p id="selectedCourseMeta">-</p>
+            </div>
+
+            <div class="chat-container" id="chatContainer">
+              <div class="chat-message system">
+                <div class="chat-message-header">系统</div>
+                <div>课件已加载，请描述您想要进行的修改。</div>
+              </div>
+            </div>
+
+            <div class="adjustment-input-area">
+              <textarea 
+                class="adjustment-input" 
+                id="adjustmentInput" 
+                placeholder="描述您想要的修改，例如：&#10;• 增加更多互动练习&#10;• 简化第三部分的内容&#10;• 添加更多示例..."
+                rows="2"
+              ></textarea>
+              <button class="btn btn-primary" id="submitBtn" onclick="submitAdjustment()">
+                发送 ✨
+              </button>
+            </div>
+
+            <div class="btn-group">
+              <button class="btn btn-secondary" onclick="validateCurrentHtml()">✅ 验证HTML</button>
+              <button class="btn btn-secondary" onclick="showHistory()">📜 调整历史</button>
+              <button class="btn btn-success" onclick="saveFinal()">💾 保存课件</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="previewCard" style="display: none;">
+          <div class="card-header">
+            <div class="card-title">👁️ 预览对比</div>
+            <button class="btn btn-secondary" onclick="togglePreview()" style="padding: 8px 16px; font-size: 0.85rem;">收起</button>
+          </div>
+          
+          <div class="preview-container">
+            <div class="preview-box">
+              <div class="preview-header">📄 修改前</div>
+              <div class="preview-content">
+                <iframe id="previewBefore"></iframe>
+              </div>
+            </div>
+            <div class="preview-box">
+              <div class="preview-header">✨ 修改后</div>
+              <div class="preview-content">
+                <iframe id="previewAfter"></iframe>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="validationCard" style="display: none;">
+          <div class="card-header">
+            <div class="card-title">🔍 验证结果</div>
+          </div>
+          <div id="validationResults"></div>
+        </div>
+
+        <div class="card" id="historyCard" style="display: none;">
+          <div class="card-header">
+            <div class="card-title">📜 调整历史</div>
+            <button class="btn btn-secondary" onclick="hideHistory()" style="padding: 8px 16px; font-size: 0.85rem;">关闭</button>
+          </div>
+          <div id="historyList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let courses = [];
+    let selectedCourse = null;
+    let currentSession = null;
+    let adjustmentHistory = [];
+
+    async function loadCourses() {
+      try {
+        const response = await fetch('/api/adjustment/courses');
+        const data = await response.json();
+        
+        if (data.success) {
+          courses = data.courses;
+          renderCourseList(courses);
+          document.getElementById('courseCount').textContent = courses.length;
+        } else {
+          showError('加载课件列表失败: ' + data.error);
+        }
+      } catch (error) {
+        showError('加载课件列表失败: ' + error.message);
+      }
+    }
+
+    function renderCourseList(coursesToRender) {
+      const container = document.getElementById('courseList');
+      
+      if (coursesToRender.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p>没有找到课件</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = coursesToRender.map(course => `
+        <div class="course-item ${selectedCourse?.id === course.id ? 'selected' : ''}" 
+             onclick="selectCourse('${course.id}')">
+          <div class="course-item-title">${escapeHtml(course.topic)}</div>
+          <div class="course-item-meta">
+            <span>📖 ${course.subject}</span>
+            <span>🎓 ${course.gradeLevel}年级</span>
+          </div>
+          ${course.preview ? `<div class="course-item-preview">${escapeHtml(course.preview)}</div>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    async function selectCourse(courseId) {
+      selectedCourse = courses.find(c => c.id === courseId);
+      
+      if (!selectedCourse) return;
+
+      renderCourseList(courses);
+
+      document.getElementById('noSelectionState').style.display = 'none';
+      document.getElementById('workspaceContent').style.display = 'block';
+      document.getElementById('selectedCourseTitle').textContent = selectedCourse.topic;
+      document.getElementById('selectedCourseMeta').textContent = 
+        `${selectedCourse.subject} · ${selectedCourse.gradeLevel}年级 · ${new Date(selectedCourse.createdAt).toLocaleDateString()}`;
+      document.getElementById('sessionStatus').textContent = '已选择';
+      document.getElementById('sessionStatus').className = 'badge badge-refine';
+
+      try {
+        const response = await fetch('/api/adjustment/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ courseId: selectedCourse.id })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          currentSession = data.session;
+          document.getElementById('sessionStatus').textContent = '会话已创建';
+          
+          await loadCourseHtml(selectedCourse.filePath);
+        } else {
+          showError('创建会话失败: ' + data.error);
+        }
+      } catch (error) {
+        showError('创建会话失败: ' + error.message);
+      }
+    }
+
+    async function loadCourseHtml(filePath) {
+      try {
+        const response = await fetch('/courses/' + encodeURIComponent(filePath.split('/').pop()));
+        const html = await response.text();
+        
+        const iframe = document.getElementById('previewAfter');
+        iframe.srcdoc = html;
+        
+        document.getElementById('previewCard').style.display = 'block';
+      } catch (error) {
+        console.error('加载课件HTML失败:', error);
+      }
+    }
+
+    async function submitAdjustment() {
+      const input = document.getElementById('adjustmentInput');
+      const userRequest = input.value.trim();
+      
+      if (!userRequest) {
+        addChatMessage('system', '⚠️ 请输入修改请求');
+        return;
+      }
+
+      if (!currentSession) {
+        addChatMessage('system', '⚠️ 请先选择课件');
+        return;
+      }
+
+      input.value = '';
+      addChatMessage('user', userRequest);
+
+      try {
+        const response = await fetch('/api/adjustment/adjust', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: currentSession.sessionId,
+            courseId: selectedCourse.id,
+            userRequest: userRequest,
+            stream: true
+          })
+        });
+
+        if (!response.ok) {
+          addChatMessage('assistant', '❌ 请求失败');
+          return;
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.substring(6);
+              try {
+                const event = JSON.parse(data);
+                handleStreamEvent(event);
+              } catch (e) {
+                console.error('解析SSE事件失败:', e);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        addChatMessage('assistant', '❌ 请求失败: ' + error.message);
+      }
+    }
+
+    function handleStreamEvent(event) {
+      switch (event.type) {
+        case 'progress':
+          // 更新进度状态
+          if (!document.getElementById('current-progress')) {
+            addProgressMessage(event.message);
+            document.querySelector('.progress-content span').parentElement.parentElement.id = 'current-progress';
+          } else {
+            updateProgressMessage('current-progress', event.message);
+          }
+          break;
+
+        case 'log':
+          // 展示日志消息
+          addLogMessage(event.log);
+          break;
+
+        case 'result':
+          // 处理最终结果
+          const progressDiv = document.getElementById('current-progress');
+          if (progressDiv) {
+            progressDiv.remove();
+          }
+          
+          if (event.success) {
+            getSession(event.sessionId).then(session => {
+              if (session) {
+                currentSession = session;
+              }
+            });
+            
+            addChatMessage('assistant', event.message || '✅ 修改已完成');
+            
+            if (event.html) {
+              updatePreview(event.html);
+              addChatMessage('system', '📄 课件已更新，可以在右侧预览查看效果');
+            }
+            
+            if (event.adjustmentRecord) {
+              adjustmentHistory.push(event.adjustmentRecord);
+            }
+          } else {
+            addChatMessage('assistant', '❌ 修改失败: ' + event.error);
+          }
+          break;
+
+        case 'error':
+          const errProgressDiv = document.getElementById('current-progress');
+          if (errProgressDiv) {
+            errProgressDiv.remove();
+          }
+          addChatMessage('assistant', '❌ ' + event.error);
+          break;
+      }
+    }
+
+    function addLogMessage(log) {
+      const container = document.getElementById('chatContainer');
+      const categoryLabels = {
+        system: '系统',
+        ai: 'AI',
+        tool: '工具'
+      };
+      
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'chat-message log';
+      
+      let indentClass = '';
+      if (log.indentLevel > 0) {
+        indentClass = 'log-indent';
+        for (let i = 1; i < log.indentLevel; i++) {
+          indentClass += ' log-indent';
+        }
+      }
+      
+      let detailsHtml = '';
+      if (log.details) {
+        const detailsStr = typeof log.details === 'object' 
+          ? JSON.stringify(log.details, null, 2) 
+          : String(log.details);
+        detailsHtml = `<div class="log-details">${escapeHtml(detailsStr)}</div>`;
+      }
+      
+      messageDiv.innerHTML = `
+        <div class="log-header">
+          <span class="log-badge ${log.level}">${log.level.toUpperCase()}</span>
+          <span class="log-badge ${log.category}">${categoryLabels[log.category] || log.category}</span>
+          <span style="opacity: 0.6;">${new Date(log.timestamp).toLocaleTimeString()}</span>
+        </div>
+        <div class="log-content ${indentClass}">${escapeHtml(log.message)}</div>
+        ${detailsHtml}
+      `;
+      
+      container.appendChild(messageDiv);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    async function getSession(sessionId) {
+      try {
+        const response = await fetch(`/api/adjustment/sessions/${sessionId}`);
+        const data = await response.json();
+        return data.success ? data.session : null;
+      } catch (error) {
+        console.error('获取会话失败:', error);
+        return null;
+      }
+    }
+
+    function addChatMessage(role, content) {
+      const container = document.getElementById('chatContainer');
+      const roleLabels = {
+        user: '您',
+        assistant: 'AI助手',
+        system: '系统'
+      };
+      
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `chat-message ${role}`;
+      messageDiv.innerHTML = `
+        <div class="chat-message-header">${roleLabels[role]}</div>
+        <div>${escapeHtml(content)}</div>
+      `;
+      
+      container.appendChild(messageDiv);
+      container.scrollTop = container.scrollHeight;
+      return messageDiv;
+    }
+
+    function addProgressMessage(content) {
+      const container = document.getElementById('chatContainer');
+      const progressId = 'progress-' + Date.now();
+      
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'chat-message assistant';
+      messageDiv.id = progressId;
+      messageDiv.innerHTML = `
+        <div class="chat-message-header">AI助手</div>
+        <div class="progress-content">
+          <div class="progress-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <span>${escapeHtml(content)}</span>
+        </div>
+      `;
+      
+      container.appendChild(messageDiv);
+      container.scrollTop = container.scrollHeight;
+      return progressId;
+    }
+
+    function removeProgressMessage(progressId) {
+      const progressDiv = document.getElementById(progressId);
+      if (progressDiv) {
+        progressDiv.remove();
+      }
+    }
+
+    function updateProgressMessage(progressId, content) {
+      const progressDiv = document.getElementById(progressId);
+      if (progressDiv) {
+        const contentDiv = progressDiv.querySelector('.progress-content span');
+        if (contentDiv) {
+          contentDiv.textContent = content;
+        }
+      }
+    }
+
+    function updatePreview(html) {
+      const iframe = document.getElementById('previewAfter');
+      iframe.srcdoc = html;
+      document.getElementById('previewCard').style.display = 'block';
+    }
+
+    async function validateCurrentHtml() {
+      if (!currentSession) {
+        addChatMessage('system', '⚠️ 请先选择课件');
+        return;
+      }
+
+      const progressId = addProgressMessage('正在验证HTML...');
+
+      try {
+        const session = await getSession(currentSession.sessionId);
+        
+        if (!session || !session.currentHtml) {
+          removeProgressMessage(progressId);
+          addChatMessage('system', '❌ 无法获取当前HTML内容');
+          return;
+        }
+
+        const response = await fetch('/api/adjustment/validate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ html: session.currentHtml })
+        });
+
+        const data = await response.json();
+        removeProgressMessage(progressId);
+
+        displayValidationResults(data);
+        addChatMessage('system', data.isValid ? '✅ HTML验证通过' : '⚠️ HTML验证发现问题，请查看下方详情');
+      } catch (error) {
+        removeProgressMessage(progressId);
+        addChatMessage('system', '❌ 验证失败: ' + error.message);
+      }
+    }
+
+    function displayValidationResults(data) {
+      const container = document.getElementById('validationResults');
+      const card = document.getElementById('validationCard');
+      
+      card.style.display = 'block';
+      
+      if (!data.isValid) {
+        container.className = 'validation-results has-errors';
+      } else {
+        container.className = 'validation-results';
+      }
+
+      let html = '';
+      
+      if (data.issues && data.issues.length > 0) {
+        html += '<div style="margin-bottom: 12px;"><strong>发现的问题:</strong></div>';
+        data.issues.forEach(issue => {
+          const iconClass = issue.severity === 'error' ? 'error' : 
+                           issue.severity === 'warning' ? 'warning' : 'success';
+          const icon = issue.severity === 'error' ? '✗' : 
+                      issue.severity === 'warning' ? '⚠' : 'ℹ';
+          html += `
+            <div class="validation-item">
+              <div class="validation-icon ${iconClass}">${icon}</div>
+              <div>
+                <strong>${issue.category}</strong>: ${escapeHtml(issue.message)}
+                ${issue.location ? `<br><small>${escapeHtml(issue.location)}</small>` : ''}
+              </div>
+            </div>
+          `;
+        });
+      } else {
+        html += `
+          <div class="validation-item">
+            <div class="validation-icon success">✓</div>
+            <div><strong>验证通过</strong>: 没有发现明显问题</div>
+          </div>
+        `;
+      }
+
+      if (data.suggestions && data.suggestions.length > 0) {
+        html += '<div style="margin-top: 16px;"><strong>改进建议:</strong></div>';
+        data.suggestions.forEach(suggestion => {
+          html += `
+            <div class="validation-item">
+              <div class="validation-icon" style="background: var(--primary);">💡</div>
+              <div>${escapeHtml(suggestion)}</div>
+            </div>
+          `;
+        });
+      }
+
+      container.innerHTML = html;
+    }
+
+    function showHistory() {
+      const card = document.getElementById('historyCard');
+      const list = document.getElementById('historyList');
+      
+      card.style.display = 'block';
+      
+      if (!currentSession || !currentSession.adjustmentHistory || currentSession.adjustmentHistory.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p>暂无调整历史</p>
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = currentSession.adjustmentHistory.map((record, index) => `
+        <div class="history-item" onclick="previewAdjustment('${record.id}')">
+          <div class="history-item-header">
+            <span>调整 #${index + 1}</span>
+            <span class="history-item-time">${new Date(record.timestamp).toLocaleString()}</span>
+          </div>
+          <div class="history-item-request">${escapeHtml(record.userRequest)}</div>
+          <div style="margin-top: 8px;">
+            <button class="btn btn-warning" style="padding: 6px 12px; font-size: 0.8rem;" 
+                    onclick="event.stopPropagation(); rollbackTo('${record.id}')">
+              ↩️ 回滚到此版本
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function hideHistory() {
+      document.getElementById('historyCard').style.display = 'none';
+    }
+
+    async function rollbackTo(adjustmentId) {
+      const progressId = addProgressMessage('正在回滚...');
+
+      try {
+        const response = await fetch('/api/adjustment/rollback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: currentSession.sessionId,
+            adjustmentId: adjustmentId
+          })
+        });
+
+        const data = await response.json();
+        removeProgressMessage(progressId);
+
+        if (data.success) {
+          addChatMessage('system', '✅ 已回滚到指定版本');
+          updatePreview(data.html);
+          currentSession = await getSession(currentSession.sessionId);
+        } else {
+          addChatMessage('system', '❌ 回滚失败: ' + data.error);
+        }
+      } catch (error) {
+        removeProgressMessage(progressId);
+        addChatMessage('system', '❌ 回滚失败: ' + error.message);
+      }
+    }
+
+    async function saveFinal() {
+      if (!currentSession) {
+        addChatMessage('system', '⚠️ 请先选择课件');
+        return;
+      }
+
+      const progressId = addProgressMessage('正在保存...');
+
+      try {
+        const response = await fetch('/api/adjustment/save-final', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: currentSession.sessionId })
+        });
+
+        const data = await response.json();
+        removeProgressMessage(progressId);
+
+        if (data.success) {
+          addChatMessage('system', '✅ 课件已保存成功！文件路径: ' + data.filePath);
+        } else {
+          addChatMessage('system', '❌ 保存失败: ' + data.error);
+        }
+      } catch (error) {
+        removeProgressMessage(progressId);
+        addChatMessage('system', '❌ 保存失败: ' + error.message);
+      }
+    }
+
+    function togglePreview() {
+      const card = document.getElementById('previewCard');
+      card.style.display = card.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function showError(message) {
+      const container = document.getElementById('courseList');
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">❌</div>
+          <p>${escapeHtml(message)}</p>
+        </div>
+      `;
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      const filtered = courses.filter(course => 
+        course.topic.toLowerCase().includes(query) ||
+        course.subject.toLowerCase().includes(query)
+      );
+      renderCourseList(filtered);
+    });
+
+    document.getElementById('adjustmentInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        submitAdjustment();
+      }
+    });
+
+    loadCourses();
+  </script>
+</body>
+</html>

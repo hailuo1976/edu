@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>导数的原理 - 高中数学</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            color: white;
+            animation: fadeInDown 1s ease;
+        }
+        
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: fadeInUp 1s ease;
+        }
+        
+        .section-title {
+            font-size: 32px;
+            color: #667eea;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title::before {
+            content: '';
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+            margin-right: 15px;
+        }
+        
+        .concept-box {
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            border-left: 5px solid #764ba2;
+        }
+        
+        .formula-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
+            animation: pulse 2s infinite;
+        }
+        
+        .formula-box .formula {
+            font-size: 32px;
+            margin: 15px 0;
+            font-family: 'Times New Roman', serif;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .formula-box .notation {
+            font-size: 16px;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+        
+        .key-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .key-point {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid #f5576c;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .key-point:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .key-point h3 {
+            color: #d63384;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .key-point p {
+            color: #333;
+            line-height: 1.8;
+        }
+        
+        .steps-container {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+        
+        .step:hover {
+            transform: translateX(10px);
+        }
+        
+        .step-num {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+        
+        .step-content {
+            flex: 1;
+            font-size: 18px;
+            line-height: 1.8;
+            padding-top: 10px;
+        }
+        
+        .step-content .formula-inline {
+            background: #f8f9fa;
+            padding: 5px 15px;
+            border-radius: 8px;
+            font-family: 'Times New Roman', serif;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .graph-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .graph-title {
+            text-align: center;
+            font-size: 20px;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .canvas-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        canvas {
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            background: white;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .controls button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 25px;
+            margin: 5px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
+        }
+        
+        .controls input[type="range"] {
+            width: 200px;
+            margin: 0 10px;
+            vertical-align: middle;
+        }
+        
+        .controls label {
+            font-size: 16px;
+            color: #333;
+            margin-right: 10px;
+        }
+        
+        .exercise-container {
+            margin: 20px 0;
+        }
+        
+        .exercise {
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+        
+        .exercise h3 {
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        
+        .exercise p {
+            font-size: 18px;
+            line-height: 1.8;
+            margin: 15px 0;
+        }
+        
+        .exercise .formula-inline {
+            background: white;
+            padding: 5px 15px;
+            border-radius: 8px;
+            font-family: 'Times New Roman', serif;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .option {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+        
+        .option:hover {
+            background: #f0f4ff;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .option.correct {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .option.wrong {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+        
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 16px;
+            display: none;
+        }
+        
+        .feedback.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #10b981;
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .feedback.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #ef4444;
+            display: block;
+            animation: shake 0.5s ease;
+        }
+        
+        .btn-check {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .btn-check:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
+        }
+        
+        .example-box {
+            background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            border: 2px solid #f5576c;
+        }
+        
+        .example-box h3 {
+            color: #f5576c;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+        
+        .solution-steps {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        
+        .solution-step {
+            padding: 10px 0;
+            border-bottom: 1px dashed #ddd;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+        
+        .solution-step:last-child {
+            border-bottom: none;
+        }
+        
+        .highlight {
+            background: linear-gradient(transparent 60%, #ffeb3b 60%);
+            font-weight: bold;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-10px);
+            }
+            75% {
+                transform: translateX(10px);
+            }
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            border-bottom: 1px dotted #667eea;
+        }
+        
+        .tooltip:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            white-space: nowrap;
+            z-index: 100;
+        }
+        
+        .summary-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        
+        .summary-box h3 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .summary-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .summary-box li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            font-size: 16px;
+        }
+        
+        .summary-box li:last-child {
+            border-bottom: none;
+        }
+        
+        .summary-box li::before {
+            content: '✓ ';
+            color: #ffd700;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📐 导数的原理</h1>
+            <p>探索变化率的奥秘 | 理解微积分的核心概念</p>
+        </div>
+        
+        <!-- 概念讲解模块 -->
+        <div class="section" id="concept">
+            <h2 class="section-title">一、导数的概念</h2>
+            
+            <div class="concept-box">
+                <h3>📖 什么是导数？</h3>
+                <p style="font-size: 18px; line-height: 1.8; margin-top: 15px;">
+                    导数是微积分中最重要的概念之一，它描述了函数在某一点的<strong>瞬时变化率</strong>。
+                    简单来说，导数告诉我们：当自变量发生微小变化时，因变量会以多快的速度变化。
+                </p>
+                <p style="font-size: 18px; line-height: 1.8; margin-top: 10px;">
+                    导数的概念源于人们对"变化"和"速度"的思考。从物理学的角度看，导数可以帮助我们理解：
+                </p>
+                <ul style="margin-left: 30px; margin-top: 10px; font-size: 17px; line-height: 2;">
+                    <li>🚗 汽车的瞬时速度（位移对时间的导数）</li>
+                    <li>⚡ 加速度（速度对时间的导数）</li>
+                    <li>📈 股票价格的变化趋势</li>
+                    <li>📉 边际成本、边际收益等经济概念</li>
+                </ul>
+            </div>
+            
+            <div class="formula-box">
+                <p>导数的定义公式</p>
+                <div class="formula">f'(x) = lim<sub>Δx→0</sub> [f(x+Δx) - f(x)] / Δx</div>
+                <div class="notation">也可以记作：dy/dx 或 df/dx，表示y对x的变化率</div>
+            </div>
+            
+            <div class="key-points">
+                <div class="key-point">
+                    <h3>📌 几何意义</h3>
+                    <p>导数的几何意义是函数图像在某点处的<strong>切线斜率</strong>。切线斜率反映了曲线在该点的倾斜程度和变化方向。</p>
+                    <p style="margin-top: 10px; color: #667eea; font-weight: bold;">几何直观：f'(a) = 曲线y=f(x)在点(a,f(a))处的切线斜率</p>
+                </div>
+                
+                <div class="key-point">
+                    <h3>📌 物理意义</h3>
+                    <p>在物理学中，导数表示<strong>瞬时变化率</strong>。例如：</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>速度 = 位移对时间的导数</li>
+                        <li>加速度 = 速度对时间的导数</li>
+                        <li>功率 = 功对时间的导数</li>
+                    </ul>
+                </div>
+                
+                <div class="key-point">
+                    <h3>📌 极限思想</h3>
+                    <p>导数的核心是<strong>极限思想</strong>：当Δx无限趋近于0时，平均变化率趋近于瞬时变化率。</p>
+                    <p style="margin-top: 10px; color: #667eea; font-weight: bold;">从"平均"到"瞬时"的跨越</p>
+                </div>
+            </div>
+            
+            <h3 style="color: #764ba2; margin: 30px 0 20px 0; font-size: 24px;">📝 导数计算的三个步骤</h3>
+            
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div class="step-content">
+                        <strong>求函数增量</strong><br>
+                        计算 <span class="formula-inline">Δy = f(x+Δx) - f(x)</span>，表示当自变量变化Δx时，因变量的变化量。
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div class="step-content">
+                        <strong>求平均变化率</strong><br>
+                        计算比值 <span class="formula-inline">Δy/Δx = [f(x+Δx) - f(x)] / Δx</span>，表示在区间[x, x+Δx]上的平均变化快慢。
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div class="step-content">
+                        <strong>取极限求瞬时变化率</strong><br>
+                        令Δx趋近于0，求极限 <span class="formula-inline">f'(x) = lim<sub>Δx→0</sub> Δy/Δx</span>，得到瞬时变化率。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>💡 经典例题：用定义求导数</h3>
+                <p><strong>问题：</strong>用导数定义求函数 f(x) = x² 在 x = 3 处的导数。</p>
+                
+                <div class="solution-steps">
+                    <div class="solution-step">
+                        <strong>Step 1:</strong> 设自变量在 x = 3 处有增量 Δx，则函数增量为：<br>
+                        Δy = f(3+Δx) - f(3) = (3+Δx)² - 3² = 9 + 6Δx + (Δx)² - 9 = 6Δx + (Δx)²
+                    </div>
+                    <div class="solution-step">
+                        <strong>Step 2:</strong> 求平均变化率：<br>
+                        Δy/Δx = [6Δx + (Δx)²] / Δx = 6 + Δx
+                    </div>
+                    <div class="solution-step">
+                        <strong>Step 3:</strong> 取极限求导数：<br>
+                        f'(3) = lim<sub>Δx→0</sub> (6 + Δx) = <span class="highlight">6</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 图形演示模块 -->
+        <div class="section" id="demo">
+            <h2 class="section-title">二、图形演示</h2>
+            
+            <div class="graph-container">
+                <div class="graph-title">📊 导数的几何意义 - 切线与割线</div>
+                <div class="canvas-wrapper">
+                    <div>
+                        <canvas id="graphCanvas1" width="450" height="400"></canvas>
+                    </div>
+                </div>
+                <div class="controls">
+                    <label>调整Δx大小：</label>
+                    <input type="range" id="deltaSlider" min="0.05" max="2.5" step="0.05" value="1.5">
+                    <span id="deltaValue">Δx = 1.50</span>
+                    <br><br>
+                    <button id="animateBtn">🎬 动画演示极限过程</button>
+                    <button id="resetBtn">🔄 重置</button>
+                </div>
+                <div id="infoPanel" style="margin-top: 20px; padding: 15px; background: white; border-radius: 10px; text-align: center; font-size: 16px;">
+                    <p>拖动滑块观察：<span style="color: #667eea; font-weight: bold;">红色虚线</span>是割线，<span style="color: #10b981; font-weight: bold;">绿色实线</span>是切线</p>
+                    <p>当Δx趋近于0时，割线逐渐逼近切线</p>
+                </div>
+            </div>
+            
+            <div class="graph-container" style="margin-top: 30px;">
+                <div class="graph-title">📈 极限过程可视化</div>
+                <div class="canvas-wrapper">
+                    <canvas id="graphCanvas2" width="450" height="400"></canvas>
+                </div>
+                <div id="limitInfo" style="margin-top: 15px; padding: 15px; background: white; border-radius: 10px; text-align: center; font-size: 16px;">
+                    <p>割线斜率 = <span id="secantSlope" style="color: #ef4444; font-weight: bold; font-size: 18px;">--</span></p>
+                    <p>切线斜率（导数）= <span id="tangentSlope" style="color: #10b981; font-weight: bold; font-size: 18px;">--</span></p>
+                    <p>斜率差值 = <span id="slopeDiff" style="color: #f59e0b; font-weight: bold; font-size: 18px;">--</span></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 练习测试模块 -->
+        <div class="section" id="exercise">
+            <h2 class="section-title">三、练习测试</h2>
+            
+            <div class="exercise-container">
+                <div class="exercise" id="q1">
+                    <h3>题目 1：导数的定义</h3>
+                    <p>导数 f'(x) 的几何意义是：</p>
+                    <div class="options" data-question="1">
+                        <div class="option" data-value="A">A. 曲线在某点的切线斜率</div>
+                        <div class="option" data-value="B">B. 曲线在某点的函数值</div>
+                        <div class="option" data-value="C">C. 曲线的弧长</div>
+                        <div class="option" data-value="D">D. 曲线围成的面积</div>
+                    </div>
+                    <div class="feedback" id="feedback1"></div>
+                    <button class="btn-check" onclick="checkAnswer(1, 'A')">检查答案</button>
+                </div>
+                
+                <div class="exercise" id="q2">
+                    <h3>题目 2：极限思想</h3>
+                    <p>用定义求导数时，令 Δx→0 的目的是：</p>
+                    <div class="options" data-question="2">
+                        <div class="option" data-value="A">A. 求平均变化率</div>
+                        <div class="option" data-value="B">B. 求瞬时变化率</div>
+                        <div class="option" data-value="C">C. 让计算更简单</div>
+                        <div class="option" data-value="D">D. 求函数的最大值</div>
+                    </div>
+                    <div class="feedback" id="feedback2"></div>
+                    <button class="btn-check" onclick="checkAnswer(2, 'B')">检查答案</button>
+                </div>
+                
+                <div class="exercise" id="q3">
+                    <h3>题目 3：导数计算</h3>
+                    <p>函数 f(x) = x³ 在 x = 2 处的导数值是：</p>
+                    <div class="options" data-question="3">
+                        <div class="option" data-value="A">A. 6</div>
+                        <div class="option" data-value="B">B. 8</div>
+                        <div class="option" data-value="C">C. 12</div>
+                        <div class="option" data-value="D">D. 24</div>
+                    </div>
+                    <div class="feedback" id="feedback3"></div>
+                    <button class="btn-check" onclick="checkAnswer(3, 'C')">检查答案</button>
+                </div>
+                
+                <div class="exercise" id="q4">
+                    <h3>题目 4：物理意义</h3>
+                    <p>如果位移函数为 s(t)，那么 s'(t) 表示：</p>
+                    <div class="options" data-question="4">
+                        <div class="option" data-value="A">A. 加速度</div>
+                        <div class="option" data-value="B">B. 速度</div>
+                        <div class="option" data-value="C">C. 力</div>
+                        <div class="option" data-value="D">D. 能量</div>
+                    </div>
+                    <div class="feedback" id="feedback4"></div>
+                    <button class="btn-check" onclick="checkAnswer(4, 'B')">检查答案</button>
+                </div>
+                
+                <div class="exercise" id="q5">
+                    <h3>题目 5：综合应用</h3>
+                    <p>已知函数 f(x) = 3x² - 2x + 1，求 f'(1) 的值：</p>
+                    <div class="options" data-question="5">
+                        <div class="option" data-value="A">A. 2</div>
+                        <div class="option" data-value="B">B. 3</div>
+                        <div class="option" data-value="C">C. 4</div>
+                        <div class="option" data-value="D">D. 5</div>
+                    </div>
+                    <div class="feedback" id="feedback5"></div>
+                    <button class="btn-check" onclick="checkAnswer(5, 'C')">检查答案</button>
+                </div>
+            </div>
+            
+            <div class="summary-box">
+                <h3>🎓 本节要点总结</h3>
+                <ul>
+                    <li>导数的定义：f'(x) = lim<sub>Δx→0</sub> [f(x+Δx) - f(x)] / Δx</li>
+                    <li>几何意义：曲线在某点的切线斜率</li>
+                    <li>物理意义：瞬时变化率（如速度、加速度）</li>
+                    <li>核心思想：通过极限实现从"平均"到"瞬时"的跨越</li>
+                    <li>计算步骤：求增量 → 求比值 → 取极限</li>
+                    <li>切线逼近：割线斜率的极限就是切线斜率</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 图形绘制
+        const canvas1 = document.getElementById('graphCanvas1');
+        const ctx1 = canvas1.getContext('2d');
+        const canvas2 = document.getElementById('graphCanvas2');
+        const ctx2 = canvas2.getContext('2d');
+        
+        // 函数定义 f(x) = x²/4
+        function f(x) {
+            return x * x / 4;
+        }
+        
+        // 导数 f'(x) = x/2
+        function fPrime(x) {
+            return x / 2;
+        }
+        
+        // 坐标转换
+        function toCanvasX(x) {
+            return canvas1.width / 2 + x * 40;
+        }
+        
+        function toCanvasY(y) {
+            return canvas1.height - 50 - y * 40;
+        }
+        
+        // 绘制坐标系
+        function drawAxes(ctx, canvas) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 背景网格
+            ctx.strokeStyle = '#e5e7eb';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i <= canvas.width; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= canvas.height; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+            
+            // x轴
+            ctx.beginPath();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.moveTo(0, canvas.height - 50);
+            ctx.lineTo(canvas.width, canvas.height - 50);
+            ctx.stroke();
+            
+            // x轴箭头
+            ctx.beginPath();
+            ctx.moveTo(canvas.width - 10, canvas.height - 45);
+            ctx.lineTo(canvas.width, canvas.height - 50);
+            ctx.lineTo(canvas.width - 10, canvas.height - 55);
+            ctx.stroke();
+            
+            // y轴
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, canvas.height);
+            ctx.lineTo(canvas.width / 2, 0);
+            ctx.stroke();
+            
+            // y轴箭头
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2 - 5, 10);
+            ctx.lineTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2 + 5, 10);
+            ctx.stroke();
+            
+            // 原点标注
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.fillText('O', canvas.width / 2 - 15, canvas.height - 35);
+            ctx.fillText('x', canvas.width - 20, canvas.height - 35);
+            ctx.fillText('y', canvas.width / 2 + 10, 20);
+            
+            // 刻度
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#666';
+            for (let i = -4; i <= 4; i++) {
+                if (i !== 0) {
+                    ctx.fillText(i.toString(), canvas.width / 2 + i * 40 - 5, canvas.height - 35);
+                }
+            }
+            for (let i = 1; i <= 6; i++) {
+                ctx.fillText(i.toString(), canvas.width / 2 + 8, canvas.height - 50 - i * 40 + 5);
+            }
+        }
+        
+        // 绘制曲线
+        function drawCurve(ctx, canvas, x0) {
+            ctx.beginPath();
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            
+            for (let x = -5; x <= 5; x += 0.1) {
+                const canvasX = toCanvasX(x);
+                const canvasY = toCanvasY(f(x));
+                if (x === -5) {
+                    ctx.moveTo(canvasX, canvasY);
+                } else {
+                    ctx.lineTo(canvasX, canvasY);
+                }
+            }
+            ctx.stroke();
+        }
+        
+        // 绘制切线
+        function drawTangent(ctx, canvas, x0, color) {
+            const slope = fPrime(x0);
+            const y0 = f(x0);
+            
+            // 切线方程: y - y0 = f'(x0)(x - x0)
+            let x1 = x0 - 3;
+            let y1 = y0 + slope * (x1 - x0);
+            let x2 = x0 + 3;
+            let y2 = y0 + slope * (x2 - x0);
+            
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.moveTo(toCanvasX(x1), toCanvasY(y1));
+            ctx.lineTo(toCanvasX(x2), toCanvasY(y2));
+            ctx.stroke();
+        }
+        
+        // 绘制割线
+        function drawSecant(ctx, canvas, x0, dx, color) {
+            const y0 = f(x0);
+            const y1 = f(x0 + dx);
+            const slope = (y1 - y0) / dx;
+            
+            // 割线方程
+            let x1 = x0 - 3;
+            let y1_line = y0 + slope * (x1 - x0);
+            let x2 = x0 + dx + 2;
+            let y2_line = y0 + slope * (x2 - x0);
+            
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.moveTo(toCanvasX(x1), toCanvasY(y1_line));
+            ctx.lineTo(toCanvasX(x2), toCanvasY(y2_line));
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        
+        // 绘制点
+        function drawPoint(ctx, canvas, x, y, color, label) {
+            ctx.beginPath();
+            ctx.fillStyle = color;
+            ctx.arc(toCanvasX(x), toCanvasY(y), 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            if (label) {
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 14px Arial';
+                ctx.fillText(label, toCanvasX(x) + 10, toCanvasY(y) - 10);
+            }
+        }
+        
+        // 绘制函数标注
+        function drawFunctionLabel(ctx, canvas) {
+            ctx.fillStyle = '#667eea';
+            ctx.font = 'italic 18px Times New Roman';
+            ctx.fillText('f(x) = x²/4', toCanvasX(3) - 20, toCanvasY(f(3)) - 20);
+        }
+        
+        // 主绘制函数
+        let currentDx = 1.5;
+        const x0 = 2; // 切点固定在x=2
+        
+        function draw(dx) {
+            currentDx = dx;
+            
+            // Canvas 1: 完整图形
+            drawAxes(ctx1, canvas1);
+            drawCurve(ctx1, canvas1);
+            drawFunctionLabel(ctx1, canvas1);
+            
+            // 绘制切线（绿色）
+            drawTangent(ctx1, canvas1, x0, '#10b981');
+            
+            // 绘制割线（红色）
+            if (dx > 0.01) {
+                drawSecant(ctx1, canvas1, x0, dx, '#ef4444');
+            }
+            
+            // 绘制切点
+            drawPoint(ctx1, canvas1, x0, f(x0), '#667eea', 'A');
+            
+            // 绘制割线的另一个点
+            if (dx > 0.01) {
+                drawPoint(ctx1, canvas1, x0 + dx, f(x0 + dx), '#ef4444', 'B');
+            }
+            
+            // 图例
+            ctx1.fillStyle = '#333';
+            ctx1.font = '14px Microsoft YaHei';
+            ctx1.fillText('● 曲线 y = x²/4', 20, 30);
+            ctx1.fillStyle = '#10b981';
+            ctx1.fillText('— 切线（斜率 = f\'(x)）', 20, 50);
+            ctx1.fillStyle = '#ef4444';
+            ctx1.fillText('-- 割线（斜率 = Δy/Δx）', 20, 70);
+            
+            // Canvas 2: 极限过程可视化
+            drawAxes(ctx2, canvas2);
+            drawCurve(ctx2, canvas2);
+            
+            // 放大显示极限过程
+            drawTangent(ctx2, canvas2, x0, '#10b981');
+            if (dx > 0.01) {
+                drawSecant(ctx2, canvas2, x0, dx, '#ef4444');
+            }
+            drawPoint(ctx2, canvas2, x0, f(x0), '#667eea', '');
+            if (dx > 0.01) {
+                drawPoint(ctx2, canvas2, x0 + dx, f(x0 + dx), '#ef4444', '');
+            }
+            
+            // 更新信息面板
+            const tangentSlope = fPrime(x0);
+            const secantSlope = dx > 0.01 ? (f(x0 + dx) - f(x0)) / dx : tangentSlope;
+            const diff = Math.abs(secantSlope - tangentSlope);
+            
+            document.getElementById('secantSlope').textContent = secantSlope.toFixed(4);
+            document.getElementById('tangentSlope').textContent = tangentSlope.toFixed(4);
+            document.getElementById('slopeDiff').textContent = diff.toFixed(4);
+            
+            // 更新滑块显示
+            document.getElementById('deltaValue').textContent = 'Δx = ' + dx.toFixed(2);
+        }
+        
+        // 初始绘制
+        draw(currentDx);
+        
+        // 滑块控制
+        document.getElementById('deltaSlider').addEventListener('input', function(e) {
+            draw(parseFloat(e.target.value));
+        });
+        
+        // 重置按钮
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            document.getElementById('deltaSlider').value = 1.5;
+            draw(1.5);
+        });
+        
+        // 动画演示
+        let animationId = null;
+        document.getElementById('animateBtn').addEventListener('click', function() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+                this.textContent = '🎬 动画演示极限过程';
+                return;
+            }
+            
+            let dx = 2.5;
+            const animate = () => {
+                dx -= 0.02;
+                if (dx < 0.05) {
+                    dx = 0.05;
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                    document.getElementById('animateBtn').textContent = '🎬 动画演示极限过程';
+                    return;
+                }
+                
+                document.getElementById('deltaSlider').value = dx;
+                draw(dx);
+                animationId = requestAnimationFrame(animate);
+            };
+            
+            document.getElementById('animateBtn').textContent = '⏸ 暂停动画';
+            animate();
+        });
+        
+        // 练习系统
+        let userAnswers = {};
+        
+        // 选项点击事件
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', function() {
+                const questionNum = this.parentElement.dataset.question;
+                const options = this.parentElement.querySelectorAll('.option');
+                
+                options.forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                userAnswers[questionNum] = this.dataset.value;
+            });
+        });
+        
+        function checkAnswer(questionNum, correctAnswer) {
+            const userAnswer = userAnswers[questionNum];
+            const feedback = document.getElementById('feedback' + questionNum);
+            const options = document.querySelector(`[data-question="${questionNum}"]`).querySelectorAll('.option');
+            
+            if (!userAnswer) {
+                feedback.className = 'feedback error';
+                feedback.textContent = '❌ 请先选择一个答案！';
+                return;
+            }
+            
+            options.forEach(opt => {
+                opt.classList.remove('correct', 'wrong');
+                if (opt.dataset.value === correctAnswer) {
+                    opt.classList.add('correct');
+                } else if (opt.dataset.value === userAnswer && userAnswer !== correctAnswer) {
+                    opt.classList.add('wrong');
+                }
+            });
+            
+            if (userAnswer === correctAnswer) {
+                feedback.className = 'feedback success';
+                feedback.innerHTML = '✅ <strong>正确！</strong> 你已经掌握了这个知识点。';
+            } else {
+                feedback.className = 'feedback error';
+                feedback.innerHTML = `❌ <strong>错误！</strong> 正确答案是 ${correctAnswer}。让我们再回顾一下相关概念。`;
+            }
+        }
+    </script>
+</body>
+</html>

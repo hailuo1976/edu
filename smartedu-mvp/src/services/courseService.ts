@@ -64,7 +64,13 @@ export class CourseService {
   ): Promise<Course> {
     console.log(`[CourseService] 使用工具生成课程`);
     
-    const result = await this.courseToolCallAgent.generate(topic, subject, gradeLevel);
+    // 创建新的CourseToolCallAgent实例，传递onProgress回调
+    const courseToolCallAgent = new CourseToolCallAgent({
+      workDir: this.coursesDir,
+      onProgress
+    });
+    
+    const result = await courseToolCallAgent.generate(topic, subject, gradeLevel);
     
     console.log(`[CourseService] 工具生成结果: 成功=${result.success}, 迭代次数=${result.iterations}`);
     

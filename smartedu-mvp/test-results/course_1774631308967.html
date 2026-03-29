@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正方形面积 - 三年级数学</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 36px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: bounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .module {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .module:hover {
+            transform: translateY(-5px);
+        }
+        
+        .module-title {
+            font-size: 24px;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .module-title .icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+        
+        /* 概念模块 */
+        #concept {
+            background: linear-gradient(white, #f0f4ff);
+        }
+        
+        .formula-box {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            box-shadow: 0 8px 25px rgba(240, 147, 251, 0.4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        .formula-box .small {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+        
+        .explanation {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            margin-top: 20px;
+        }
+        
+        .explanation p {
+            margin: 10px 0;
+            line-height: 1.8;
+            color: #333;
+        }
+        
+        .highlight {
+            color: #f5576c;
+            font-weight: bold;
+        }
+        
+        /* 演示模块 */
+        #demo {
+            text-align: center;
+        }
+        
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        #squareCanvas {
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .demo-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(56, 239, 125, 0.5);
+        }
+        
+        .size-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .size-selector label {
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .size-selector select {
+            padding: 8px 15px;
+            font-size: 16px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            outline: none;
+        }
+        
+        .size-selector select:focus {
+            border-color: #764ba2;
+        }
+        
+        .info-display {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .info-item {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            min-width: 150px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .info-item .label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .info-item .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        /* 练习模块 */
+        #exercise {
+            background: linear-gradient(white, #fff5f5);
+        }
+        
+        .exercise-item {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #eee;
+            transition: all 0.3s ease;
+        }
+        
+        .exercise-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+        }
+        
+        .question-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .question-text {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .answer-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .answer-input {
+            padding: 10px 20px;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            width: 150px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .answer-input:focus {
+            border-color: #667eea;
+        }
+        
+        .unit {
+            font-size: 16px;
+            color: #666;
+        }
+        
+        .btn-check {
+            padding: 10px 25px;
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-check:hover {
+            transform: scale(1.05);
+        }
+        
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .feedback.correct {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .feedback.incorrect {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .score-board {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 25px;
+        }
+        
+        .score-board h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+        
+        .score-value {
+            font-size: 40px;
+            font-weight: bold;
+        }
+        
+        /* 提示框 */
+        .tip-box {
+            background: linear-gradient(135deg, #fff3cd, #ffeeba);
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            border-radius: 0 10px 10px 0;
+            margin: 15px 0;
+        }
+        
+        .tip-box strong {
+            color: #856404;
+        }
+        
+        /* 步骤说明 */
+        .steps-container {
+            margin: 20px 0;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .step:nth-child(1) { border-left: 4px solid #667eea; }
+        .step:nth-child(2) { border-left: 4px solid #f093fb; }
+        .step:nth-child(3) { border-left: 4px solid #38ef7d; }
+        
+        .step-num {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .step-content {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 28px;
+            }
+            
+            .formula-box {
+                font-size: 18px;
+            }
+            
+            .info-display {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .answer-input {
+                width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📐 正方形面积</h1>
+        
+        <!-- 概念讲解模块 -->
+        <div class="module" id="concept">
+            <div class="module-title">
+                <span class="icon">💡</span>
+                概念讲解
+            </div>
+            
+            <div class="formula-box">
+                正方形面积 = 边长 × 边长
+                <div class="small">用字母表示：S = a × a = a²</div>
+            </div>
+            
+            <div class="explanation">
+                <p><span class="highlight">正方形</span>是一种特殊的四边形，它的<span class="highlight">四条边都相等</span>，四个角都是直角。</p>
+                <p>计算正方形面积时，我们只需要知道它的<span class="highlight">边长</span>，然后用<span class="highlight">边长乘以边长</span>就可以了！</p>
+            </div>
+            
+            <div class="tip-box">
+                <strong>📌 小提示：</strong>面积的单位有平方厘米(cm²)、平方分米(dm²)、平方米(m²)等。计算时记得带上单位哦！
+            </div>
+            
+            <div class="steps-container">
+                <h3 style="margin-bottom: 15px; color: #667eea;">📝 计算步骤：</h3>
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div class="step-content">找出正方形的<span class="highlight">边长</span>是多少</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div class="step-content">用<span class="highlight">边长 × 边长</span>计算出面积</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div class="step-content">写出答案，记得<span class="highlight">加上面积单位</span></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 图形演示模块 -->
+        <div class="module" id="demo">
+            <div class="module-title">
+                <span class="icon">🎯</span>
+                图形演示
+            </div>
+            
+            <div class="demo-controls">
+                <div class="size-selector">
+                    <label for="sideLength">选择边长：</label>
+                    <select id="sideLength" onchange="updateSquare()">
+                        <option value="1">1厘米</option>
+                        <option value="2">2厘米</option>
+                        <option value="3" selected>3厘米</option>
+                        <option value="4">4厘米</option>
+                        <option value="5">5厘米</option>
+                        <option value="6">6厘米</option>
+                        <option value="7">7厘米</option>
+                        <option value="8">8厘米</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="animateSquare()">▶ 演示动画</button>
+                <button class="btn btn-success" onclick="resetDemo()">🔄 重置</button>
+            </div>
+            
+            <div class="canvas-container">
+                <canvas id="squareCanvas" width="400" height="400"></canvas>
+            </div>
+            
+            <div class="info-display">
+                <div class="info-item">
+                    <div class="label">边长</div>
+                    <div class="value" id="sideDisplay">3 cm</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">计算过程</div>
+                    <div class="value" id="calcDisplay">3×3</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">面积</div>
+                    <div class="value" id="areaDisplay">9 cm²</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 练习测试模块 -->
+        <div class="module" id="exercise">
+            <div class="module-title">
+                <span class="icon">✏️</span>
+                练习测试
+            </div>
+            
+            <div class="exercise-item" id="q1">
+                <div class="question-text">
+                    <span class="question-number">1</span>
+                    一个正方形的边长是 5 厘米，它的面积是多少平方厘米？
+                </div>
+                <div class="answer-area">
+                    <input type="number" class="answer-input" id="ans1" placeholder="输入答案">
+                    <span class="unit">平方厘米</span>
+                    <button class="btn-check" onclick="checkAnswer(1, 25)">检查答案</button>
+                </div>
+                <div class="feedback" id="fb1"></div>
+            </div>
+            
+            <div class="exercise-item" id="q2">
+                <div class="question-text">
+                    <span class="question-number">2</span>
+                    一个正方形花坛的边长是 8 米，这个花坛的面积是多少平方米？
+                </div>
+                <div class="answer-area">
+                    <input type="number" class="answer-input" id="ans2" placeholder="输入答案">
+                    <span class="unit">平方米</span>
+                    <button class="btn-check" onclick="checkAnswer(2, 64)">检查答案</button>
+                </div>
+                <div class="feedback" id="fb2"></div>
+            </div>
+            
+            <div class="exercise-item" id="q3">
+                <div class="question-text">
+                    <span class="question-number">3</span>
+                    小红画了一个边长 10 厘米的正方形，这个正方形的面积是多少平方厘米？
+                </div>
+                <div class="answer-area">
+                    <input type="number" class="answer-input" id="ans3" placeholder="输入答案">
+                    <span class="unit">平方厘米</span>
+                    <button class="btn-check" onclick="checkAnswer(3, 100)">检查答案</button>
+                </div>
+                <div class="feedback" id="fb3"></div>
+            </div>
+            
+            <div class="exercise-item" id="q4">
+                <div class="question-text">
+                    <span class="question-number">4</span>
+                    一个正方形手帕的边长是 25 厘米，它的面积是多少平方厘米？
+                </div>
+                <div class="answer-area">
+                    <input type="number" class="answer-input" id="ans4" placeholder="输入答案">
+                    <span class="unit">平方厘米</span>
+                    <button class="btn-check" onclick="checkAnswer(4, 625)">检查答案</button>
+                </div>
+                <div class="feedback" id="fb4"></div>
+            </div>
+            
+            <div class="exercise-item" id="q5">
+                <div class="question-text">
+                    <span class="question-number">5</span>
+                    <strong>思考题：</strong>一个正方形的周长是 20 厘米，它的面积是多少平方厘米？<br>
+                    <small style="color: #666;">提示：先算出边长，再算面积</small>
+                </div>
+                <div class="answer-area">
+                    <input type="number" class="answer-input" id="ans5" placeholder="输入答案">
+                    <span class="unit">平方厘米</span>
+                    <button class="btn-check" onclick="checkAnswer(5, 25)">检查答案</button>
+                </div>
+                <div class="feedback" id="fb5"></div>
+            </div>
+            
+            <div class="score-board">
+                <h3>🏆 我的得分</h3>
+                <div class="score-value" id="scoreDisplay">0 / 5</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 初始化画布
+        const canvas = document.getElementById('squareCanvas');
+        const ctx = canvas.getContext('2d');
+        let currentSide = 3;
+        let animationId = null;
+        
+        // 绘制正方形
+        function drawSquare(side, progress = 1) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const pixelSize = 40; // 每个单位大小的像素
+            const squareSize = side * pixelSize * progress;
+            const startX = (canvas.width - squareSize) / 2;
+            const startY = (canvas.height - squareSize) / 2;
+            
+            // 绘制网格
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                ctx.beginPath();
+                ctx.moveTo(startX + i * pixelSize * progress, startY);
+                ctx.lineTo(startX + i * pixelSize * progress, startY + squareSize);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(startX, startY + i * pixelSize * progress);
+                ctx.lineTo(startX + squareSize, startY + i * pixelSize * progress);
+                ctx.stroke();
+            }
+            
+            // 绘制正方形边框
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(startX, startY, squareSize, squareSize);
+            
+            // 填充颜色
+            ctx.fillStyle = 'rgba(102, 126, 234, 0.2)';
+            ctx.fillRect(startX, startY, squareSize, squareSize);
+            
+            // 标注边长
+            if (progress === 1) {
+                ctx.fillStyle = '#764ba2';
+                ctx.font = 'bold 18px Microsoft YaHei';
+                ctx.textAlign = 'center';
+                
+                // 底部标注
+                ctx.fillText(side + ' cm', startX + squareSize / 2, startY + squareSize + 30);
+                
+                // 右侧标注
+                ctx.save();
+                ctx.translate(startX + squareSize + 30, startY + squareSize / 2);
+                ctx.rotate(Math.PI / 2);
+                ctx.fillText(side + ' cm', 0, 0);
+                ctx.restore();
+                
+                // 面积标注
+                ctx.fillStyle = '#f5576c';
+                ctx.font = 'bold 24px Microsoft YaHei';
+                ctx.fillText('面积 = ' + (side * side) + ' cm²', canvas.width / 2, startY + squareSize / 2);
+            }
+        }
+        
+        // 更新正方形
+        function updateSquare() {
+            const select = document.getElementById('sideLength');
+            currentSide = parseInt(select.value);
+            
+            document.getElementById('sideDisplay').textContent = currentSide + ' cm';
+            document.getElementById('calcDisplay').textContent = currentSide + '×' + currentSide;
+            document.getElementById('areaDisplay').textContent = (currentSide * currentSide) + ' cm²';
+            
+            drawSquare(currentSide);
+        }
+        
+        // 动画演示
+        function animateSquare() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            
+            let progress = 0;
+            function animate() {
+                progress += 0.02;
+                if (progress > 1) progress = 1;
+                
+                drawSquare(currentSide, progress);
+                
+                if (progress < 1) {
+                    animationId = requestAnimationFrame(animate);
+                }
+            }
+            animate();
+        }
+        
+        // 重置演示
+        function resetDemo() {
+            document.getElementById('sideLength').value = '3';
+            updateSquare();
+        }
+        
+        // 检查答案
+        let correctCount = 0;
+        function checkAnswer(questionNum, correctAnswer) {
+            const input = document.getElementById('ans' + questionNum);
+            const feedback = document.getElementById('fb' + questionNum);
+            const userAnswer = parseInt(input.value);
+            
+            if (isNaN(userAnswer)) {
+                feedback.className = 'feedback incorrect';
+                feedback.textContent = '⚠️ 请输入一个数字！';
+                return;
+            }
+            
+            if (userAnswer === correctAnswer) {
+                feedback.className = 'feedback correct';
+                feedback.textContent = '🎉 太棒了！回答正确！';
+                input.disabled = true;
+                input.style.backgroundColor = '#d4edda';
+                
+                // 更新分数
+                correctCount = 0;
+                for (let i = 1; i <= 5; i++) {
+                    const ansInput = document.getElementById('ans' + i);
+                    if (ansInput.disabled && !ansInput.style.backgroundColor.includes('d4edda')) {
+                        correctCount--;
+                    }
+                    if (ansInput.disabled) correctCount++;
+                }
+                document.getElementById('scoreDisplay').textContent = correctCount + ' / 5';
+            } else {
+                feedback.className = 'feedback incorrect';
+                if (questionNum === 5) {
+                    feedback.textContent = '❌ 再想想！提示：正方形周长 = 边长 × 4，所以边长 = 周长 ÷ 4';
+                } else {
+                    feedback.textContent = '❌ 再想想！记住：面积 = 边长 × 边长';
+                }
+            }
+        }
+        
+        // 初始化
+        updateSquare();
+    </script>
+</body>
+</html>

@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抛物线运动 - 物理课件</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;500;700;900&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0f1a;
+            --fg: #e8edf5;
+            --muted: #5a6b8a;
+            --accent: #00d4aa;
+            --accent-dim: #00d4aa33;
+            --card: #111827;
+            --border: #1e293b;
+            --warning: #f59e0b;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        h1, h2, h3 {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        .bg-pattern {
+            position: fixed;
+            inset: 0;
+            background-image: 
+                radial-gradient(ellipse at 20% 20%, rgba(0, 212, 170, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
+                linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.3) 100%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .grid-overlay {
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(0, 212, 170, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 170, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .section-title {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 1.5em;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        
+        .concept-card {
+            background: linear-gradient(135deg, var(--card) 0%, rgba(17, 24, 39, 0.8) 100%);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .concept-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 212, 170, 0.1);
+        }
+        
+        .formula-box {
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid var(--accent-dim);
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: 'Space Grotesk', monospace;
+            font-size: 1.25rem;
+            text-align: center;
+            color: var(--accent);
+            margin: 1rem 0;
+        }
+        
+        .canvas-container {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .control-panel {
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .slider-group {
+            margin-bottom: 1rem;
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+        
+        .slider-value {
+            color: var(--accent);
+            font-weight: 700;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, #00b894 100%);
+            color: var(--bg);
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 212, 170, 0.3);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--fg);
+            border: 1px solid var(--border);
+            padding: 0.875rem 2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .stat-item {
+            background: rgba(0, 212, 170, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 0.25rem;
+        }
+        
+        .exercise-option {
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 0.75rem;
+        }
+        
+        .exercise-option:hover {
+            border-color: var(--accent);
+            background: rgba(0, 212, 170, 0.05);
+        }
+        
+        .exercise-option.selected {
+            border-color: var(--accent);
+            background: rgba(0, 212, 170, 0.1);
+        }
+        
+        .exercise-option.correct {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.1);
+        }
+        
+        .exercise-option.wrong {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        .feedback-box {
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .feedback-box.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .feedback-box.correct {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+        }
+        
+        .feedback-box.wrong {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #00b894);
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease forwards;
+            opacity: 0;
+        }
+        
+        .fade-in:nth-child(1) { animation-delay: 0.1s; }
+        .fade-in:nth-child(2) { animation-delay: 0.2s; }
+        .fade-in:nth-child(3) { animation-delay: 0.3s; }
+        
+        @media (prefers-reduced-motion: reduce) {
+            .fade-in {
+                animation: none;
+                opacity: 1;
+            }
+            .concept-card:hover {
+                transform: none;
+            }
+        }
+        
+        .highlight-text {
+            color: var(--accent);
+            font-weight: 700;
+        }
+        
+        .key-concept {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0, 212, 170, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--accent);
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--card);
+            padding: 0.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-tab:hover {
+            color: var(--fg);
+        }
+        
+        .nav-tab.active {
+            background: var(--accent);
+            color: var(--bg);
+        }
+        
+        .module-section {
+            display: none;
+        }
+        
+        .module-section.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    <div class="grid-overlay"></div>
+    
+    <div class="content-wrapper">
+        <!-- Header -->
+        <header class="px-6 py-8 max-w-6xl mx-auto">
+            <div class="fade-in">
+                <p class="text-sm tracking-widest mb-2" style="color: var(--accent);">PHYSICS / KINEMATICS</p>
+                <h1 class="text-4xl md:text-5xl font-bold tracking-tight" style="font-family: 'Space Grotesk', sans-serif;">
+                    抛物线运动原理
+                </h1>
+                <p class="mt-4 text-lg" style="color: var(--muted);">
+                    探索物体在重力作用下的运动轨迹，理解水平与垂直运动的独立性
+                </p>
+            </div>
+            
+            <div class="progress-bar mt-6">
+                <div class="progress-fill" id="progressFill" style="width: 33%;"></div>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <nav class="nav-tabs fade-in">
+                <button class="nav-tab active" data-tab="concept">概念讲解</button>
+                <button class="nav-tab" data-tab="demo">交互演示</button>
+                <button class="nav-tab" data-tab="exercise">练习测试</button>
+            </nav>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="px-6 pb-16 max-w-6xl mx-auto">
+            
+            <!-- Concept Module -->
+            <section id="concept" class="module-section active">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="fade-in">
+                        <div class="concept-card">
+                            <h2 class="section-title">什么是抛物线运动</h2>
+                            <p class="leading-relaxed mb-4" style="color: var(--muted);">
+                                抛物线运动是物体在<span class="highlight-text">仅受重力作用</span>下的运动形式。
+                                当你踢出一颗足球、投出一块石头，或者喷泉中的水柱上升时，物体都会沿着抛物线轨迹运动。
+                            </p>
+                            <p class="leading-relaxed mb-4" style="color: var(--muted);">
+                                这种运动的关键特点是：<strong style="color: var(--fg);">水平方向做匀速直线运动，垂直方向做匀加速直线运动</strong>。
+                                这两个方向的运动相互独立，互不干扰。
+                            </p>
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <span class="key-concept">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 2v20M2 12h20"/>
+                                    </svg>
+                                    运动独立性
+                                </span>
+                                <span class="key-concept">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                    </svg>
+                                    仅受重力
+                                </span>
+                                <span class="key-concept">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 17l6-6 4 4 8-8"/>
+                                    </svg>
+                                    曲线轨迹
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="fade-in">
+                        <div class="concept-card">
+                            <h2 class="section-title">核心公式</h2>
+                            <p class="mb-4" style="color: var(--muted);">
+                                抛物线运动的数学描述可以分为水平方向和垂直方向：
+                            </p>
+                            
+                            <div class="formula-box">
+                                x = v₀ · cos(θ) · t
+                            </div>
+                            <p class="text-sm text-center mb-4" style="color: var(--muted);">水平位移公式</p>
+                            
+                            <div class="formula-box">
+                                y = v₀ · sin(θ) · t - ½gt²
+                            </div>
+                            <p class="text-sm text-center mb-4" style="color: var(--muted);">垂直位移公式</p>
+                            
+                            <div class="formula-box">
+                                R = v₀² · sin(2θ) / g
+                            </div>
+                            <p class="text-sm text-center" style="color: var(--muted);">水平射程公式</p>
+                        </div>
+                    </div>
+                    
+                    <div class="md:col-span-2 fade-in">
+                        <div class="concept-card">
+                            <h2 class="section-title">运动分解原理</h2>
+                            <div class="grid md:grid-cols-3 gap-6 mt-4">
+                                <div class="text-center">
+                                    <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style="background: rgba(0, 212, 170, 0.1);">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="font-bold mb-2">水平分运动</h3>
+                                    <p class="text-sm" style="color: var(--muted);">
+                                        匀速直线运动，速度恒定为 vₓ = v₀·cos(θ)，不受重力影响
+                                    </p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style="background: rgba(0, 212, 170, 0.1);">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                                            <path d="M12 19V5M5 12l7-7 7 7"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="font-bold mb-2">垂直分运动</h3>
+                                    <p class="text-sm" style="color: var(--muted);">
+                                        匀变速运动，初速度 vᵧ = v₀·sin(θ)，加速度为 -g
+                                    </p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style="background: rgba(0, 212, 170, 0.1);">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                                            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.063 17.5 2 12 2z"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="font-bold mb-2">合运动</h3>
+                                    <p class="text-sm" style="color: var(--muted);">
+                                        两分运动合成，形成抛物线轨迹，最高点时垂直速度为零
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Demo Module -->
+            <section id="demo" class="module-section">
+                <div class="grid lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 fade-in">
+                        <div class="canvas-container">
+                            <canvas id="demoCanvas" width="800" height="500"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="fade-in">
+                        <div class="control-panel">
+                            <h3 class="font-bold text-lg mb-4">参数控制</h3>
+                            
+                            <div class="slider-group">
+                                <div class="slider-label">
+                                    <span>初速度</span>
+                                    <span class="slider-value" id="velocityValue">30 m/s</span>
+                                </div>
+                                <input type="range" id="velocitySlider" min="10" max="50" value="30">
+                            </div>
+                            
+                            <div class="slider-group">
+                                <div class="slider-label">
+                                    <span>发射角度</span>
+                                    <span class="slider-value" id="angleValue">45°</span>
+                                </div>
+                                <input type="range" id="angleSlider" min="10" max="80" value="45">
+                            </div>
+                            
+                            <div class="slider-group">
+                                <div class="slider-label">
+                                    <span>重力加速度</span>
+                                    <span class="slider-value" id="gravityValue">10 m/s²</span>
+                                </div>
+                                <input type="range" id="gravitySlider" min="1" max="20" value="10">
+                            </div>
+                            
+                            <button class="btn-primary mt-4" id="launchBtn">发射</button>
+                            <button class="btn-secondary mt-2" id="resetBtn">重置</button>
+                            
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value" id="maxHeight">0.0</div>
+                                    <div class="stat-label">最大高度</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="range">0.0</div>
+                                    <div class="stat-label">水平射程</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="flightTime">0.0</div>
+                                    <div class="stat-label">飞行时间</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="currentVx">0.0</div>
+                                    <div class="stat-label">水平速度</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Exercise Module -->
+            <section id="exercise" class="module-section">
+                <div class="max-w-2xl mx-auto">
+                    <div class="concept-card fade-in">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="section-title mb-0">练习题</h2>
+                            <span class="text-sm" style="color: var(--muted);">
+                                <span id="currentQuestion">1</span> / <span id="totalQuestions">5</span>
+                            </span>
+                        </div>
+                        
+                        <div id="questionContainer">
+                            <p class="text-lg mb-6" id="questionText">
+                                一个物体以 20 m/s 的初速度、30° 角抛出，其水平分速度是多少？
+                            </p>
+                            
+                            <div id="optionsContainer">
+                                <div class="exercise-option" data-index="0">
+                                    <span class="font-bold mr-3">A.</span>
+                                    <span>10 m/s</span>
+                                </div>
+                                <div class="exercise-option" data-index="1">
+                                    <span class="font-bold mr-3">B.</span>
+                                    <span>17.3 m/s</span>
+                                </div>
+                                <div class="exercise-option" data-index="2">
+                                    <span class="font-bold mr-3">C.</span>
+                                    <span>20 m/s</span>
+                                </div>
+                                <div class="exercise-option" data-index="3">
+                                    <span class="font-bold mr-3">D.</span>
+                                    <span>15 m/s</span>
+                                </div>
+                            </div>
+                            
+                            <div class="feedback-box" id="feedbackBox"></div>
+                            
+                            <button class="btn-primary mt-6" id="nextQuestionBtn" style="display: none;">
+                                下一题
+                            </button>
+                        </div>
+                        
+                        <div id="resultContainer" style="display: none;">
+                            <div class="text-center py-8">
+                                <div class="text-6xl font-bold mb-4" style="color: var(--accent);" id="scoreDisplay">0</div>
+                                <p class="text-xl mb-6">正确率</p>
+                                <div class="flex gap-4 justify-center">
+                                    <button class="btn-primary" style="width: auto;" id="retryBtn">重新测试</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script>
+        // Initialize variables first
+        const GROUND_Y = 450;
+        const SCALE = 4;
+        const ORIGIN_X = 50;
+        const ORIGIN_Y = GROUND_Y;
+        
+        let demoCanvas = null;
+        let demoCtx = null;
+        let animationId = null;
+        let isAnimating = false;
+        
+        // Projectile state
+        let projectile = {
+            x: 0,
+            y: 0,
+            vx: 0,
+            vy: 0,
+            trail: [],
+            time: 0
+        };
+        
+        // Parameters
+        let params = {
+            velocity: 30,
+            angle: 45,
+            gravity: 10
+        };
+        
+        // Quiz data
+        const questions = [
+            {
+                text: "一个物体以 20 m/s 的初速度、30° 角抛出，其水平分速度是多少？",
+                options: ["10 m/s", "17.3 m/s", "20 m/s", "15 m/s"],
+                correct: 1,
+                explanation: "水平分速度 = v₀ × cos(θ) = 20 × cos(30°) = 20 × 0.866 ≈ 17.3 m/s"
+            },
+            {
+                text: "在抛物线运动中，物体到达最高点时，下列说法正确的是：",
+                options: ["速度为零", "水平速度为零", "垂直速度为零", "加速度为零"],
+                correct: 2,
+                explanation: "在最高点时，物体的垂直速度为零，但水平速度不为零，加速度始终为 g。"
+            },
+            {
+                text: "初速度相同的情况下，要使抛射体飞得最远，发射角度应为：",
+                options: ["30°", "45°", "60°", "90°"],
+                correct: 1,
+                explanation: "当 θ = 45° 时，sin(2θ) = sin(90°) = 1 达到最大值，射程最大。"
+            },
+            {
+                text: "一个物体从高处水平抛出，经过 3 秒落地，则下落高度为（g=10m/s²）：",
+                options: ["30 m", "45 m", "60 m", "90 m"],
+                correct: 1,
+                explanation: "h = ½gt² = ½ × 10 × 3² = 45 m"
+            },
+            {
+                text: "下列关于抛物线运动的说法，错误的是：",
+                options: [
+                    "水平方向做匀速运动",
+                    "垂直方向做自由落体运动",
+                    "运动轨迹是一条抛物线",
+                    "在任何位置加速度都相同"
+                ],
+                correct: 1,
+                explanation: "垂直方向做的是竖直上抛或竖直下抛运动，而非简单的自由落体运动，初速度不为零。"
+            }
+        ];
+        
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+        
+        // DOM ready initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            initCanvas();
+            initControls();
+            initNavigation();
+            initQuiz();
+        });
+        
+        function initCanvas() {
+            demoCanvas = document.getElementById('demoCanvas');
+            if (!demoCanvas) {
+                console.error('Canvas not found');
+                return;
+            }
+            
+            demoCtx = demoCanvas.getContext('2d');
+            if (!demoCtx) {
+                console.error('Could not get 2D context');
+                return;
+            }
+            
+            // Set canvas size
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Draw initial state
+            drawBackground();
+        }
+        
+        function resizeCanvas() {
+            if (!demoCanvas) return;
+            
+            const container = demoCanvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            demoCanvas.width = rect.width * dpr;
+            demoCanvas.height = 500 * dpr;
+            demoCanvas.style.width = rect.width + 'px';
+            demoCanvas.style.height = '500px';
+            
+            demoCtx = demoCanvas.getContext('2d');
+            demoCtx.scale(dpr, dpr);
+            
+            drawBackground();
+        }
+        
+        function drawBackground() {
+            if (!demoCtx || !demoCanvas) return;
+            
+            const width = demoCanvas.width / (window.devicePixelRatio || 1);
+            const height = demoCanvas.height / (window.devicePixelRatio || 1);
+            
+            // Clear canvas
+            demoCtx.fillStyle = '#0d1117';
+            demoCtx.fillRect(0, 0, width, height);
+            
+            // Draw grid
+            demoCtx.strokeStyle = 'rgba(0, 212, 170, 0.1)';
+            demoCtx.lineWidth = 1;
+            
+            // Vertical lines
+            for (let x = ORIGIN_X; x < width; x += 40) {
+                demoCtx.beginPath();
+                demoCtx.moveTo(x, 50);
+                demoCtx.lineTo(x, GROUND_Y);
+                demoCtx.stroke();
+            }
+            
+            // Horizontal lines
+            for (let y = 50; y <= GROUND_Y; y += 40) {
+                demoCtx.beginPath();
+                demoCtx.moveTo(ORIGIN_X, y);
+                demoCtx.lineTo(width - 20, y);
+                demoCtx.stroke();
+            }
+            
+            // Ground
+            demoCtx.fillStyle = 'rgba(0, 212, 170, 0.2)';
+            demoCtx.fillRect(0, GROUND_Y, width, height - GROUND_Y);
+            
+            demoCtx.strokeStyle = '#00d4aa';
+            demoCtx.lineWidth = 2;
+            demoCtx.beginPath();
+            demoCtx.moveTo(0, GROUND_Y);
+            demoCtx.lineTo(width, GROUND_Y);
+            demoCtx.stroke();
+            
+            // Axis labels
+            demoCtx.fillStyle = '#5a6b8a';
+            demoCtx.font = '12px Space Grotesk, sans-serif';
+            
+            for (let i = 0; i <= 10; i++) {
+                const x = ORIGIN_X + i * 40;
+                const label = i * 40;
+                demoCtx.fillText(label + 'm', x - 10, GROUND_Y + 20);
+            }
+            
+            for (let i = 0; i <= 10; i++) {
+                const y = GROUND_Y - i * 40;
+                if (y >= 50) {
+                    demoCtx.fillText(i * 40 + 'm', 5, y + 4);
+                }
+            }
+        }
+        
+        function drawProjectile() {
+            if (!demoCtx || !demoCanvas) return;
+            
+            drawBackground();
+            
+            // Draw trail
+            if (projectile.trail.length > 1) {
+                demoCtx.beginPath();
+                demoCtx.strokeStyle = 'rgba(0, 212, 170, 0.5)';
+                demoCtx.lineWidth = 2;
+                
+                for (let i = 0; i < projectile.trail.length; i++) {
+                    const point = projectile.trail[i];
+                    const screenX = ORIGIN_X + point.x * SCALE;
+                    const screenY = GROUND_Y - point.y * SCALE;
+                    
+                    if (i === 0) {
+                        demoCtx.moveTo(screenX, screenY);
+                    } else {
+                        demoCtx.lineTo(screenX, screenY);
+                    }
+                }
+                demoCtx.stroke();
+                
+                // Trail dots
+                for (let i = 0; i < projectile.trail.length; i += 5) {
+                    const point = projectile.trail[i];
+                    const screenX = ORIGIN_X + point.x * SCALE;
+                    const screenY = GROUND_Y - point.y * SCALE;
+                    
+                    demoCtx.beginPath();
+                    demoCtx.arc(screenX, screenY, 3, 0, Math.PI * 2);
+                    demoCtx.fillStyle = 'rgba(0, 212, 170, 0.8)';
+                    demoCtx.fill();
+                }
+            }
+            
+            // Draw projectile
+            const screenX = ORIGIN_X + projectile.x * SCALE;
+            const screenY = GROUND_Y - projectile.y * SCALE;
+            
+            // Glow effect
+            const gradient = demoCtx.createRadialGradient(screenX, screenY, 0, screenX, screenY, 30);
+            gradient.addColorStop(0, 'rgba(0, 212, 170, 0.6)');
+            gradient.addColorStop(1, 'rgba(0, 212, 170, 0)');
+            
+            demoCtx.fillStyle = gradient;
+            demoCtx.beginPath();
+            demoCtx.arc(screenX, screenY, 30, 0, Math.PI * 2);
+            demoCtx.fill();
+            
+            // Main ball
+            demoCtx.beginPath();
+            demoCtx.arc(screenX, screenY, 10, 0, Math.PI * 2);
+            demoCtx.fillStyle = '#00d4aa';
+            demoCtx.fill();
+            
+            demoCtx.beginPath();
+            demoCtx.arc(screenX - 3, screenY - 3, 4, 0, Math.PI * 2);
+            demoCtx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            demoCtx.fill();
+            
+            // Velocity vector
+            const vecScale = 2;
+            const vxEnd = screenX + projectile.vx * vecScale;
+            const vyEnd = screenY - projectile.vy * vecScale;
+            
+            demoCtx.beginPath();
+            demoCtx.strokeStyle = '#f59e0b';
+            demoCtx.lineWidth = 2;
+            demoCtx.moveTo(screenX, screenY);
+            demoCtx.lineTo(vxEnd, vyEnd);
+            demoCtx.stroke();
+            
+            // Arrow head
+            const angle = Math.atan2(-(projectile.vy), projectile.vx);
+            demoCtx.beginPath();
+            demoCtx.moveTo(vxEnd, vyEnd);
+            demoCtx.lineTo(vxEnd - 10 * Math.cos(angle - 0.3), vyEnd + 10 * Math.sin(angle - 0.3));
+            demoCtx.moveTo(vxEnd, vyEnd);
+            demoCtx.lineTo(vxEnd - 10 * Math.cos(angle + 0.3), vyEnd + 10 * Math.sin(angle + 0.3));
+            demoCtx.stroke();
+            
+            // Velocity components
+            // Vx component
+            demoCtx.beginPath();
+            demoCtx.strokeStyle = 'rgba(99, 102, 241, 0.8)';
+            demoCtx.setLineDash([5, 5]);
+            demoCtx.moveTo(screenX, screenY);
+            demoCtx.lineTo(vxEnd, screenY);
+            demoCtx.stroke();
+            
+            // Vy component
+            demoCtx.beginPath();
+            demoCtx.moveTo(vxEnd, screenY);
+            demoCtx.lineTo(vxEnd, vyEnd);
+            demoCtx.stroke();
+            demoCtx.setLineDash([]);
+            
+            // Labels
+            demoCtx.fillStyle = '#f59e0b';
+            demoCtx.font = 'bold 12px Space Grotesk, sans-serif';
+            demoCtx.fillText('v', vxEnd + 5, vyEnd - 5);
+            
+            demoCtx.fillStyle = 'rgba(99, 102, 241, 0.8)';
+            demoCtx.fillText('vx', (screenX + vxEnd) / 2, screenY + 15);
+            demoCtx.fillText('vy', vxEnd + 5, (screenY + vyEnd) / 2);
+        }
+        
+        function launch() {
+            if (isAnimating) {
+                cancelAnimationFrame(animationId);
+            }
+            
+            const angleRad = params.angle * Math.PI / 180;
+            
+            projectile = {
+                x: 0,
+                y: 0,
+                vx: params.velocity * Math.cos(angleRad),
+                vy: params.velocity

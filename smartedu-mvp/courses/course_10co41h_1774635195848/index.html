@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微积分演示</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0f1a;
+            --bg-secondary: #111827;
+            --fg: #e8edf5;
+            --muted: #6b7994;
+            --accent: #00d4aa;
+            --accent-secondary: #ff6b6b;
+            --card: #151d2e;
+            --border: #2a3548;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .bg-gradient {
+            background: 
+                radial-gradient(ellipse at 20% 0%, rgba(0, 212, 170, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 100%, rgba(255, 107, 107, 0.06) 0%, transparent 50%),
+                var(--bg);
+        }
+        
+        .nav-btn {
+            position: relative;
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 500;
+        }
+        
+        .nav-btn:hover {
+            border-color: var(--accent);
+            color: var(--fg);
+        }
+        
+        .nav-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg);
+        }
+        
+        .module {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .module.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            border-color: rgba(0, 212, 170, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 212, 170, 0.1);
+        }
+        
+        .formula {
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid rgba(0, 212, 170, 0.2);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            display: inline-block;
+            color: var(--accent);
+        }
+        
+        .canvas-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .control-btn {
+            padding: 0.5rem 1rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--fg);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        .control-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg);
+        }
+        
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            outline: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .quiz-option {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            text-align: left;
+            color: var(--fg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+        }
+        
+        .quiz-option:hover {
+            border-color: var(--accent);
+            background: rgba(0, 212, 170, 0.05);
+        }
+        
+        .quiz-option.correct {
+            border-color: var(--accent);
+            background: rgba(0, 212, 170, 0.15);
+        }
+        
+        .quiz-option.incorrect {
+            border-color: var(--accent-secondary);
+            background: rgba(255, 107, 107, 0.15);
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+            transition: width 0.5s ease;
+        }
+        
+        .floating-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 8s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+            50% { transform: translateY(-30px) translateX(20px); opacity: 0.6; }
+        }
+        
+        @media (prefers-reduced-motion: reduce) {
+            .floating-particle, .module {
+                animation: none;
+            }
+            .nav-btn, .card, .quiz-option, .control-btn {
+                transition: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+            .card {
+                padding: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient">
+    <!-- Floating Particles -->
+    <div id="particles" class="fixed inset-0 pointer-events-none overflow-hidden"></div>
+    
+    <!-- Header -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-opacity-80" style="background: rgba(10, 15, 26, 0.9);">
+        <div class="max-w-6xl mx-auto px-4 py-4">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <h1 class="text-2xl font-bold">
+                    <span style="color: var(--accent);">Calc</span>ulus
+                </h1>
+                <nav class="flex gap-2 flex-wrap justify-center">
+                    <button class="nav-btn active" data-target="concept" onclick="switchModule('concept')">概念讲解</button>
+                    <button class="nav-btn" data-target="demo" onclick="switchModule('demo')">图形演示</button>
+                    <button class="nav-btn" data-target="exercise" onclick="switchModule('exercise')">练习测试</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        
+        <!-- Concept Module -->
+        <section id="concept" class="module active">
+            <div class="space-y-8">
+                <div class="text-center space-y-4">
+                    <h2 class="text-4xl sm:text-5xl font-bold" style="color: var(--fg);">微积分基础</h2>
+                    <p class="text-lg" style="color: var(--muted);">探索变化率与累积的数学之美</p>
+                </div>
+                
+                <!-- Derivative Section -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="card space-y-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(0, 212, 170, 0.15);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent);">
+                                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold">导数</h3>
+                        </div>
+                        <p style="color: var(--muted);">导数描述函数在某一点的瞬时变化率，是微积分的核心概念之一。</p>
+                        <div class="formula mono text-lg">
+                            f'(x) = lim<sub>h→0</sub> [f(x+h) - f(x)] / h
+                        </div>
+                        <p style="color: var(--muted);">几何意义：曲线在该点切线的斜率</p>
+                    </div>
+                    
+                    <div class="card space-y-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(255, 107, 107, 0.15);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-secondary);">
+                                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                    <path d="M3 9h18M9 21V9"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold">积分</h3>
+                        </div>
+                        <p style="color: var(--muted);">积分是导数的逆运算，用于计算曲线下的面积和累积量。</p>
+                        <div class="formula mono text-lg" style="background: rgba(255, 107, 107, 0.1); border-color: rgba(255, 107, 107, 0.2); color: var(--accent-secondary);">
+                            ∫<sub>a</sub><sup>b</sup> f(x) dx = F(b) - F(a)
+                        </div>
+                        <p style="color: var(--muted);">几何意义：曲线与x轴之间的有向面积</p>
+                    </div>
+                </div>
+                
+                <!-- Key Concepts -->
+                <div class="card">
+                    <h3 class="text-xl font-bold mb-6">核心定理</h3>
+                    <div class="space-y-6">
+                        <div class="p-4 rounded-lg" style="background: var(--bg-secondary);">
+                            <h4 class="font-bold mb-2" style="color: var(--accent);">微积分基本定理</h4>
+                            <p style="color: var(--muted);" class="mb-3">建立了微分与积分之间的桥梁，揭示了它们互为逆运算的关系。</p>
+                            <div class="formula mono">
+                                d/dx ∫<sub>a</sub><sup>x</sup> f(t) dt = f(x)
+                            </div>
+                        </div>
+                        
+                        <div class="grid sm:grid-cols-3 gap-4">
+                            <div class="p-4 rounded-lg text-center" style="background: var(--bg-secondary);">
+                                <div class="text-2xl font-bold" style="color: var(--accent);">链式法则</div>
+                                <p class="mono text-sm mt-2" style="color: var(--muted);">[f(g(x))]' = f'(g(x))·g'(x)</p>
+                            </div>
+                            <div class="p-4 rounded-lg text-center" style="background: var(--bg-secondary);">
+                                <div class="text-2xl font-bold" style="color: var(--accent);">乘积法则</div>
+                                <p class="mono text-sm mt-2" style="color: var(--muted);">[f·g]' = f'g + fg'</p>
+                            </div>
+                            <div class="p-4 rounded-lg text-center" style="background: var(--bg-secondary);">
+                                <div class="text-2xl font-bold" style="color: var(--accent);">商法则</div>
+                                <p class="mono text-sm mt-2" style="color: var(--muted);">[f/g]' = (f'g - fg')/g²</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Demo Module -->
+        <section id="demo" class="module">
+            <div class="space-y-6">
+                <div class="text-center space-y-2">
+                    <h2 class="text-3xl font-bold">图形演示</h2>
+                    <p style="color: var(--muted);">拖动滑块调整参数，观察曲线变化</p>
+                </div>
+                
+                <div class="grid lg:grid-cols-3 gap-6">
+                    <!-- Canvas Area -->
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="canvas-container">
+                            <canvas id="mainCanvas" width="700" height="450"></canvas>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="control-btn" onclick="setDemo('derivative')">导数演示</button>
+                            <button class="control-btn" onclick="setDemo('integral')">积分演示</button>
+                            <button class="control-btn" onclick="setDemo('tangent')">切线可视化</button>
+                            <button class="control-btn" onclick="setDemo('riemann')">黎曼和</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Controls -->
+                    <div class="card space-y-6">
+                        <div>
+                            <h3 class="font-bold mb-4">函数选择</h3>
+                            <select id="functionSelect" class="w-full p-3 rounded-lg" style="background: var(--bg-secondary); border: 1px solid var(--border); color: var(--fg);" onchange="updateDemo()">
+                                <option value="quadratic">f(x) = x²</option>
+                                <option value="sine">f(x) = sin(x)</option>
+                                <option value="cubic">f(x) = x³ - x</option>
+                                <option value="exp">f(x) = e^x</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block mb-2 font-medium">观察点位置</label>
+                            <input type="range" id="pointSlider" class="slider" min="-2" max="2" step="0.05" value="0" oninput="updateDemo()">
+                            <div class="flex justify-between text-sm mt-1" style="color: var(--muted);">
+                                <span>-2</span>
+                                <span id="pointValue" class="mono" style="color: var(--accent);">0.00</span>
+                                <span>2</span>
+                            </div>
+                        </div>
+                        
+                        <div id="integralControls" style="display: none;">
+                            <label class="block mb-2 font-medium">积分上限</label>
+                            <input type="range" id="integralSlider" class="slider" min="-2" max="2" step="0.05" value="1" oninput="updateDemo()">
+                            <div class="flex justify-between text-sm mt-1" style="color: var(--muted);">
+                                <span>-2</span>
+                                <span id="integralValue" class="mono" style="color: var(--accent-secondary);">1.00</span>
+                                <span>2</span>
+                            </div>
+                        </div>
+                        
+                        <div id="riemannControls" style="display: none;">
+                            <label class="block mb-2 font-medium">矩形数量</label>
+                            <input type="range" id="riemannSlider" class="slider" min="4" max="50" step="1" value="10" oninput="updateDemo()">
+                            <div class="text-center text-sm mt-1 mono" style="color: var(--accent);">
+                                <span id="riemannValue">10</span> 个矩形
+                            </div>
+                        </div>
+                        
+                        <div class="p-4 rounded-lg" style="background: var(--bg-secondary);">
+                            <h4 class="font-bold mb-2">计算结果</h4>
+                            <div id="resultDisplay" class="space-y-2 mono text-sm">
+                                <div>f(x) = <span style="color: var(--accent);">x²</span></div>
+                                <div>f'(x) = <span style="color: var(--accent-secondary);">2x</span></div>
+                                <div>在 x = 0: <span style="color: var(--fg);">f'(0) = 0</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Exercise Module -->
+        <section id="exercise" class="module">
+            <div class="space-y-6">
+                <div class="text-center space-y-2">
+                    <h2 class="text-3xl font-bold">练习测试</h2>
+                    <p style="color: var(--muted);">检验你的微积分知识</p>
+                </div>
+                
+                <!-- Progress -->
+                <div class="card">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-medium">进度</span>
+                        <span id="progressText" class="mono" style="color: var(--accent);">0 / 5</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+                
+                <!-- Quiz Area -->
+                <div class="card">
+                    <div id="quizArea">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center mono font-bold" style="background: var(--accent); color: var(--bg);">
+                                <span id="questionNum">1</span>
+                            </div>
+                            <h3 id="questionText" class="text-xl font-bold">函数 f(x) = x² 的导数是?</h3>
+                        </div>
+                        
+                        <div id="optionsContainer" class="space-y-3">
+                            <!-- Options will be populated by JS -->
+                        </div>
+                        
+                        <div id="feedback" class="mt-6 p-4 rounded-lg hidden" style="background: var(--bg-secondary);">
+                            <p id="feedbackText"></p>
+                        </div>
+                        
+                        <div class="flex justify-end mt-6">
+                            <button id="nextBtn" class="control-btn hidden" onclick="nextQuestion()">下一题</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Results -->
+                    <div id="resultsArea" class="hidden text-center space-y-6">
+                        <div class="text-6xl font-bold" style="color: var(--accent);" id="scoreDisplay">0%</div>
+                        <p id="scoreMessage" style="color: var(--muted);">继续努力!</p>
+                        <button class="control-btn" onclick="restartQuiz()">重新开始</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+    </main>
+    
+    <!-- Footer -->
+    <footer class="text-center py-8" style="color: var(--muted);">
+        <p>微积分演示 - 交互式学习工具</p>
+    </footer>
+
+    <script>
+        // Initialize variables first
+        let currentDemo = 'derivative';
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+        
+        // Quiz Data
+        const quizData = [
+            {
+                question: "函数 f(x) = x² 的导数是?",
+                options: ["f'(x) = x", "f'(x) = 2x", "f'(x) = x²", "f'(x) = 2x²"],
+                correct: 1,
+                explanation: "根据幂函数求导法则，(xⁿ)' = n·xⁿ⁻¹，所以 (x²)' = 2x"
+            },
+            {
+                question: "∫x dx 等于?",
+                options: ["x²", "x²/2", "x", "1"],
+                correct: 1,
+                explanation: "根据幂函数积分公式，∫xⁿdx = xⁿ⁺¹/(n+1) + C，所以 ∫x dx = x²/2 + C"
+            },
+            {
+                question: "函数 f(x) = sin(x) 的导数是?",
+                options: ["cos(x)", "-sin(x)", "-cos(x)", "sin(x)"],
+                correct: 0,
+                explanation: "三角函数的导数：(sin x)' = cos x，(cos x)' = -sin x"
+            },
+            {
+                question: "微积分基本定理建立了什么之间的关系?",
+                options: ["极限与连续", "导数与积分", "微分与极限", "积分与级数"],
+                correct: 1,
+                explanation: "微积分基本定理建立了导数与积分之间的桥梁，表明它们互为逆运算"
+            },
+            {
+                question: "如果 f'(x₀) = 0，则 x₀ 可能是什么点?",
+                options: ["断点", "极值点", "零点", "拐点"],
+                correct: 1,
+                explanation: "导数为零的点可能是极值点（极大值或极小值），这是费马定理的内容"
+            }
+        ];
+        
+        // Function definitions
+        const functions = {
+            quadratic: { f: x => x * x, df: x => 2 * x, name: 'x²', dname: '2x' },
+            sine: { f: x => Math.sin(x * 2), df: x => 2 * Math.cos(x * 2), name: 'sin(x)', dname: 'cos(x)' },
+            cubic: { f: x => x * x * x - x, df: x => 3 * x * x - 1, name: 'x³ - x', dname: '3x² - 1' },
+            exp: { f: x => Math.exp(x) - 1, df: x => Math.exp(x), name: 'e^x - 1', dname: 'e^x' }
+        };
+        
+        // Particle system
+        function createParticles() {
+            const container = document.getElementById('particles');
+            if (!container) return;
+            container.innerHTML = '';
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'floating-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (6 + Math.random() * 4) + 's';
+                container.appendChild(particle);
+            }
+        }
+        
+        // Module switching
+        function switchModule(targetId) {
+            const modules = document.querySelectorAll('.module');
+            modules.forEach(m => m.classList.remove('active'));
+            
+            const targetModule = document.getElementById(targetId);
+            if (targetModule) {
+                targetModule.classList.add('active');
+            }
+            
+            const buttons = document.querySelectorAll('.nav-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-target') === targetId) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            if (targetId === 'demo') {
+                setTimeout(initCanvas, 100);
+            }
+        }
+        
+        // Canvas initialization
+        function initCanvas() {
+            const canvas = document.getElementById('mainCanvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+            
+            // Responsive canvas
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            canvas.width = Math.max(400, rect.width);
+            canvas.height = 450;
+            
+            updateDemo();
+        }
+        
+        // Set demo type
+        function setDemo(type) {
+            currentDemo = type;
+            
+            const integralControls = document.getElementById('integralControls');
+            const riemannControls = document.getElementById('riemannControls');
+            
+            if (integralControls) integralControls.style.display = 'none';
+            if (riemannControls) riemannControls.style.display = 'none';
+            
+            if (type === 'integral' && integralControls) {
+                integralControls.style.display = 'block';
+            } else if (type === 'riemann' && riemannControls) {
+                riemannControls.style.display = 'block';
+            }
+            
+            updateDemo();
+        }
+        
+        // Update demo visualization
+        function updateDemo() {
+            const canvas = document.getElementById('mainCanvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+            
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // Clear canvas
+            ctx.fillStyle = '#111827';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Get current values
+            const funcSelect = document.getElementById('functionSelect');
+            const pointSlider = document.getElementById('pointSlider');
+            const integralSlider = document.getElementById('integralSlider');
+            const riemannSlider = document.getElementById('riemannSlider');
+            
+            const funcKey = funcSelect ? funcSelect.value : 'quadratic';
+            const x0 = pointSlider ? parseFloat(pointSlider.value) : 0;
+            const x1 = integralSlider ? parseFloat(integralSlider.value) : 1;
+            const n = riemannSlider ? parseInt(riemannSlider.value) : 10;
+            
+            // Update displays
+            const pointValue = document.getElementById('pointValue');
+            const integralValue = document.getElementById('integralValue');
+            const riemannValue = document.getElementById('riemannValue');
+            
+            if (pointValue) pointValue.textContent = x0.toFixed(2);
+            if (integralValue) integralValue.textContent = x1.toFixed(2);
+            if (riemannValue) riemannValue.textContent = n;
+            
+            const func = functions[funcKey];
+            
+            // Coordinate system
+            const cx = width / 2;
+            const cy = height / 2;
+            const scale = 80;
+            
+            // Draw grid
+            ctx.strokeStyle = '#2a3548';
+            ctx.lineWidth = 1;
+            for (let i = -5; i <= 5; i++) {
+                ctx.beginPath();
+                ctx.moveTo(cx + i * scale, 0);
+                ctx.lineTo(cx + i * scale, height);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, cy + i * scale);
+                ctx.lineTo(width, cy + i * scale);
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#6b7994';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, cy);
+            ctx.lineTo(width, cy);
+            ctx.moveTo(cx, 0);
+            ctx.lineTo(cx, height);
+            ctx.stroke();
+            
+            // Draw function curve
+            ctx.strokeStyle = '#00d4aa';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            let started = false;
+            for (let px = 0; px < width; px++) {
+                const x = (px - cx) / scale;
+                const y = func.f(x);
+                const py = cy - y * scale;
+                if (py > -100 && py < height + 100) {
+                    if (!started) {
+                        ctx.moveTo(px, py);
+                        started = true;
+                    } else {
+                        ctx.lineTo(px, py);
+                    }
+                }
+            }
+            ctx.stroke();
+            
+            // Demo specific visualizations
+            if (currentDemo === 'derivative' || currentDemo === 'tangent') {
+                // Draw tangent line
+                const slope = func.df(x0);
+                const y0 = func.f(x0);
+                
+                ctx.strokeStyle = '#ff6b6b';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                const xStart = x0 - 3;
+                const xEnd = x0 + 3;
+                ctx.moveTo(cx + xStart * scale, cy - (y0 + slope * (xStart - x0)) * scale);
+                ctx.lineTo(cx + xEnd * scale, cy - (y0 + slope * (xEnd - x0)) * scale);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Draw point
+                ctx.fillStyle = '#ff6b6b';
+                ctx.beginPath();
+                ctx.arc(cx + x0 * scale, cy - y0 * scale, 8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Update result
+                updateResult(func.name, func.dname, x0, slope);
+            }
+            
+            if (currentDemo === 'integral') {
+                // Draw integral area
+                ctx.fillStyle = 'rgba(255, 107, 107, 0.3)';
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                for (let x = 0; x <= x1; x += 0.02) {
+                    const y = func.f(x);
+                    ctx.lineTo(cx + x * scale, cy - y * scale);
+                }
+                ctx.lineTo(cx + x1 * scale, cy);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Calculate integral (approximate)
+                let integral = 0;
+                const steps = 1000;
+                const dx = x1 / steps;
+                for (let i = 0; i < steps; i++) {
+                    integral += func.f(i * dx) * dx;
+                }
+                
+                updateResultIntegral(func.name, x1, integral);
+            }
+            
+            if (currentDemo === 'riemann') {
+                // Draw Riemann rectangles
+                const a = 0;
+                const b = x1;
+                const dx = (b - a) / n;
+                
+                for (let i = 0; i < n; i++) {
+                    const x = a + i * dx;
+                    const y = func.f(x + dx / 2); // midpoint
+                    const rectHeight = Math.abs(y) * scale;
+                    
+                    ctx.fillStyle = i % 2 === 0 ? 'rgba(0, 212, 170, 0.4)' : 'rgba(255, 107, 107, 0.4)';
+                    ctx.fillRect(
+                        cx + x * scale,
+                        cy - Math.max(0, y) * scale,
+                        dx * scale,
+                        rectHeight
+                    );
+                    ctx.strokeStyle = '#00d4aa';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(
+                        cx + x * scale,
+                        cy - Math.max(0, y) * scale,
+                        dx * scale,
+                        rectHeight
+                    );
+                }
+                
+                // Calculate Riemann sum
+                let sum = 0;
+                for (let i = 0; i < n; i++) {
+                    const x = a + i * dx + dx / 2;
+                    sum += func.f(x) * dx;
+                }
+                
+                updateResultRiemann(n, sum);
+            }
+        }
+        
+        // Update result displays
+        function updateResult(fname, dfname, x, slope) {
+            const display = document.getElementById('resultDisplay');
+            if (!display) return;
+            display.innerHTML = `
+                <div>f(x) = <span style="color: var(--accent);">${fname}</span></div>
+                <div>f'(x) = <span style="color: var(--accent-secondary);">${dfname}</span></div>
+                <div>在 x = ${x.toFixed(2)}: <span style="color: var(--fg);">f'(${x.toFixed(2)}) = ${slope.toFixed(3)}</span></div>
+            `;
+        }
+        
+        function updateResultIntegral(fname, x1, integral) {
+            const display = document.getElementById('resultDisplay');
+            if (!display) return;
+            display.innerHTML = `
+                <div>f(x) = <span style="color: var(--accent);">${fname}</span></div>
+                <div>∫₀^${x1.toFixed(2)} f(x) dx ≈ <span style="color: var(--accent-secondary);">${integral.toFixed(4)}</span></div>
+            `;
+        }
+        
+        function updateResultRiemann(n, sum) {
+            const display = document.getElementById('resultDisplay');
+            if (!display) return;
+            display.innerHTML = `
+                <div>矩形数量: <span style="color: var(--accent);">${n}</span></div>
+                <div>黎曼和 ≈ <span style="color: var(--accent-secondary);">${sum.toFixed(4)}</span></div>
+            `;
+        }
+        
+        // Quiz functions
+        function loadQuestion() {
+            const quizArea = document.getElementById('quizArea');
+            const resultsArea = document.getElementById('resultsArea');
+            
+            if (currentQuestion >= quizData.length) {
+                showResults();
+                return;
+            }
+            
+            if (quizArea) quizArea.classList.remove('hidden');
+            if (resultsArea) resultsArea.classList.add('hidden');
+            
+            const q = quizData[currentQuestion];
+            const questionNum = document.getElementById('questionNum');
+            const questionText = document.getElementById('questionText');
+            const optionsContainer = document.getElementById('optionsContainer');
+            const feedback = document.getElementById('feedback');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            if (questionNum) questionNum.textContent = currentQuestion + 1;
+            if (questionText) questionText.textContent = q.question;
+            if (feedback) feedback.classList.add('hidden');
+            if (nextBtn) nextBtn.classList.add('hidden');
+            
+            answered = false;
+            
+            if (optionsContainer) {
+                optionsContainer.innerHTML = '';
+                q.options.forEach((opt, i) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'quiz-option';
+                    btn.textContent = opt;
+                    btn.onclick = () => selectAnswer(i);
+                    optionsContainer.appendChild(btn);
+                });
+            }
+            
+            updateProgress();
+        }
+        
+        function selectAnswer(index) {
+            if (answered) return;
+            answered = true;
+            
+            const q = quizData[currentQuestion];
+            const options = document.querySelectorAll('.quiz-option');
+            const feedback = document.getElementById('feedback');
+            const feedbackText = document.getElementById('feedbackText');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            options.forEach((opt, i) => {
+                opt.style.pointerEvents = 'none';
+                if (i === q.correct) {
+                    opt.classList.add('correct');
+                } else if (i === index && index !== q.correct) {
+                    opt.classList.add('incorrect');
+                }
+            });
+            
+            if (feedback && feedbackText) {
+                feedback.classList.remove('hidden');
+                if (index === q.correct) {
+                    score++;
+                    feedbackText.innerHTML = `<span style="color: var(--accent);">正确!</span> ${q.explanation}`;
+                } else {
+                    feedbackText.innerHTML = `<span style="color: var(--accent-secondary);">错误!</span> ${q.explanation}`;
+                }
+            }
+            
+            if (nextBtn) nextBtn.classList.remove('hidden');
+        }
+        
+        function nextQuestion() {
+            currentQuestion++;
+            loadQuestion();
+        }
+        
+        function updateProgress() {
+            const progressText = document.getElementById('progressText');
+            const progressFill = document.getElementById('progressFill');
+            
+            if (progressText) progressText.textContent = `${currentQuestion} / ${quizData.length}`;
+            if (progressFill) progressFill.style.width = `${(currentQuestion / quizData.length) * 100}%`;
+        }

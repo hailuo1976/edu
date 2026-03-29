@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>波的传播与干涉 - 物理课件</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0f1a;
+            --bg-secondary: #111827;
+            --fg: #f0f4f8;
+            --muted: #8b9cb3;
+            --accent: #00d4aa;
+            --accent-warm: #ff6b4a;
+            --card: rgba(17, 24, 39, 0.8);
+            --border: rgba(255, 255, 255, 0.1);
+            --glow: rgba(0, 212, 170, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .font-display {
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        .gradient-mesh {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background: 
+                radial-gradient(ellipse 80% 50% at 20% 20%, rgba(0, 212, 170, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255, 107, 74, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse 100% 100% at 50% 50%, rgba(10, 15, 26, 1) 0%, rgba(17, 24, 39, 1) 100%);
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        }
+
+        .section-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .section-card:hover {
+            border-color: rgba(0, 212, 170, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 40px var(--glow);
+        }
+
+        .wave-canvas {
+            border-radius: 16px;
+            background: linear-gradient(180deg, rgba(0, 20, 40, 0.8) 0%, rgba(10, 15, 26, 0.9) 100%);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, #00a88a 100%);
+            color: var(--bg);
+            font-weight: 600;
+            padding: 12px 28px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 212, 170, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--accent);
+            font-weight: 500;
+            padding: 12px 28px;
+            border-radius: 12px;
+            border: 2px solid var(--accent);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 212, 170, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .concept-highlight {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .concept-warm {
+            color: var(--accent-warm);
+            font-weight: 600;
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slider-container input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--glow);
+            transition: transform 0.2s ease;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--muted);
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: rgba(0, 212, 170, 0.15);
+            color: var(--accent);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: var(--fg);
+        }
+
+        .answer-option {
+            padding: 16px 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .answer-option:hover {
+            border-color: rgba(0, 212, 170, 0.5);
+            background: rgba(0, 212, 170, 0.05);
+        }
+
+        .answer-option.selected {
+            border-color: var(--accent);
+            background: rgba(0, 212, 170, 0.1);
+        }
+
+        .answer-option.correct {
+            border-color: var(--accent);
+            background: rgba(0, 212, 170, 0.2);
+        }
+
+        .answer-option.incorrect {
+            border-color: var(--accent-warm);
+            background: rgba(255, 107, 74, 0.2);
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .floating-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0.6; }
+            50% { transform: translateY(-20px) translateX(10px); opacity: 0.3; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse-dot {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .fade-in {
+                opacity: 1;
+                transform: none;
+                transition: none;
+            }
+            .floating-particle {
+                animation: none;
+            }
+            .pulse-dot {
+                animation: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .section-card {
+                border-radius: 16px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-mesh"></div>
+    <div class="noise-overlay"></div>
+    
+    <main class="relative z-10 max-w-6xl mx-auto px-4 py-12 md:py-20">
+        <!-- Header -->
+        <header class="text-center mb-16 fade-in">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-opacity-20 border border-opacity-30 mb-6" style="background: rgba(0, 212, 170, 0.1); border-color: rgba(0, 212, 170, 0.3);">
+                <span class="w-2 h-2 rounded-full pulse-dot" style="background: var(--accent);"></span>
+                <span class="text-sm font-medium" style="color: var(--accent);">物理课件 / 波动光学</span>
+            </div>
+            <h1 class="font-display text-4xl md:text-6xl font-black mb-6 leading-tight" style="letter-spacing: -0.02em;">
+                波的传播与<span class="concept-highlight">干涉</span>现象
+            </h1>
+            <p class="text-lg md:text-xl max-w-2xl mx-auto" style="color: var(--muted);">
+                探索波的神奇世界，理解两个波相遇时发生的奇妙现象
+            </p>
+        </header>
+
+        <!-- Concept Module -->
+        <section id="concept" class="section-card p-6 md:p-10 mb-8 fade-in">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, var(--accent), #00a88a);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--bg);">
+                        <path d="M2 12h2M6 8v8M10 4v16M14 8v8M18 6v12M22 10v4"/>
+                    </svg>
+                </div>
+                <h2 class="font-display text-2xl md:text-3xl font-bold">概念讲解</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <span class="w-1.5 h-6 rounded-full" style="background: var(--accent);"></span>
+                        什么是波？
+                    </h3>
+                    <p class="leading-relaxed mb-4" style="color: var(--muted);">
+                        波是<span class="concept-highlight">能量的传播方式</span>，它不需要物质的整体移动，而是通过介质中粒子的振动将能量传递出去。想象一下，当你在平静的湖面上投下一颗石子，水面会泛起层层涟漪——这就是最直观的波动现象。
+                    </p>
+                    <p class="leading-relaxed" style="color: var(--muted);">
+                        波有两个核心特征：<span class="concept-highlight">波长</span>（一个完整波形的空间长度）和<span class="concept-highlight">频率</span>（每秒振动的次数）。它们的关系是：波速 = 波长 × 频率。
+                    </p>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <span class="w-1.5 h-6 rounded-full" style="background: var(--accent-warm);"></span>
+                        波的干涉
+                    </h3>
+                    <p class="leading-relaxed mb-4" style="color: var(--muted);">
+                        当两列或多列波在同一介质中相遇时，它们会发生<span class="concept-warm">叠加</span>。这就是著名的<span class="concept-highlight">叠加原理</span>：在相遇区域，每个点的位移等于各列波单独作用时位移的矢量和。
+                    </p>
+                    <div class="p-4 rounded-xl mb-4" style="background: rgba(0, 212, 170, 0.1); border-left: 3px solid var(--accent);">
+                        <p class="text-sm font-medium mb-2" style="color: var(--accent);">关键知识点</p>
+                        <p class="text-sm" style="color: var(--muted);">
+                            <strong>相长干涉：</strong>波峰与波峰相遇，振幅加倍<br>
+                            <strong>相消干涉：</strong>波峰与波谷相遇，振幅减小甚至为零
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 p-6 rounded-xl" style="background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--border);">
+                <h4 class="font-bold mb-3">生活实例</h4>
+                <div class="grid md:grid-cols-3 gap-4 text-sm" style="color: var(--muted);">
+                    <div class="p-4 rounded-lg" style="background: rgba(0, 0, 0, 0.2);">
+                        <strong class="block mb-1" style="color: var(--fg);">降噪耳机</strong>
+                        利用相消干涉原理，产生与外界噪音相反的声波，实现静音效果
+                    </div>
+                    <div class="p-4 rounded-lg" style="background: rgba(0, 0, 0, 0.2);">
+                        <strong class="block mb-1" style="color: var(--fg);">肥皂泡颜色</strong>
+                        光在薄膜前后表面反射后发生干涉，形成绚丽的彩色条纹
+                    </div>
+                    <div class="p-4 rounded-lg" style="background: rgba(0, 0, 0, 0.2);">
+                        <strong class="block mb-1" style="color: var(--fg);">全息影像</strong>
+                        利用激光干涉记录物体的全部信息，实现立体成像
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Module -->
+        <section id="demo" class="section-card p-6 md:p-10 mb-8 fade-in">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, var(--accent-warm), #ff8a6b);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--bg);">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                </div>
+                <h2 class="font-display text-2xl md:text-3xl font-bold">互动演示</h2>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="flex flex-wrap gap-2 mb-6 p-1 rounded-xl" style="background: rgba(255, 255, 255, 0.03);">
+                <button class="tab-btn active" data-tab="single" onclick="switchTab('single')">单波传播</button>
+                <button class="tab-btn" data-tab="double" onclick="switchTab('double')">双波干涉</button>
+                <button class="tab-btn" data-tab="standing" onclick="switchTab('standing')">驻波形成</button>
+            </div>
+
+            <!-- Canvas Container -->
+            <div class="relative rounded-xl overflow-hidden mb-6" style="background: rgba(0, 0, 0, 0.3);">
+                <canvas id="waveCanvas" class="wave-canvas w-full" style="height: 320px;"></canvas>
+                <div id="waveInfo" class="absolute top-4 left-4 px-3 py-2 rounded-lg text-sm font-medium" style="background: rgba(0, 0, 0, 0.7); color: var(--accent);">
+                    单波传播模式
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="slider-container">
+                    <div class="flex justify-between mb-2">
+                        <label class="font-medium">波长</label>
+                        <span id="wavelengthValue" class="font-mono" style="color: var(--accent);">50</span>
+                    </div>
+                    <input type="range" id="wavelength" min="20" max="100" value="50" oninput="updateWavelength(this.value)">
+                </div>
+                <div class="slider-container">
+                    <div class="flex justify-between mb-2">
+                        <label class="font-medium">振幅</label>
+                        <span id="amplitudeValue" class="font-mono" style="color: var(--accent);">40</span>
+                    </div>
+                    <input type="range" id="amplitude" min="10" max="80" value="40" oninput="updateAmplitude(this.value)">
+                </div>
+                <div class="slider-container">
+                    <div class="flex justify-between mb-2">
+                        <label class="font-medium">频率</label>
+                        <span id="frequencyValue" class="font-mono" style="color: var(--accent);">1.0x</span>
+                    </div>
+                    <input type="range" id="frequency" min="0.5" max="3" step="0.1" value="1" oninput="updateFrequency(this.value)">
+                </div>
+                <div class="slider-container" id="phaseControl" style="display: none;">
+                    <div class="flex justify-between mb-2">
+                        <label class="font-medium">相位差</label>
+                        <span id="phaseValue" class="font-mono" style="color: var(--accent-warm);">0°</span>
+                    </div>
+                    <input type="range" id="phase" min="0" max="360" value="0" oninput="updatePhase(this.value)">
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap gap-4 mt-6">
+                <button class="btn-primary" onclick="toggleAnimation()">
+                    <span id="playBtn">暂停动画</span>
+                </button>
+                <button class="btn-secondary" onclick="resetDemo()">重置参数</button>
+            </div>
+        </section>
+
+        <!-- Exercise Module -->
+        <section id="exercise" class="section-card p-6 md:p-10 fade-in">
+            <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: white;">
+                            <path d="M9 11l3 3L22 4"/>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                        </svg>
+                    </div>
+                    <h2 class="font-display text-2xl md:text-3xl font-bold">知识检测</h2>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-sm" style="color: var(--muted);">当前得分</span>
+                    <div class="relative w-16 h-16">
+                        <svg class="progress-ring w-16 h-16">
+                            <circle cx="32" cy="32" r="28" stroke="rgba(255,255,255,0.1)" stroke-width="4" fill="none"/>
+                            <circle id="progressCircle" cx="32" cy="32" r="28" stroke="var(--accent)" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="175.93" stroke-dashoffset="175.93"/>
+                        </svg>
+                        <span id="scoreDisplay" class="absolute inset-0 flex items-center justify-center font-bold text-lg">0/5</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Container -->
+            <div id="questionContainer">
+                <div class="mb-6">
+                    <span class="text-sm font-medium px-3 py-1 rounded-full" style="background: rgba(99, 102, 241, 0.2); color: #8b5cf6;">题目 <span id="currentQ">1</span> / 5</span>
+                </div>
+                <h3 id="questionText" class="text-xl font-bold mb-6"></h3>
+                <div id="answerOptions" class="space-y-3"></div>
+            </div>
+
+            <!-- Result Container -->
+            <div id="resultContainer" class="hidden text-center py-8">
+                <div class="w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center" style="background: rgba(0, 212, 170, 0.2);">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                </div>
+                <h3 class="font-display text-3xl font-bold mb-2">测试完成</h3>
+                <p id="finalScore" class="text-xl mb-6" style="color: var(--muted);"></p>
+                <button class="btn-primary" onclick="restartQuiz()">重新测试</button>
+            </div>
+
+            <div class="flex justify-end mt-6">
+                <button id="nextBtn" class="btn-primary" onclick="nextQuestion()">下一题</button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center mt-12 py-8 fade-in" style="color: var(--muted);">
+            <p class="text-sm">物理课件 · 波动光学系列 · 适合高中物理学习</p>
+        </footer>
+    </main>
+
+    <script>
+        // ============ 全局变量初始化 ============
+        const canvas = document.getElementById('waveCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let animationId = null;
+        let isAnimating = true;
+        let currentTab = 'single';
+        let time = 0;
+        
+        // 波形参数
+        let waveParams = {
+            wavelength: 50,
+            amplitude: 40,
+            frequency: 1,
+            phase: 0
+        };
+
+        // 题目数据
+        const questions = [
+            {
+                question: "当两列波的波峰与波峰相遇时，会发生什么现象？",
+                options: ["相消干涉", "相长干涉", "波的折射", "波的衍射"],
+                correct: 1,
+                explanation: "波峰与波峰相遇时，两列波的振动方向相同，振幅相加，产生相长干涉。"
+            },
+            {
+                question: "降噪耳机的工作原理是什么？",
+                options: ["反射声波", "吸收声波", "利用相消干涉抵消噪音", "增强外部声音"],
+                correct: 2,
+                explanation: "降噪耳机产生与外界噪音相位相反的声波，利用相消干涉原理抵消噪音。"
+            },
+            {
+                question: "下列哪个现象不是波的干涉现象？",
+                options: ["肥皂泡的彩色条纹", "水面油膜的彩色", "彩虹的形成", "双缝干涉实验中的明暗条纹"],
+                correct: 2,
+                explanation: "彩虹是光的折射和色散现象，不是干涉现象。其他选项都是光的干涉产生的。"
+            },
+            {
+                question: "波长为λ的波，其相邻波峰之间的距离是多少？",
+                options: ["λ/2", "λ", "2λ", "λ/4"],
+                correct: 1,
+                explanation: "波长的定义就是相邻两个波峰（或波谷）之间的距离，所以答案就是λ。"
+            },
+            {
+                question: "驻波有什么特点？",
+                options: ["波形不断向前传播", "所有点都在振动", "存在不振动的节点", "能量持续向前传递"],
+                correct: 2,
+                explanation: "驻波中存在不振动的点（节点），波形不向前传播，能量在波节和波腹之间来回转换。"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+
+        // ============ Canvas 初始化 ============
+        function initCanvas() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+        }
+
+        // ============ 波形绘制函数 ============
+        function drawWave(offset, color, alpha, phaseOffset) {
+            const width = canvas.getBoundingClientRect().width;
+            const height = canvas.getBoundingClientRect().height;
+            const centerY = height / 2;
+            
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.globalAlpha = alpha;
+            ctx.lineWidth = 3;
+            
+            const wavelength = Math.max(10, waveParams.wavelength);
+            const amplitude = Math.max(5, Math.min(100, waveParams.amplitude));
+            const k = (2 * Math.PI) / wavelength;
+            const omega = waveParams.frequency * 0.05;
+            
+            for (let x = 0; x <= width; x += 2) {
+                const y = centerY + amplitude * Math.sin(k * x - omega * time + phaseOffset);
+                if (x === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
+
+        function drawCombinedWave() {
+            const width = canvas.getBoundingClientRect().width;
+            const height = canvas.getBoundingClientRect().height;
+            const centerY = height / 2;
+            
+            ctx.beginPath();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            ctx.globalAlpha = 0.9;
+            
+            const wavelength = Math.max(10, waveParams.wavelength);
+            const amplitude = Math.max(5, Math.min(100, waveParams.amplitude));
+            const k = (2 * Math.PI) / wavelength;
+            const omega = waveParams.frequency * 0.05;
+            const phaseRad = waveParams.phase * Math.PI / 180;
+            
+            for (let x = 0; x <= width; x += 2) {
+                const y1 = amplitude * Math.sin(k * x - omega * time);
+                const y2 = amplitude * Math.sin(k * x - omega * time + phaseRad);
+                const y = centerY + (y1 + y2) / 2;
+                if (x === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
+
+        function drawStandingWave() {
+            const width = canvas.getBoundingClientRect().width;
+            const height = canvas.getBoundingClientRect().height;
+            const centerY = height / 2;
+            
+            const wavelength = Math.max(10, waveParams.wavelength);
+            const amplitude = Math.max(5, Math.min(100, waveParams.amplitude));
+            const k = (2 * Math.PI) / wavelength;
+            const omega = waveParams.frequency * 0.05;
+            
+            // 绘制包络线
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(0, 212, 170, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            
+            for (let x = 0; x <= width; x += 2) {
+                const envelope = amplitude * Math.abs(Math.cos(k * x / 2));
+                const y1 = centerY - envelope;
+                const y2 = centerY + envelope;
+                if (x === 0) {
+                    ctx.moveTo(x, y1);
+                } else {
+                    ctx.lineTo(x, y1);
+                }
+            }
+            ctx.stroke();
+            
+            for (let x = 0; x <= width; x += 2) {
+                const envelope = amplitude * Math.abs(Math.cos(k * x / 2));
+                const y2 = centerY + envelope;
+                if (x === 0) {
+                    ctx.moveTo(x, y2);
+                } else {
+                    ctx.lineTo(x, y2);
+                }
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 绘制驻波
+            ctx.beginPath();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            
+            for (let x = 0; x <= width; x += 2) {
+                const y = centerY + amplitude * Math.cos(k * x) * Math.sin(omega * time);
+                if (x === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // 绘制波节位置
+            ctx.fillStyle = '#ff6b4a';
+            for (let x = 0; x <= width; x += wavelength / 2) {
+                ctx.beginPath();
+                ctx.arc(x, centerY, 6, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawGrid() {
+            const width = canvas.getBoundingClientRect().width;
+            const height = canvas.getBoundingClientRect().height;
+            const centerY = height / 2;
+            
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 1;
+            
+            // 垂直线
+            for (let x = 0; x <= width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            
+            // 水平线
+            for (let y = 0; y <= height; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            
+            // 中心线
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.stroke();
+        }
+
+        function animate() {
+            const width = canvas.getBoundingClientRect().width;
+            const height = canvas.getBoundingClientRect().height;
+            
+            ctx.clearRect(0, 0, width, height);
+            drawGrid();
+            
+            if (currentTab === 'single') {
+                drawWave(0, '#00d4aa', 1, 0);
+            } else if (currentTab === 'double') {
+                drawWave(0, 'rgba(0, 212, 170, 0.5)', 0.7, 0);
+                drawWave(0, 'rgba(255, 107, 74, 0.5)', 0.7, waveParams.phase * Math.PI / 180);
+                drawCombinedWave();
+            } else if (currentTab === 'standing') {
+                drawStandingWave();
+            }
+            
+            if (isAnimating) {
+                time += 1;
+            }
+            
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // ============ 控制函数 ============
+        function switchTab(tab) {
+            currentTab = tab;
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(t => {
+                t.classList.remove('active');
+                if (t.dataset.tab === tab) {
+                    t.classList.add('active');
+                }
+            });
+            
+            const phaseControl = document.getElementById('phaseControl');
+            const waveInfo = document.getElementById('waveInfo');
+            
+            if (tab === 'double') {
+                phaseControl.style.display = 'block';
+                waveInfo.textContent = '双波干涉模式';
+            } else if (tab === 'standing') {
+                phaseControl.style.display = 'none';
+                waveInfo.textContent = '驻波形成模式';
+            } else {
+                phaseControl.style.display = 'none';
+                waveInfo.textContent = '单波传播模式';
+            }
+        }
+
+        function updateWavelength(value) {
+            waveParams.wavelength = parseInt(value);
+            document.getElementById('wavelengthValue').textContent = value;
+        }
+
+        function updateAmplitude(value) {
+            waveParams.amplitude = parseInt(value);
+            document.getElementById('amplitudeValue').textContent = value;
+        }
+
+        function updateFrequency(value) {
+            waveParams.frequency = parseFloat(value);
+            document.getElementById('frequencyValue').textContent = value + 'x';
+        }
+
+        function updatePhase(value) {
+            waveParams.phase = parseInt(value);
+            document.getElementById('phaseValue').textContent = value + '°';
+        }
+
+        function toggleAnimation() {
+            isAnimating = !isAnimating;
+            document.getElementById('playBtn').textContent = isAnimating ? '暂停动画' : '播放动画';
+        }
+
+        function resetDemo() {
+            waveParams = {
+                wavelength: 50,
+                amplitude: 40,
+                frequency: 1,
+                phase: 0
+            };
+            
+            document.getElementById('wavelength').value = 50;
+            document.getElementById('amplitude').value = 40;
+            document.getElementById('frequency').value = 1;
+            document.getElementById('phase').value = 0;
+            
+            document.getElementById('wavelengthValue').textContent = '50';
+            document.getElementById('amplitudeValue').textContent = '40';
+            document.getElementById('frequencyValue').textContent = '1.0x';
+            document.getElementById('phaseValue').textContent = '0°';
+            
+            time = 0;
+            isAnimating = true;
+            document.getElementById('playBtn').textContent = '暂停动画';
+        }
+
+        // ============ 测试功能 ============
+        function loadQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('currentQ').textContent = currentQuestion + 1;
+            document.getElementById('questionText').textContent = q.question;
+            
+            const optionsContainer = document.getElementById('answerOptions');
+            optionsContainer.innerHTML = '';
+            answered = false;
+            
+            q.options.forEach((option, index) => {
+                const optionEl = document.createElement('div');
+                optionEl.className = 'answer-option';
+                optionEl.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style="background: rgba(255,255,255,0.1);">${String.fromCharCode(65 + index)}</span>
+                        <span>${option}</span>
+                    </div>

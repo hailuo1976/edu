@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>立体几何全面复习 - 小学6年级数学</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .section {
+            padding: 40px 30px;
+        }
+
+        .section-title {
+            font-size: 28px;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            padding-left: 15px;
+            border-left: 4px solid #3498db;
+        }
+
+        /* 概念讲解模块 */
+        #concept {
+            background: #f8f9fa;
+        }
+
+        .formula-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .formula-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 25px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+
+        .formula-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .formula-card h3 {
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .formula-card .formula {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .formula-card.blue {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .formula-card.green {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .formula-card.purple {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        }
+
+        .formula-card.orange {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .key-points {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .key-points h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .key-points ul {
+            list-style: none;
+        }
+
+        .key-points li {
+            padding: 10px 0;
+            border-bottom: 1px dashed #ddd;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .key-points li:before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        /* 图形演示模块 */
+        #demo {
+            background: white;
+        }
+
+        .shape-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .shape-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .shape-box svg {
+            margin: 15px auto;
+        }
+
+        .shape-info {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .shape-info h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        /* 步骤展示 */
+        .steps-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            color: white;
+            margin: 30px 0;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .step-num {
+            width: 40px;
+            height: 40px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .step-content {
+            font-size: 16px;
+        }
+
+        /* 练习测试模块 */
+        #exercise {
+            background: #f8f9fa;
+        }
+
+        .exercise-category {
+            margin: 30px 0;
+        }
+
+        .category-title {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .exercise-item {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .exercise-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .exercise-item h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .exercise-content {
+            line-height: 1.8;
+            color: #34495e;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .answer-input:focus {
+            border-color: #4facfe;
+            outline: none;
+        }
+
+        .btn-check {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.3s;
+        }
+
+        .btn-check:hover {
+            transform: scale(1.05);
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #d1fae5;
+            color: #065f46;
+            display: block;
+        }
+
+        .feedback.wrong {
+            background: #fee2e2;
+            color: #991b1b;
+            display: block;
+        }
+
+        .tips-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 30px 0;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .tips-box h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+
+        .tips-box ul {
+            list-style: none;
+        }
+
+        .tips-box li {
+            padding: 8px 0;
+            color: #78350f;
+        }
+
+        footer {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .formula-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .shape-container {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 立体几何全面复习</h1>
+            <div class="subtitle">小学6年级数学 · 长方体、正方体、圆柱、圆锥</div>
+        </header>
+
+        <!-- 概念讲解模块 -->
+        <section id="concept" class="section">
+            <h2 class="section-title">📚 核心概念与公式</h2>
+            
+            <div class="formula-grid">
+                <!-- 长方体 -->
+                <div class="formula-card blue">
+                    <h3>📦 长方体</h3>
+                    <div class="formula">
+                        <strong>特征：</strong>6个长方形面，相对面相等，12条棱分3组<br>
+                        <strong>表面积：</strong>S = 2(ab + ah + bh)<br>
+                        <strong>体积：</strong>V = abh<br>
+                        其中：a=长，b=宽，h=高
+                    </div>
+                </div>
+
+                <!-- 正方体 -->
+                <div class="formula-card green">
+                    <h3>🎲 正方体</h3>
+                    <div class="formula">
+                        <strong>特征：</strong>6个完全相同的正方形面，12条棱相等<br>
+                        <strong>表面积：</strong>S = 6a²<br>
+                        <strong>体积：</strong>V = a³<br>
+                        其中：a=棱长
+                    </div>
+                </div>
+
+                <!-- 圆柱 -->
+                <div class="formula-card purple">
+                    <h3>🔵 圆柱</h3>
+                    <div class="formula">
+                        <strong>特征：</strong>两个相等圆形底面，侧面展开为长方形<br>
+                        <strong>侧面积：</strong>S侧 = 2πrh 或 πdh<br>
+                        <strong>表面积：</strong>S = 2πr² + 2πrh<br>
+                        <strong>体积：</strong>V = πr²h<br>
+                        其中：r=半径，d=直径，h=高
+                    </div>
+                </div>
+
+                <!-- 圆锥 -->
+                <div class="formula-card orange">
+                    <h3>🔺 圆锥</h3>
+                    <div class="formula">
+                        <strong>特征：</strong>一个圆形底面，侧面展开为扇形<br>
+                        <strong>体积：</strong>V = ⅓πr²h<br>
+                        <strong>重要关系：</strong>圆锥体积 = 等底等高圆柱体积的⅓<br>
+                        其中：r=半径，h=高
+                    </div>
+                </div>
+            </div>
+
+            <!-- 核心要点 -->
+            <div class="key-points">
+                <h3>💡 重要知识点（基于最新教学资料）</h3>
+                <ul>
+                    <li><strong>等底等高关系：</strong>圆柱体积是圆锥体积的3倍（圆锥体积 = 圆柱体积÷3）</li>
+                    <li><strong>表面积特殊情况：</strong>无盖水桶只算侧面积+一个底面积；通风管只算侧面积</li>
+                    <li><strong>体积单位换算：</strong>1升 = 1000毫升，1毫升 = 1立方厘米，1升 = 1立方分米</li>
+                    <li><strong>熔铸问题：</strong>体积守恒，形状改变但体积不变</li>
+                    <li><strong>切割问题：</strong>横切圆柱增加2个底面积，纵切增加2个长方形侧面</li>
+                    <li><strong>展开图：</strong>圆柱侧面沿高展开是长方形，圆锥侧面展开是扇形</li>
+                </ul>
+            </div>
+
+            <!-- 解题五步法 -->
+            <div class="steps-container">
+                <h3>🔢 立体几何解题五步法</h3>
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div class="step-content"><strong>识别图形：</strong>确定是长方体、正方体、圆柱还是圆锥</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div class="step-content"><strong>确定条件：</strong>找出边长、半径、高度等已知数据</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div class="step-content"><strong>选择公式：</strong>根据题目要求选择表面积或体积公式</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <div class="step-content"><strong>统一单位：</strong>确保所有数据单位一致后再计算</div>
+                </div>
+                <div class="step">
+                    <div class="step-num">5</div>
+                    <div class="step-content"><strong>检验答案：</strong>代入验算，检查结果是否合理</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 图形演示模块 -->
+        <section id="demo" class="section">
+            <h2 class="section-title">🎨 图形演示</h2>
+            
+            <div class="shape-container">
+                <!-- 长方体图形 -->
+                <div class="shape-box">
+                    <h4>长方体示意图</h4>
+                    <svg width="200" height="150" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 长方体立体图 -->
+                        <rect x="50" y="30" width="120" height="80" fill="#3b82f6" stroke="#1d4ed8" stroke-width="3" rx="5"/>
+                        <!-- 上侧面 -->
+                        <polygon points="50,30 70,10 190,10 170,30" fill="#60a5fa" stroke="#1d4ed8" stroke-width="2"/>
+                        <!-- 右侧面 -->
+                        <polygon points="170,30 190,10 190,90 170,110" fill="#93c5fd" stroke="#1d4ed8" stroke-width="2"/>
+                        <!-- 标注 -->
+                        <text x="110" y="20" fill="#1e40af" font-size="12">长 a</text>
+                        <text x="180" y="60" fill="#1e40af" font-size="12">高 h</text>
+                        <text x="60" y="85" fill="#1e40af" font-size="12">宽 b</text>
+                    </svg>
+                    <div class="shape-info">
+                        <h4>计算示例</h4>
+                        <p>长=12cm，宽=8cm，高=6cm</p>
+                        <p>表面积 = 2×(12×8 + 12×6 + 8×6) = 432cm²</p>
+                        <p>体积 = 12×8×6 = 576cm³</p>
+                    </div>
+                </div>
+
+                <!-- 正方体图形 -->
+                <div class="shape-box">
+                    <h4>正方体示意图</h4>
+                    <svg width="200" height="150" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 正方体立体图 -->
+                        <rect x="60" y="40" width="90" height="90" fill="#10b981" stroke="#059669" stroke-width="3"/>
+                        <!-- 上侧面 -->
+                        <polygon points="60,40 80,20 170,20 150,40" fill="#34d399" stroke="#059669" stroke-width="2"/>
+                        <!-- 右侧面 -->
+                        <polygon points="150,40 170,20 170,110 150,130" fill="#6ee7b7" stroke="#059669" stroke-width="2"/>
+                        <!-- 标注 -->
+                        <text x="105" y="30" fill="#065f46" font-size="12">棱长 a</text>
+                    </svg>
+                    <div class="shape-info">
+                        <h4>计算示例</h4>
+                        <p>棱长=5cm</p>
+                        <p>表面积 = 6×5² = 150cm²</p>
+                        <p>体积 = 5³ = 125cm³</p>
+                    </div>
+                </div>
+
+                <!-- 圆柱图形 -->
+                <div class="shape-box">
+                    <h4>圆柱示意图</h4>
+                    <svg width="200" height="180" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 圆柱体 -->
+                        <ellipse cx="100" cy="30" rx="50" ry="15" fill="#8b5cf6" stroke="#7c3aed" stroke-width="3"/>
+                        <rect x="50" y="30" width="100" height="100" fill="#a78bfa" stroke="#7c3aed" stroke-width="2"/>
+                        <ellipse cx="100" cy="130" rx="50" ry="15" fill="#c4b5fd" stroke="#7c3aed" stroke-width="3"/>
+                        <!-- 标注 -->
+                        <text x="160" y="80" fill="#5b21b6" font-size="12">高 h</text>
+                        <text x="100" y="20" fill="#5b21b6" font-size="10">半径 r</text>
+                        <line x1="100" y1="15" x2="150" y2="15" stroke="#5b21b6" stroke-width="1"/>
+                    </svg>
+                    <div class="shape-info">
+                        <h4>计算示例</h4>
+                        <p>半径=4cm，高=10cm</p>
+                        <p>表面积 = 2π×4² + 2π×4×10 ≈ 351.86cm²</p>
+                        <p>体积 = π×4²×10 ≈ 502.65cm³</p>
+                    </div>
+                </div>
+
+                <!-- 圆锥图形 -->
+                <div class="shape-box">
+                    <h4>圆锥示意图</h4>
+                    <svg width="200" height="180" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 圆锥体 -->
+                        <ellipse cx="100" cy="150" rx="50" ry="15" fill="#f59e0b" stroke="#d97706" stroke-width="2"/>
+                        <polygon points="100,20 50,150 150,150" fill="#fbbf24" stroke="#d97706" stroke-width="2"/>
+                        <!-- 标注 -->
+                        <text x="120" y="85" fill="#92400e" font-size="12">高 h</text>
+                        <line x1="100" y1="20" x2="100" y2="150" stroke="#92400e" stroke-width="1" stroke-dasharray="3"/>
+                        <text x="100" y="165" fill="#92400e" font-size="10">半径 r</text>
+                    </svg>
+                    <div class="shape-info">
+                        <h4>计算示例</h4>
+                        <p>半径=5cm，高=9cm</p>
+                        <p>体积 = ⅓×π×5²×9 ≈ 235.62cm³</p>
+                        <p>注：圆锥体积是等底等高圆柱的⅓</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 展开图演示 -->
+            <div class="tips-box">
+                <h4>📐 立体图形展开图</h4>
+                <ul>
+                    <li>• <strong>长方体展开图：</strong>由6个长方形组成，相对面面积相等</li>
+                    <li>• <strong>正方体展开图：</strong>由6个完全相同的正方形组成</li>
+                    <li>• <strong>圆柱展开图：</strong>侧面展开是长方形，长=底面周长，宽=圆柱的高</li>
+                    <li>• <strong>圆锥展开图：</strong>侧面展开是扇形，小学阶段主要计算体积</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 练习测试模块 -->
+        <section id="exercise" class="section">
+            <h2 class="section-title">📝 练习测试</h2>
+
+            <!-- 基础计算题 -->
+            <div class="exercise-category">
+                <div class="category-title">
+                    <h3>基础计算题</h3>
+                </div>
+
+                <div class="exercise-item">
+                    <h4>题目1：长方体表面积和体积</h4>
+                    <div class="exercise-content">
+                        一个长方体，长8厘米，宽6厘米，高5厘米。<br>
+                        求：(1) 表面积 (2) 体积
+                    </div>
+                    <input type="text" class="answer-input" id="answer1" placeholder="请输入表面积答案（平方厘米）">
+                    <input type="text" class="answer-input" id="answer1b" placeholder="请输入体积答案（立方厘米）">
+                    <button class="btn-check" onclick="checkAnswer1()">检查答案</button>
+                    <div class="feedback" id="feedback1"></div>
+                </div>
+
+                <div class="exercise-item">
+                    <h4>题目2：正方体计算</h4>
+                    <div class="exercise-content">
+                        一个正方体的棱长是4分米。<br>
+                        求：(1) 表面积 (2) 体积
+                    </div>
+                    <input type="text" class="answer-input" id="answer2" placeholder="请输入表面积答案（平方分米）">
+                    <input type="text" class="answer-input" id="answer2b" placeholder="请输入体积答案（立方分米）">
+                    <button class="btn-check" onclick="checkAnswer2()">检查答案</button>
+                    <div class="feedback" id="feedback2"></div>
+                </div>
+
+                <div class="exercise-item">
+                    <h4>题目3：圆柱体积</h4>
+                    <div class="exercise-content">
+                        一个圆柱的底面半径是3厘米，高是10厘米。<br>
+                        求它的体积（保留两位小数）。
+                    </div>
+                    <input type="text" class="answer-input" id="answer3" placeholder="请输入体积答案（立方厘米）">
+                    <button class="btn-check" onclick="checkAnswer3()">检查答案</button>
+                    <div class="feedback" id="feedback3"></div>
+                </div>
+
+                <div class="exercise-item">
+                    <h4>题目4：圆锥体积</h4>
+                    <div class="exercise-content">
+                        一个圆锥的底面半径是5厘米，高是9厘米。<br>
+                        求它的体积（保留两位小数）。
+                    </div>
+                    <input type="text" class="answer-input" id="answer4" placeholder="请输入体积答案（立方厘米）">
+                    <button class="btn-check" onclick="checkAnswer4()">检查答案</button>
+                    <div class="feedback" id="feedback4"></div>
+                </div>
+            </div>
+
+            <!-- 应用题 -->
+            <div class="exercise-category">
+                <div class="category-title">
+                    <h3>应用题</h3>
+                </div>
+
+                <div class="exercise-item">
+                    <h4>题目5：无盖水桶问题</h4>
+                    <div class="exercise-content">
+                        一个无盖圆柱形水桶，底面直径是4分米，高是5分米。<br>
+                        做这个水桶需要多少铁皮？（保留两位小数）<br>
+                        <strong>提示：</strong>无盖水桶表面积 = 侧面积 + 一个底面积
+                    </div>
+                    <input type="text" class="answer-input" id="answer5" placeholder="请输入答案（平方分米）">
+                    <button class="btn-check" onclick="checkAnswer5()">检查答案</button>
+                    <div class="feedback" id="feedback5"></div>
+                </div>
+
+                <div class="exercise-item">
+                    <h4>题目6：熔铸问题</h4>
+                    <div class="exercise-content">
+                        把一个底面半径6厘米、高12厘米的圆柱形橡皮泥，<br>
+                        捏成一个底面半径相同的圆锥，这个圆锥的高是多少厘米？<br>
+                        <strong>提示：</strong>体积守恒，圆柱体积 = 圆锥体积
+                    </div>
+                    <input type="text" class="answer-input" id="answer6" placeholder="请输入圆锥的高（厘米）">
+                    <button class="btn-check" onclick="checkAnswer6()">检查答案</button>
+                    <div class="feedback" id="feedback6"></div>
+                </div>
+
+                <div class="exercise-item">
+                    <h4>题目7：沙堆重量问题</h4>
+                    <div class="exercise-content">
+                        一个圆锥形沙堆，底面周长是12.56米，高是1.5米。<br>
+                        如果每立方米沙子重1.5吨，这堆沙子重多少吨？<br>
+                        <strong>提示：</strong>先求半径，再求体积，最后求重量
+                    </div>
+                    <input type="text" class="answer-input" id="answer7" placeholder="请输入沙子重量（吨）">
+                    <button class="btn-check" onclick="checkAnswer7()">检查答案</button>
+                    <div class="feedback" id="feedback7"></div>
+                </div>
+            </div>
+
+            <!-- 易错题提示 -->
+            <div class="tips-box">
+                <h4>⚠️ 易错点提醒</h4>
+                <ul>
+                    <li>• <strong>单位陷阱：</strong>半径与直径要分清，r = d÷2</li>
+                    <li>• <strong>公式混淆：</strong>圆锥体积公式有⅓，不要漏掉</li>
+                    <li>• <strong>表面积陷阱：</strong>无盖水桶只算一个底面积，通风管只算侧面积</li>
+                    <li>• <strong>等底等高：</strong>圆锥体积 = 等底等高圆柱体积的⅓</li>
+                    <li>• <strong>熔铸问题：</strong>体积守恒是关键，形状改变但体积不变</li>
+                    <li>• <strong>切割问题：</strong>横切圆柱增加2个底面积，纵切增加2个长方形面</li>
+                </ul>
+            </div>
+        </section>
+
+        <footer>
+            <p>© 2025 立体几何全面复习课件 | 小学6年级数学</p>
+            <p>课程ID: course_1774716018161</p>
+        </footer>
+    </div>
+
+    <script>
+        // 检查答案函数
+        function checkAnswer1() {
+            const answer1 = document.getElementById('answer1').value;
+            const answer1b = document.getElementById('answer1b').value;
+            const feedback = document.getElementById('feedback1');
+            
+            // 正确答案：表面积 = 2×(8×6 + 8×5 + 6×5) = 236，体积 = 8×6×5 = 240
+            if(answer1 == '236' && answer1b == '240') {
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = '✅ 正确！表面积 = 2×(8×6 + 8×5 + 6×5) = 236平方厘米<br>体积 = 8×6×5 = 240立方厘米';
+            } else {
+                feedback.className = 'feedback wrong';
+                feedback.innerHTML = '❌ 错误！请检查：<br>表面积公式：S = 2(ab + ah + bh)<br>体积公式：V = abh';
+            }
+        }
+
+        function checkAnswer2() {
+            const answer2 = document.getElementById('answer2').value;
+            const answer2b = document.getElementById('answer2b').value;
+            const feedback = document.getElementById('feedback2');
+            
+            // 正确答案：表面积 = 6×4² = 96，体积 = 4³ = 64
+            if(answer2 == '96' && answer2b == '64') {
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = '✅ 正确！表面积 = 6×4² = 96平方分米<br>体积 = 4³ = 64立方分米';
+            } else {
+                feedback.className = 'feedback wrong';
+                feedback.innerHTML = '❌ 错误！请检查：<br>表面积公式：S = 6a²<br>体积公式：V = a³';
+            }
+        }
+
+        function checkAnswer3() {
+            const answer3 = document.getElementById('answer3').value;
+            const feedback = document.getElementById('feedback3');
+            
+            // 正确答案：体积 = π×3²×10 ≈ 282.74
+            if(Math.abs(parseFloat(answer3) - 282.74) < 0.1 || answer3 == '282.74' || answer3 == '282.7' || answer3 == '283') {
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = '✅ 正确！体积 = π×3²×10 ≈ 282.74立方厘米';
+            } else {
+                feedback.className = 'feedback wrong';
+                feedback.innerHTML = '❌ 错误！圆柱体积公式：V = πr²h<br>代入：V = 3.14×3²×10 = 282.74立方厘米';
+            }
+        }
+
+        function checkAnswer4() {
+            const answer4 = document.getElementById('answer4').value;
+            const feedback = document.getElementById('feedback4');
+            
+            // 正确答案：体积 = ⅓×π×5²×9 ≈ 235.62
+            if(Math.abs(parseFloat(answer4) - 235.62) < 0.1 || answer4 == '235.62' || answer4 == '235.6' || answer4 == '236') {
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = '✅ 正确！体积 = ⅓×π×5²×9 ≈ 235.62立方厘米<br>圆锥体积公式有⅓，不要忘记！';
+            } else {
+                feedback.className = 'feedback wrong';
+                feedback.innerHTML = '❌ 错误！圆锥体积公式：V = ⅓πr²h<br>代入：V = ⅓×3.14×5²×9 = 235.62立方厘米<br>注意：圆锥体积公式有⅓！';
+            }
+        }
+
+        function checkAnswer5() {
+            const answer5 = document.getElementById('answer5').value;
+            const feedback = document.getElementById('feedback5');
+            
+            // 正确答案：侧面积 + 底面积 = π×4×5 + π×2² ≈ 75.36
+            const correctAnswer = 3.14 * 4 * 5 + 3.14 * 2 * 2;
+            if(Math.abs(parseFloat(answer5) - correctAnswer) < 0.1 || answer5 == '75.36' || answer5 == '75.4' || answer5 == '75') {
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = '✅ 正确！无盖水桶表面积 = 侧面积 + 一个底面积<br>= πdh + πr² = π×4×5 + π×2² ≈ 75.36平方分米';
+            } else {
+                feedback.className = 'feedback wrong';
+                feedback.innerHTML = '❌ 错误！无盖水桶只算一个底面积<br>表面积 = 侧面积 + 一个底面积<br>= πdh + πr² = 3.14×4×5 + 3.14×2² = 75.36平方分米';
+            }
+        }
+
+        function checkAnswer6() {
+            const answer6 = document.getElementById('answer6').value;
+            const feedback = document.getElementById('feedback6');
+            
+            // 正确答案：圆锥高 = 圆柱高×3 = 36厘米
+            if(answer6 == '36') {
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = '✅ 正确！体积守恒，圆柱体积 = 圆锥体积<br>π×6²×12 = ⅓×π×6²×h<br>解得：h = 36厘米';
+            } else {
+                feedback.className = 'feedback wrong';
+                feedback.innerHTML = '❌ 错误！体积守恒：圆柱体积 = 圆锥体积<br>π×6²×12 = ⅓×π×6²×h<br>12 = h÷3<br>h = 36厘米';
+            }
+        }
+
+        function checkAnswer7() {
+            const answer7 = document.getElementById('answer7').value;
+            const feedback = document.getElementById('feedback7');
+            
+            // 正确答案：重量 ≈ 3.77吨
+            const radius = 12.56 / 3.14 / 2; // r = 2米
+            const volume = 1/3 * 3.14 * radius * radius * 1.5; // V ≈ 6.28立方米
+            const weight = volume * 1.5; // 重量 ≈ 9.42吨
+            
+            if(Math.abs(parseFloat(answer7) - weight) < 0.1 || answer7 == '9.42' || answer7 == '9.4' || answer7 == '9') {
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = '✅ 正确！<br>步骤1：半径 = 12.56÷3.14÷2 = 2米<br>步骤2：体积 = ⅓×π×2²×1.5 ≈ 6.28立方米<br>步骤3：重量 = 6.28×1.5 ≈ 9.42吨';
+            } else {
+                feedback.className = 'feedback wrong';
+                feedback.innerHTML = '❌ 错误！解题步骤：<br>①半径 = 周长÷π÷2 = 12.56÷3.14÷2 = 2米<br>②体积 = ⅓×π×2²×1.5 ≈ 6.28立方米<br>③重量 = 6.28×1.5 ≈ 9.42吨';
+            }
+        }
+    </script>
+</body>
+</html>

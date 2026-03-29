@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>泛函分析基础课程</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: fadeInDown 1s ease;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .module {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .module-title {
+            font-size: 1.8em;
+            color: #4a5568;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+        }
+
+        .module-title::before {
+            content: '';
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+            margin-right: 15px;
+        }
+
+        /* 概念模块 */
+        #concept .concept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .concept-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .concept-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .concept-card h3 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .concept-card p {
+            color: #718096;
+            line-height: 1.8;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.2em;
+            margin: 15px 0;
+            font-family: 'Times New Roman', serif;
+        }
+
+        .property-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .property-list li {
+            padding: 10px 15px;
+            margin: 8px 0;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+            position: relative;
+            padding-left: 35px;
+        }
+
+        .property-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 10px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        /* 演示模块 */
+        #demo .demo-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .svg-box {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .svg-box svg {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .svg-title {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #4a5568;
+        }
+
+        .svg-description {
+            color: #718096;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        /* 步骤展示 */
+        .steps-container {
+            margin-top: 30px;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin: 20px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .step-num {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+            color: #4a5568;
+            line-height: 1.8;
+        }
+
+        .step-content strong {
+            color: #667eea;
+        }
+
+        /* 练习模块 */
+        #exercise .exercise-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .exercise-item {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .exercise-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .exercise-item h4 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .exercise-item p {
+            color: #718096;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .option-btn {
+            padding: 12px 20px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+            color: #4a5568;
+        }
+
+        .option-btn:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .option-btn.correct {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            border-color: #48bb78;
+        }
+
+        .option-btn.wrong {
+            background: linear-gradient(135deg, #fc8181, #f56565);
+            color: white;
+            border-color: #fc8181;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback.correct {
+            background: rgba(72, 187, 120, 0.2);
+            color: #276749;
+        }
+
+        .feedback.wrong {
+            background: rgba(245, 101, 101, 0.2);
+            color: #c53030;
+        }
+
+        /* 动画 */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .module {
+                padding: 20px;
+            }
+
+            .module-title {
+                font-size: 1.4em;
+            }
+
+            .options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Canvas容器 */
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        canvas {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .math-notation {
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+        }
+
+        .highlight {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .definition-box {
+            background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+            border: 2px solid #fc8181;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .definition-box h4 {
+            color: #c53030;
+            margin-bottom: 10px;
+        }
+
+        .theorem-box {
+            background: linear-gradient(135deg, #ebf8ff 0%, #fff 100%);
+            border: 2px solid #4299e1;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .theorem-box h4 {
+            color: #2b6cb0;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📐 泛函分析基础</h1>
+            <p>范数、度量空间与巴拿赫空间入门</p>
+        </header>
+
+        <!-- 概念讲解模块 -->
+        <section id="concept" class="module">
+            <h2 class="module-title">概念讲解</h2>
+            
+            <div class="concept-grid">
+                <div class="concept-card">
+                    <h3>🎯 什么是泛函分析？</h3>
+                    <p>泛函分析是研究<strong>无限维线性空间</strong>上的函数（泛函）和算子的数学分支。它将线性代数和数学分析的方法推广到无限维空间，是现代分析数学的基础。</p>
+                </div>
+
+                <div class="concept-card">
+                    <h3>📏 范数的定义</h3>
+                    <p>设 X 是一个向量空间，若对于每个 x ∈ X，都有一个实数 ||x|| 与之对应，满足：</p>
+                    <div class="formula-box">
+                        ||·|| : X → ℝ
+                    </div>
+                </div>
+
+                <div class="concept-card">
+                    <h3>✅ 范数三大性质</h3>
+                    <ul class="property-list">
+                        <li><strong>非负性：</strong>||x|| ≥ 0，且 ||x|| = 0 ⟺ x = 0</li>
+                        <li><strong>齐次性：</strong>||αx|| = |α|·||x||，∀α ∈ ℝ</li>
+                        <li><strong>三角不等式：</strong>||x + y|| ≤ ||x|| + ||y||</li>
+                    </ul>
+                </div>
+
+                <div class="concept-card">
+                    <h3>🌐 常见范数示例</h3>
+                    <p>在 ℝⁿ 中，常用的范数包括：</p>
+                    <div class="formula-box">
+                        p-范数：||x||<sub>p</sub> = (∑|xᵢ|<sup>p</sup>)<sup>1/p</sup>
+                    </div>
+                    <p style="margin-top:10px;">特别地，p=2时为<strong>欧几里得范数</strong></p>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <h4>📖 定义：度量空间</h4>
+                <p>设 X 是一个非空集合，若存在一个映射 d: X × X → ℝ，满足以下条件，则称 (X, d) 为<strong>度量空间</strong>：</p>
+                <ul class="property-list">
+                    <li><strong>非负性：</strong>d(x, y) ≥ 0，d(x, y) = 0 ⟺ x = y</li>
+                    <li><strong>对称性：</strong>d(x, y) = d(y, x)</li>
+                    <li><strong>三角不等式：</strong>d(x, z) ≤ d(x, y) + d(y, z)</li>
+                </ul>
+            </div>
+
+            <div class="theorem-box">
+                <h4>📚 重要定理：完备性</h4>
+                <p><strong>巴拿赫空间</strong>：一个完备的赋范向量空间称为巴拿赫空间。完备性意味着每个柯西序列都收敛。</p>
+                <p style="margin-top:10px;"><strong>希尔伯特空间</strong>：具有内积结构的完备空间，记作 (H, ⟨·,·⟩)。</p>
+            </div>
+        </section>
+
+        <!-- 图形演示模块 -->
+        <section id="demo" class="module">
+            <h2 class="module-title">图形演示</h2>
+            
+            <div class="demo-container">
+                <div class="svg-box">
+                    <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 背景网格 -->
+                        <defs>
+                            <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e2e8f0" stroke-width="0.5"/>
+                            </pattern>
+                        </defs>
+                        <rect width="400" height="300" fill="url(#grid)"/>
+                        
+                        <!-- 坐标轴 -->
+                        <line x1="200" y1="20" x2="200" y2="280" stroke="#4a5568" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <line x1="20" y1="150" x2="380" y2="150" stroke="#4a5568" stroke-width="2"/>
+                        
+                        <!-- 箭头 -->
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#4a5568"/>
+                            </marker>
+                        </defs>
+                        
+                        <!-- 单位圆 (2-范数) -->
+                        <circle cx="200" cy="150" r="80" fill="rgba(102, 126, 234, 0.2)" stroke="#667eea" stroke-width="3"/>
+                        
+                        <!-- 单位菱形 (1-范数) -->
+                        <polygon points="200,70 280,150 200,230 120,150" fill="rgba(72, 187, 120, 0.2)" stroke="#48bb78" stroke-width="2"/>
+                        
+                        <!-- 单位正方形 (∞-范数) -->
+                        <rect x="120" y="70" width="160" height="160" fill="rgba(245, 101, 101, 0.1)" stroke="#f56565" stroke-width="2"/>
+                        
+                        <!-- 标签 -->
+                        <text x="290" y="100" fill="#667eea" font-size="12" font-weight="bold">||x||₂ = 1</text>
+                        <text x="290" y="130" fill="#48bb78" font-size="12" font-weight="bold">||x||₁ = 1</text>
+                        <text x="290" y="160" fill="#f56565" font-size="12" font-weight="bold">||x||∞ = 1</text>
+                        
+                        <!-- 坐标轴标签 -->
+                        <text x="380" y="145" fill="#4a5568" font-size="14" font-weight="bold">x₁</text>
+                        <text x="205" y="25" fill="#4a5568" font-size="14" font-weight="bold">x₂</text>
+                        <text x="275" y="165" fill="#4a5568" font-size="10">1</text>
+                        <text x="115" y="165" fill="#4a5568" font-size="10">-1</text>
+                    </svg>
+                    <div class="svg-title">不同范数下的单位球</div>
+                    <div class="svg-description">蓝圆：2-范数 | 绿菱形：1-范数 | 红方：∞-范数</div>
+                </div>
+
+                <div class="svg-box">
+                    <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 背景 -->
+                        <rect width="400" height="300" fill="#f8f9fa"/>
+                        
+                        <!-- 度量空间示意图 -->
+                        <circle cx="150" cy="120" r="8" fill="#667eea"/>
+                        <circle cx="280" cy="180" r="8" fill="#48bb78"/>
+                        <circle cx="220" cy="80" r="8" fill="#f56565"/>
+                        
+                        <!-- 连接线 -->
+                        <line x1="150" y1="120" x2="280" y2="180" stroke="#4a5568" stroke-width="2" stroke-dasharray="5,5"/>
+                        <line x1="150" y1="120" x2="220" y2="80" stroke="#4a5568" stroke-width="2" stroke-dasharray="5,5"/>
+                        <line x1="220" y1="80" x2="280" y2="180" stroke="#4a5568" stroke-width="2" stroke-dasharray="5,5"/>
+                        
+                        <!-- 距离标签 -->
+                        <text x="200" y="165" fill="#4a5568" font-size="12">d(x,y)</text>
+                        <text x="170" y="90" fill="#4a5568" font-size="12">d(x,z)</text>
+                        <text x="260" y="120" fill="#4a5568" font-size="12">d(z,y)</text>
+                        
+                        <!-- 点标签 -->
+                        <text x="140" y="145" fill="#667eea" font-size="14" font-weight="bold">x</text>
+                        <text x="290" y="185" fill="#48bb78" font-size="14" font-weight="bold">y</text>
+                        <text x="225" y="75" fill="#f56565" font-size="14" font-weight="bold">z</text>
+                        
+                        <!-- 公式 -->
+                        <text x="100" y="260" fill="#4a5568" font-size="14" font-weight="bold">三角不等式：d(x, y) ≤ d(x, z) + d(z, y)</text>
+                    </svg>
+                    <div class="svg-title">度量空间中的距离</div>
+                    <div class="svg-description">任意两点间的距离满足三角不等式</div>
+                </div>
+            </div>
+
+            <!-- 步骤展示 -->
+            <div class="steps-container">
+                <h3 style="color:#4a5568; margin-bottom:20px;">📝 范数空间的判定步骤</h3>
+                
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div class="step-content">
+                        <strong>验证非负性：</strong>证明对于任意 x ∈ X，有 ||x|| ≥ 0，且 ||x|| = 0 当且仅当 x = 0（零向量）。
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div class="step-content">
+                        <strong>验证齐次性：</strong>证明对于任意标量 α ∈ ℝ（或 ℂ）和向量 x ∈ X，有 ||αx|| = |α|·||x||。
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div class="step-content">
+                        <strong>验证三角不等式：</strong>证明对于任意 x, y ∈ X，有 ||x + y|| ≤ ||x|| + ||y||。这通常需要用到闵可夫斯基不等式。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 练习测试模块 -->
+        <section id="exercise" class="module">
+            <h2 class="module-title">练习测试</h2>
+            
+            <div class="exercise-grid">
+                <div class="exercise-item">
+                    <h4>练习 1：范数计算</h4>
+                    <p>在 ℝ² 中，向量 x = (3, 4) 的欧几里得范数（2-范数）||x||₂ 等于多少？</p>
+                    <div class="options">
+                        <button class="option-btn" onclick="checkAnswer(this, false)">A. 7</button>
+                        <button class="option-btn" onclick="checkAnswer(this, true)">B. 5</button>
+                        <button class="option-btn" onclick="checkAnswer(this, false)">C. 12</button>
+                        <button class="option-btn" onclick="checkAnswer(this, false)">D. 25</button>
+                    </div>
+                    <div class="feedback" id="feedback1"></div>
+                </div>
+
+                <div class="exercise-item">
+                    <h4>练习 2：范数性质</h4>
+                    <p>范数必须满足哪三个基本性质？</p>
+                    <div class="options">
+                        <button class="option-btn" onclick="checkAnswer(this, false)">A. 正定性、线性、连续性</button>
+                        <button class="option-btn" onclick="checkAnswer(this, true)">B. 非负性、齐次性、三角不等式</button>
+                        <button class="option-btn" onclick="checkAnswer(this, false)">C. 对称性、传递性、自反性</button>
+                        <button class="option-btn" onclick="checkAnswer(this, false)">D. 收敛性、有界性、紧致性</button>
+                    </div>
+                    <div class="feedback" id="feedback2"></div>
+                </div>
+
+                <div class="exercise-item">
+                    <h4>练习 3：1-范数计算</h4>
+                    <p>向量 x = (1, -2, 3) 的1-范数 ||x||₁ 等于多少？</p>
+                    <div class="options">
+                        <button class="option-btn" onclick="checkAnswer(this, false)">A. 4</button>
+                        <button class="option-btn" onclick="checkAnswer(this, false)">B. √14</button>
+                        <button class="option-btn" onclick="checkAnswer(this, true)">C. 6</button>
+                        <button class="option-btn" onclick="checkAnswer(this, false)">D. 3</button>
+                    </div>
+                    <div class="feedback" id="feedback3"></div>
+                </div>
+
+                <div class="exercise-item">
+                    <h4>练习 4：度量空间</h4>
+                    <p>度量空间 (X, d) 中的度量 d 不需要满足以下哪个性质？</p>
+                    <div class="options">
+                        <button class="option-btn" onclick="checkAnswer(this, false)">A. 非负性</button>
+                        <button class="option-btn" onclick="checkAnswer(this, false)">B. 对称性</button>
+                        <button class="option-btn" onclick="checkAnswer(this, true)">C. 齐次性</button>
+                        <button class="option-btn" onclick="checkAnswer(this, false)">D. 三角不等式</button>
+                    </div>
+                    <div class="feedback" id="feedback4"></div>
+                </div>
+
+                <div class="exercise-item">
+                    <h4>练习 5：∞-范数计算</h4>
+                    <p>向量 x = (-5, 3, -2, 4) 的∞-范数 ||x||∞ 等于多少？</p>
+                    <div class="options">
+                        <button class="option-btn" onclick="checkAnswer(this, false)">A. 14</button>
+                        <button class="option-btn" onclick="checkAnswer(this, true)">B. 5</button>
+                        <button class="option-btn" onclick="checkAnswer(this, false)">C. 4</button>
+                        <button class="option-btn" onclick="checkAnswer(this, false)">D. √54</button>
+                    </div>
+                    <div class="feedback" id="feedback5"></div>
+                </div>
+
+                <div class="exercise-item">
+                    <h4>练习 6：巴拿赫空间</h4>
+                    <p>巴拿赫空间是指什么样的空间？</p>
+                    <div class="options">
+                        <button class="option-btn" onclick="checkAnswer(this, false)">A. 紧致的赋范空间</button>
+                        <button class="option-btn" onclick="checkAnswer(this, true)">B. 完备的赋范向量空间</button>
+                        <button class="option-btn" onclick="checkAnswer(this, false)">C. 有限维的内积空间</button>
+                        <button class="option-btn" onclick="checkAnswer(this, false)">D. 有界的度量空间</button>
+                    </div>
+                    <div class="feedback" id="feedback6"></div>
+                </div>
+            </div>
+
+            <div style="text-align:center; margin-top:30px;">
+                <div id="score" style="font-size:1.2em; color:#4a5568; padding:20px; background:#f8f9fa; border-radius:10px;">
+                    正确率：<span id="correctCount">0</span> / 6
+                </div>
+            </div>
+        </section>
+
+        <footer style="text-align:center; padding:30px; color:white; opacity:0.8;">
+            <p>泛函分析基础课程 | 范数、度量空间与巴拿赫空间</p>
+        </footer>
+    </div>
+
+    <script>
+        let correctAnswers = 0;
+        let answeredQuestions = new Set();
+
+        function checkAnswer(button, isCorrect) {
+            const exerciseItem = button.closest('.exercise-item');
+            const buttons = exerciseItem.querySelectorAll('.option-btn');
+            const feedback = exerciseItem.querySelector('.feedback');
+            const exerciseIndex = Array.from(document.querySelectorAll('.exercise-item')).indexOf(exerciseItem);
+            
+            // 防止重复作答
+            if (answeredQuestions.has(exerciseIndex)) {
+                return;
+            }
+            answeredQuestions.add(exerciseIndex);
+
+            // 禁用所有按钮
+            buttons.forEach(btn => btn.style.pointerEvents = 'none');
+
+            if (isCorrect) {
+                button.classList.add('correct');
+                feedback.textContent = '✓ 正确！';
+                feedback.className = 'feedback show correct';
+                correctAnswers++;
+            } else {
+                button.classList.add('wrong');
+                feedback.textContent = '✗ 错误，请再想想！';
+                feedback.className = 'feedback show wrong';
+                
+                // 显示正确答案
+                buttons.forEach(btn => {
+                    if (btn.onclick.toString().includes('true')) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+
+            // 更新分数
+            document.getElementById('correctCount').textContent = correctAnswers;
+        }
+
+        // 页面加载动画
+        document.addEventListener('DOMContentLoaded', function() {
+            const modules = document.querySelectorAll('.module');
+            modules.forEach((module, index) => {
+                module.style.animationDelay = `${index * 0.2}s`;
+            });
+        });
+    </script>
+</body>
+</html>

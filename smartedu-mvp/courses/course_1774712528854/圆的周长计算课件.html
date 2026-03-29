@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圆的周长 - 小学数学课件</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        header h1 {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        header p {
+            font-size: 1.3em;
+            color: #666;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+        }
+
+        .section-title {
+            font-size: 2em;
+            color: #667eea;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '📚';
+            margin-right: 15px;
+            font-size: 1.2em;
+        }
+
+        #concept {
+            background: linear-gradient(135deg, #fff 0%, #f0f4ff 100%);
+        }
+
+        #demo {
+            background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
+        }
+
+        #exercise {
+            background: linear-gradient(135deg, #fff 0%, #f0fff4 100%);
+        }
+
+        .concept-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #667eea;
+        }
+
+        .concept-card h3 {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .concept-card h3::before {
+            content: '✨';
+            margin-right: 10px;
+        }
+
+        .concept-card p {
+            line-height: 1.8;
+            color: #444;
+            font-size: 1.1em;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .formula-box h4 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        .formula {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 15px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .formula-note {
+            font-size: 1em;
+            margin-top: 15px;
+            opacity: 0.9;
+        }
+
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        canvas {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .control-group label {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        input[type="range"] {
+            width: 150px;
+            height: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .result-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.3em;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .question-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .question-number {
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-right: 15px;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .question-text span {
+            flex: 1;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .input-group input[type="number"] {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1em;
+            width: 150px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .feedback {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+            display: block;
+        }
+
+        .feedback.wrong {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+            display: block;
+        }
+
+        .pi-info {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.2);
+        }
+
+        .pi-info h4 {
+            color: #e65100;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .pi-value {
+            font-size: 2em;
+            color: #bf360c;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        .steps {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+            line-height: 1.6;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #856404;
+        }
+
+        .tip-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .tip-box h5 {
+            color: #1976D2;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .tip-box h5::before {
+            content: '💡';
+            margin-right: 8px;
+        }
+
+        .score-board {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .score-board h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .score {
+            font-size: 3em;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .formula {
+                font-size: 1.5em;
+            }
+        }
+
+        .animate-pop {
+            animation: pop 0.3s ease;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .emoji-big {
+            font-size: 2em;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔵 圆的周长</h1>
+            <p>小学数学 · 探索圆周率π的奥秘</p>
+        </header>
+
+        <!-- 概念讲解模块 -->
+        <section id="concept" class="section">
+            <h2 class="section-title">概念讲解</h2>
+
+            <div class="concept-card">
+                <h3>什么是圆的周长？</h3>
+                <p>圆的周长是指围绕圆形一周的闭合曲线长度，数学上称为"圆周"。想象一下，如果你沿着圆形跑道走一圈，走过的距离就是这个圆的周长。</p>
+            </div>
+
+            <div class="pi-info">
+                <h4>🔢 认识圆周率π</h4>
+                <p>圆周率是指<strong>圆的周长与直径的比值</strong>，用希腊字母π表示。这是一个神奇的数据——无论圆的大小如何，周长除以直径的值永远是π！</p>
+                <div class="pi-value">π ≈ 3.14159265358...</div>
+                <p>✨ 小知识：圆周率是一个<strong>无限不循环小数</strong>，在实际计算中我们通常取近似值 <span class="highlight">π ≈ 3.14</span></p>
+            </div>
+
+            <div class="formula-box">
+                <h4>📐 圆的周长计算公式</h4>
+                <div class="formula">C = π × d</div>
+                <p>或</p>
+                <div class="formula">C = 2 × π × r</div>
+                <div class="formula-note">
+                    其中：<br>
+                    C 表示圆的周长<br>
+                    d 表示圆的直径<br>
+                    r 表示圆的半径<br>
+                    π 表示圆周率（约等于3.14）
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <h5>记忆小技巧</h5>
+                <p>🎯 因为直径 = 2 × 半径（d = 2r），所以两个公式是等价的！</p>
+                <p>🎯 已知直径用 C = πd，已知半径用 C = 2πr</p>
+                <p>🎯 圆的周长大约是直径的3.14倍，或半径的6.28倍</p>
+            </div>
+
+            <div class="concept-card">
+                <h3>公式的由来</h3>
+                <p>古代数学家通过大量的测量发现：圆的周长和直径的比值总是接近一个固定的数。中国的《周髀算经》中就有"周三径一"的说法，意思是圆的周长大约是直径的3倍。</p>
+                <p style="margin-top: 10px;">后来，数学家们通过精密计算，发现这个比值约等于3.14159...，这就是我们所说的圆周率π。</p>
+            </div>
+        </section>
+
+        <!-- 图形演示模块 -->
+        <section id="demo" class="section">
+            <h2 class="section-title">互动演示</h2>
+
+            <div class="canvas-container">
+                <canvas id="circleCanvas" width="500" height="400"></canvas>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label for="radiusSlider">调整半径：</label>
+                    <input type="range" id="radiusSlider" min="20" max="150" value="80">
+                    <span id="radiusValue">80 cm</span>
+                </div>
+            </div>
+
+            <div class="result-display" id="resultDisplay">
+                <div>半径 r = <span id="displayRadius">80</span> cm</div>
+                <div>直径 d = <span id="displayDiameter">160</span> cm</div>
+                <div style="margin-top: 15px; font-size: 1.4em; font-weight: bold;">
+                    周长 C = 2 × π × r = <span id="displayCircumference">502.4</span> cm
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <h5>观察与思考</h5>
+                <p>🔍 当半径增大时，周长如何变化？</p>
+                <p>🔍 周长与半径的比值是多少？（提示：应该是2π ≈ 6.28）</p>
+                <p>🔍 周长与直径的比值是多少？（提示：应该是π ≈ 3.14）</p>
+            </div>
+        </section>
+
+        <!-- 练习测试模块 -->
+        <section id="exercise" class="section">
+            <h2 class="section-title">练习测试</h2>
+
+            <div class="score-board">
+                <h3>你的得分</h3>
+                <div class="score"><span id="score">0</span> / 5</div>
+            </div>
+
+            <div class="question-card" id="q1">
+                <div class="question-text">
+                    <span class="question-number">1</span>
+                    <span>一个圆形花坛的直径是10米，它的周长是多少米？（π取3.14）</span>
+                </div>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">已知：<span class="highlight">直径 d = 10 米</span></div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">公式：C = π × d</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">计算：C = 3.14 × 10 = <span class="highlight">31.4 米</span></div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>答案：</label>
+                    <input type="number" id="answer1" step="0.1" placeholder="输入答案">
+                    <span>米</span>
+                    <button class="submit-btn" onclick="checkAnswer(1, 31.4)">提交答案</button>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </div>
+
+            <div class="question-card" id="q2">
+                <div class="question-text">
+                    <span class="question-number">2</span>
+                    <span>自行车车轮的半径是35厘米，车轮滚动一周能前进多少厘米？（π取3.14）</span>
+                </div>
+                <div class="input-group">
+                    <label>答案：</label>
+                    <input type="number" id="answer2" step="0.1" placeholder="输入答案">
+                    <span>厘米</span>
+                    <button class="submit-btn" onclick="checkAnswer(2, 219.8)">提交答案</button>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+                <div class="tip-box" style="display: none; margin-top: 15px;" id="tip2">
+                    <h5>解题提示</h5>
+                    <p>车轮滚动一周前进的距离 = 圆的周长</p>
+                    <p>已知半径 r = 35 厘米，用公式 C = 2πr</p>
+                    <p>C = 2 × 3.14 × 35 = 219.8 厘米</p>
+                </div>
+            </div>
+
+            <div class="question-card" id="q3">
+                <div class="question-text">
+                    <span class="question-number">3</span>
+                    <span>一个圆形桌面的周长是157厘米，这个桌面的直径是多少厘米？（π取3.14）</span>
+                </div>
+                <div class="input-group">
+                    <label>答案：</label>
+                    <input type="number" id="answer3" step="0.1" placeholder="输入答案">
+                    <span>厘米</span>
+                    <button class="submit-btn" onclick="checkAnswer(3, 50)">提交答案</button>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+                <div class="tip-box" style="display: none; margin-top: 15px;" id="tip3">
+                    <h5>解题提示</h5>
+                    <p>已知周长，求直径，可以用公式的变形：</p>
+                    <p>C = πd → d = C ÷ π</p>
+                    <p>d = 157 ÷ 3.14 = 50 厘米</p>
+                </div>
+            </div>
+
+            <div class="question-card" id="q4">
+                <div class="question-text">
+                    <span class="question-number">4</span>
+                    <span>一个圆形游泳池的半径是20米，小红沿着游泳池边缘走了一圈，她走了多少米？（π取3.14）</span>
+                </div>
+                <div class="input-group">
+                    <label>答案：</label>
+                    <input type="number" id="answer4" step="0.1" placeholder="输入答案">
+                    <span>米</span>
+                    <button class="submit-btn" onclick="checkAnswer(4, 125.6)">提交答案</button>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+                <div class="tip-box" style="display: none; margin-top: 15px;" id="tip4">
+                    <h5>解题提示</h5>
+                    <p>走一圈的距离 = 圆的周长</p>
+                    <p>已知半径 r = 20 米</p>
+                    <p>C = 2 × 3.14 × 20 = 125.6 米</p>
+                </div>
+            </div>
+
+            <div class="question-card" id="q5">
+                <div class="question-text">
+                    <span class="question-number">5</span>
+                    <span>一个圆形钟表的周长是62.8厘米，这个钟表的半径是多少厘米？（π取3.14）</span>
+                </div>
+                <div class="input-group">
+                    <label>答案：</label>
+                    <input type="number" id="answer5" step="0.1" placeholder="输入答案">
+                    <span>厘米</span>
+                    <button class="submit-btn" onclick="checkAnswer(5, 10)">提交答案</button>
+                </div>
+                <div class="feedback" id="feedback5"></div>
+                <div class="tip-box" style="display: none; margin-top: 15px;" id="tip5">
+                    <h5>解题提示</h5>
+                    <p>已知周长，求半径，可以用公式的变形：</p>
+                    <p>C = 2πr → r = C ÷ (2π) = C ÷ 2 ÷ π</p>
+                    <p>方法一：先求直径 d = 62.8 ÷ 3.14 = 20 厘米</p>
+                    <p>方法二：直接求半径 r = 62.8 ÷ 3.14 ÷ 2 = 10 厘米</p>
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <h5>学习要点总结</h5>
+                <p>✅ 圆的周长公式：C = πd 或 C = 2πr</p>
+                <p>✅ 圆周率π ≈ 3.14，是周长与直径的比值</p>
+                <p>✅ 已知周长求直径：d = C ÷ π</p>
+                <p>✅ 已知周长求半径：r = C ÷ π ÷ 2</p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Canvas 绘图
+        const canvas = document.getElementById('circleCanvas');
+        const ctx = canvas.getContext('2d');
+        const radiusSlider = document.getElementById('radiusSlider');
+
+        let currentRadius = 80;
+
+        function drawCircle(radius) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = 250;
+            const centerY = 200;
+            const drawRadius = radius;
+
+            // 绘制圆
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, drawRadius, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(102, 126, 234, 0.1)';
+            ctx.fill();
+
+            // 绘制半径线
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(centerX + drawRadius, centerY);
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // 绘制直径线
+            ctx.beginPath();
+            ctx.moveTo(centerX - drawRadius, centerY);
+            ctx.lineTo(centerX + drawRadius, centerY);
+            ctx.strokeStyle = '#3498db';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 绘制圆心
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = '#e74c3c';
+            ctx.fill();
+
+            // 标注圆心
+            ctx.font = 'bold 16px Microsoft YaHei';
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillText('O', centerX - 20, centerY + 5);
+
+            // 标注半径
+            ctx.font = '14px Microsoft YaHei';
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillText('r = ' + radius + ' cm', centerX + drawRadius/2 - 30, centerY - 15);
+
+            // 标注直径
+            ctx.fillStyle = '#3498db';
+            ctx.fillText('d = ' + (radius * 2) + ' cm', centerX - 35, centerY + 25);
+
+            // 标注周长
+            const circumference = (2 * Math.PI * radius).toFixed(1);
+            ctx.font = 'bold 16px Microsoft YaHei';
+            ctx.fillStyle = '#667eea';
+            ctx.fillText('C = 2 × π × ' + radius + ' = ' + circumference + ' cm', 100, 380);
+        }
+
+        function updateDisplay(radius) {
+            document.getElementById('radiusValue').textContent = radius + ' cm';
+            document.getElementById('displayRadius').textContent = radius;
+            document.getElementById('displayDiameter').textContent = radius * 2;
+            document.getElementById('displayCircumference').textContent = (2 * 3.14 * radius).toFixed(1);
+        }
+
+        radiusSlider.addEventListener('input', function() {
+            currentRadius = parseInt(this.value);
+            drawCircle(currentRadius);
+            updateDisplay(currentRadius);
+        });
+
+        // 初始绘制
+        drawCircle(currentRadius);
+
+        // 练习题检查
+        let score = 0;
+
+        function checkAnswer(questionNum, correctAnswer) {
+            const answerInput = document.getElementById('answer' + questionNum);
+            const feedback = document.getElementById('feedback' + questionNum);
+            const tip = document.getElementById('tip' + questionNum);
+            const userAnswer = parseFloat(answerInput.value);
+
+            if (isNaN(userAnswer)) {
+                alert('请输入答案！');
+                return;
+            }
+
+            // 允许一定的误差范围
+            const tolerance = 0.5;
+
+            if (Math.abs(userAnswer - correctAnswer) <= tolerance) {
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = '<span class="emoji-big">🎉</span> 太棒了！完全正确！';
+                answerInput.disabled = true;
+                score++;
+                document.getElementById('score').textContent = score;
+            } else {
+                feedback.className = 'feedback wrong';
+                feedback.innerHTML = '<span class="emoji-big">😅</span> 再想想看，可以参考下面的提示哦！';
+                if (tip) {
+                    tip.style.display = 'block';
+                }
+            }
+
+            feedback.classList.add('animate-pop');
+        }
+
+        // 使提示框默认显示在第一题后面
+        document.getElementById('tip2').style.display = 'none';
+        document.getElementById('tip3').style.display = 'none';
+        document.getElementById('tip4').style.display = 'none';
+        document.getElementById('tip5').style.display = 'none';
+    </script>
+</body>
+</html>

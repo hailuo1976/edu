@@ -131,21 +131,29 @@ export class CourseToolCallAgent {
             }, iterations);
 
             if (this.checkCompletionCondition(response.content)) {
-              if (currentHtml) {
-                this.reportProgress({
-                  iteration: iterations,
-                  stage: 'complete',
-                  message: '课件生成完成!',
+              // 如果AI说完成了，但currentHtml为空，提示AI继续生成
+              if (!currentHtml) {
+                console.log(`[CourseToolCallAgent] AI说完成了，但HTML还未生成，继续执行...`);
+                messages.push({
+                  role: 'user',
+                  content: '你说了完成，但我还没有收到生成的HTML内容。请使用save_course_html工具保存生成的课件。',
                 });
-                this.logger.logSessionEnd(true, iterations, toolResults.length);
-                return {
-                  success: true,
-                  html: currentHtml,
-                  courseId,
-                  iterations,
-                  toolCalls: toolResults,
-                };
+                continue;
               }
+              
+              this.reportProgress({
+                iteration: iterations,
+                stage: 'complete',
+                message: '课件生成完成!',
+              });
+              this.logger.logSessionEnd(true, iterations, toolResults.length);
+              return {
+                success: true,
+                html: currentHtml,
+                courseId,
+                iterations,
+                toolCalls: toolResults,
+              };
             }
 
             if (!response.toolCalls || response.toolCalls.length === 0) {
@@ -251,13 +259,22 @@ export class CourseToolCallAgent {
       }
     }
 
+    // 检查是否成功生成了课件
+    const success = currentHtml.length > 0;
+    
+    if (success) {
+      console.log(`[CourseToolCallAgent] 课件生成成功，HTML长度: ${currentHtml.length}`);
+    } else {
+      console.warn(`[CourseToolCallAgent] 课件生成失败，HTML为空`);
+    }
+
     return {
-      success: currentHtml.length > 0,
+      success,
       html: currentHtml || this.generateFallbackHtml(prompt, subject, gradeLevel),
       courseId,
       iterations,
       toolCalls: toolResults,
-      error: currentHtml ? undefined : '生成失败',
+      error: success ? undefined : '生成失败',
     };
   }
 

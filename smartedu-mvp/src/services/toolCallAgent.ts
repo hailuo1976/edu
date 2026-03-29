@@ -51,7 +51,7 @@ export class ToolCallAgent {
       : fileToolExecutor;
     this.progressCallback = options.onProgress;
     this.apiKey = process.env.OPENCODE_API_KEY || '';
-    this.baseUrl = process.env.OPENCODE_BASE_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1';
+    this.baseUrl = process.env.OPENCODE_BASE_URL || 'https://coding.dashscope.aliyuncs.com/apps/anthropic';
   }
 
   async execute(initialPrompt: string): Promise<AgentExecutionResult> {

@@ -7,6 +7,7 @@ import express from 'express';
 import cors from 'cors';
 import fs from 'fs';
 import courseRoutes from './api/course';
+import adjustmentRoutes from './api/adjustment';
 import { Writable } from 'stream';
 
 const LOG_DIR = path.join(__dirname, '..', 'logs');
@@ -97,6 +98,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 app.use('/api/course', courseRoutes);
+app.use('/api/adjustment', adjustmentRoutes);
 
 const webPath = path.join(__dirname, '..', 'web');
 app.use(express.static(webPath));
@@ -122,6 +124,11 @@ app.get('/api', (req, res) => {
       'GET /api/course/:courseId': '获取课程',
       'GET /api/course/health': '健康检查',
       'POST /api/course/agent/execute': '工具调用Agent执行',
+      'GET /api/adjustment/courses': '列出可调整的课件',
+      'POST /api/adjustment/sessions': '创建调整会话',
+      'POST /api/adjustment/adjust': '提交调整请求',
+      'POST /api/adjustment/rollback': '回滚调整',
+      'POST /api/adjustment/validate': '验证HTML',
     },
   });
 });
@@ -148,6 +155,13 @@ app.listen(PORT, () => {
 ║     • GET  /api/course/:id       - 获取课程               ║
 ║     • GET  /api/course/health    - 健康检查               ║
 ║     • POST /api/course/agent/execute - 工具调用Agent     ║
+║                                                          ║
+║     课件调整系统:                                         ║
+║     • GET  /api/adjustment/courses  - 列出可调整课件      ║
+║     • POST /api/adjustment/sessions - 创建调整会话       ║
+║     • POST /api/adjustment/adjust   - 提交调整请求       ║
+║     • POST /api/adjustment/rollback - 回滚调整           ║
+║     • POST /api/adjustment/validate - 验证HTML           ║
 ║                                                          ║
 ╚══════════════════════════════════════════════════════════╝
   `);

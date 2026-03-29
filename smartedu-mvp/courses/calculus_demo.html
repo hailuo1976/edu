@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微积分演示课件</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+        }
+        
+        section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h2 {
+            color: #4c51bf;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        /* 概念模块 */
+        #concept .concept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .concept-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            border-radius: 15px;
+            padding: 25px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .concept-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .concept-card h3 {
+            color: #4c51bf;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+        }
+        
+        .formula {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Times New Roman', serif;
+            font-size: 1.2em;
+            text-align: center;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .concept-card p {
+            color: #555;
+            line-height: 1.8;
+        }
+        
+        /* 演示模块 */
+        #demo .demo-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .canvas-wrapper {
+            flex: 1;
+            min-width: 300px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .canvas-wrapper h3 {
+            color: #4c51bf;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        canvas {
+            width: 100%;
+            height: 300px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+        }
+        
+        input[type="range"] {
+            width: 150px;
+            accent-color: #667eea;
+        }
+        
+        /* 练习模块 */
+        #exercise .exercise-container {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .exercise-item {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .exercise-item h4 {
+            color: #4c51bf;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        
+        .exercise-item p {
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .answer-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        input[type="text"], input[type="number"] {
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 1em;
+            width: 200px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .feedback {
+            margin-top: 15px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .feedback.correct {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .feedback.incorrect {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            animation: shake 0.3s;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        /* 步骤展示 */
+        .steps-container {
+            margin-top: 20px;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .step:hover {
+            transform: translateX(10px);
+        }
+        
+        .step-num {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .step-content {
+            color: #333;
+            font-size: 1.1em;
+        }
+        
+        /* 信息提示 */
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        .info-box strong {
+            color: #1976D2;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8em; }
+            h2 { font-size: 1.4em; }
+            .concept-grid, .demo-container {
+                grid-template-columns: 1fr;
+            }
+            .answer-section {
+                flex-direction: column;
+            }
+            input[type="text"], input[type="number"] {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📐 微积分演示课件</h1>
+            <p class="subtitle">探索导数与积分的奥秘</p>
+        </header>
+        
+        <!-- 概念讲解模块 -->
+        <section id="concept">
+            <h2>📚 概念讲解</h2>
+            
+            <div class="concept-grid">
+                <div class="concept-card">
+                    <h3>🔵 导数概念</h3>
+                    <p>导数描述函数在某一点的<strong>瞬时变化率</strong>，即曲线在该点切线的斜率。</p>
+                    <div class="formula">
+                        f'(x) = lim<sub>h→0</sub> [f(x+h) - f(x)] / h
+                    </div>
+                    <p>几何意义：切线的斜率<br>物理意义：瞬时速度</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>🟢 积分概念</h3>
+                    <p>积分是导数的<strong>逆运算</strong>，表示曲线下的面积累积。</p>
+                    <div class="formula">
+                        ∫f(x)dx = F(x) + C
+                    </div>
+                    <p>几何意义：曲线下的面积<br>物理意义：位移、总量</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>🟣 基本公式</h3>
+                    <p><strong>幂函数导数：</strong></p>
+                    <div class="formula">(x<sup>n</sup>)' = n · x<sup>n-1</sup></div>
+                    <p><strong>幂函数积分：</strong></p>
+                    <div class="formula">∫x<sup>n</sup>dx = x<sup>n+1</sup>/(n+1) + C</div>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>🟠 学习步骤</h3>
+                    <div class="steps-container">
+                        <div class="step">
+                            <div class="step-num">1</div>
+                            <div class="step-content">理解极限概念</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">2</div>
+                            <div class="step-content">掌握导数定义</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">3</div>
+                            <div class="step-content">学习求导法则</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">4</div>
+                            <div class="step-content">理解积分概念</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">5</div>
+                            <div class="step-content">掌握积分计算</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 图形演示模块 -->
+        <section id="demo">
+            <h2>🎨 图形演示</h2>
+            
+            <div class="demo-container">
+                <div class="canvas-wrapper">
+                    <h3>导数的几何意义 - 切线斜率</h3>
+                    <canvas id="derivativeCanvas"></canvas>
+                    <div class="controls">
+                        <button onclick="animateDerivative()">▶️ 动画演示</button>
+                        <button onclick="resetDerivative()">🔄 重置</button>
+                        <div class="slider-group">
+                            <label>x = </label>
+                            <input type="range" id="xSlider" min="-3" max="3" step="0.1" value="1">
+                            <span id="xValue">1.0</span>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <strong>提示：</strong>拖动滑块观察不同点的切线变化。曲线 y = x² 在点 x 处的切线斜率为 2x。
+                    </div>
+                </div>
+                
+                <div class="canvas-wrapper">
+                    <h3>积分的几何意义 - 曲线下面积</h3>
+                    <canvas id="integralCanvas"></canvas>
+                    <div class="controls">
+                        <button onclick="animateIntegral()">▶️ 分割演示</button>
+                        <button onclick="showExactIntegral()">📐 精确值</button>
+                        <div class="slider-group">
+                            <label>n = </label>
+                            <input type="range" id="nSlider" min="1" max="100" step="1" value="10">
+                            <span id="nValue">10</span>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <strong>提示：</strong>增加分割数n，矩形面积之和趋近于曲线下的真实面积。
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 练习测试模块 -->
+        <section id="exercise">
+            <h2>✏️ 练习测试</h2>
+            
+            <div class="exercise-container">
+                <div class="exercise-item">
+                    <h4>题目1：基础导数计算</h4>
+                    <p>求函数 f(x) = x² 在 x = 3 处的导数值</p>
+                    <div class="answer-section">
+                        <input type="number" id="answer1" placeholder="输入答案">
+                        <button onclick="checkAnswer1()">检查答案</button>
+                    </div>
+                    <div class="feedback" id="feedback1"></div>
+                </div>
+                
+                <div class="exercise-item">
+                    <h4>题目2：不定积分计算</h4>
+                    <p>计算不定积分：∫2x dx = ?（用 x 表示结果，常数C可省略）</p>
+                    <div class="answer-section">
+                        <input type="text" id="answer2" placeholder="例如：x^2">
+                        <button onclick="checkAnswer2()">检查答案</button>
+                    </div>
+                    <div class="feedback" id="feedback2"></div>
+                </div>
+                
+                <div class="exercise-item">
+                    <h4>题目3：应用题</h4>
+                    <p>一个物体运动方程为 s(t) = t² + 2t，求 t = 2 时的瞬时速度？</p>
+                    <div class="answer-section">
+                        <input type="number" id="answer3" placeholder="输入答案">
+                        <button onclick="checkAnswer3()">检查答案</button>
+                    </div>
+                    <div class="feedback" id="feedback3"></div>
+                </div>
+                
+                <div class="exercise-item">
+                    <h4>题目4：定积分计算</h4>
+                    <p>计算定积分：∫₀² x dx = ?（保留一位小数）</p>
+                    <div class="answer-section">
+                        <input type="number" id="answer4" placeholder="输入答案" step="0.1">
+                        <button onclick="checkAnswer4()">检查答案</button>
+                    </div>
+                    <div class="feedback" id="feedback4"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <script>
+        // ========== 导数演示 ==========
+        const derivativeCanvas = document.getElementById('derivativeCanvas');
+        const ctxDerivative = derivativeCanvas.getContext('2d');
+        const xSlider = document.getElementById('xSlider');
+        const xValueSpan = document.getElementById('xValue');
+        
+        let animationId = null;
+        
+        function initDerivativeCanvas() {
+            derivativeCanvas.width = derivativeCanvas.offsetWidth;
+            derivativeCanvas.height = derivativeCanvas.offsetHeight;
+            drawDerivative(parseFloat(xSlider.value));
+        }
+        
+        function drawDerivative(x0) {
+            const canvas = derivativeCanvas;
+            const ctx = ctxDerivative;
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // 坐标系
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const scale = 40;
+            
+            // 绘制网格
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let i = -5; i <= 5; i++) {
+                ctx.beginPath();
+                ctx.moveTo(centerX + i * scale, 0);
+                ctx.lineTo(centerX + i * scale, height);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, centerY + i * scale);
+                ctx.lineTo(width, centerY + i * scale);
+                ctx.stroke();
+            }
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+            
+            // 绘制曲线 y = x²
+            ctx.strokeStyle = '#4c51bf';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for (let px = 0; px < width; px++) {
+                const x = (px - centerX) / scale;
+                const y = x * x;
+                const py = centerY - y * scale;
+                if (px === 0) {
+                    ctx.moveTo(px, py);
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+            
+            // 绘制切点
+            const y0 = x0 * x0;
+            const slope = 2 * x0;
+            
+            ctx.fillStyle = '#e53e3e';
+            ctx.beginPath();
+            ctx.arc(centerX + x0 * scale, centerY - y0 * scale, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 绘制切线
+            ctx.strokeStyle = '#e53e3e';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            const x1 = x0 - 3;
+            const y1 = y0 + slope * (x1 - x0);
+            const x2 = x0 + 3;
+            const y2 = y0 + slope * (x2 - x0);
+            ctx.moveTo(centerX + x1 * scale, centerY - y1 * scale);
+            ctx.lineTo(centerX + x2 * scale, centerY - y2 * scale);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 标注
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.fillText(`点 (${x0.toFixed(1)}, ${y0.toFixed(1)})`, 10, 20);
+            ctx.fillText(`切线斜率 = ${slope.toFixed(1)}`, 10, 40);
+            ctx.fillText('y = x²', width - 50, 20);
+        }
+        
+        xSlider.addEventListener('input', function() {
+            xValueSpan.textContent = parseFloat(this.value).toFixed(1);
+            drawDerivative(parseFloat(this.value));
+        });
+        
+        function animateDerivative() {
+            let x = -3;
+            function animate() {
+                x += 0.05;
+                if (x > 3) x = -3;
+                xSlider.value = x;
+                xValueSpan.textContent = x.toFixed(1);
+                drawDerivative(x);
+                animationId = requestAnimationFrame(animate);
+            }
+            if (animationId) cancelAnimationFrame(animationId);
+            animate();
+        }
+        
+        function resetDerivative() {
+            if (animationId) cancelAnimationFrame(animationId);
+            xSlider.value = 1;
+            xValueSpan.textContent = '1.0';
+            drawDerivative(1);
+        }
+        
+        // ========== 积分演示 ==========
+        const integralCanvas = document.getElementById('integralCanvas');
+        const ctxIntegral = integralCanvas.getContext('2d');
+        const nSlider = document.getElementById('nSlider');
+        const nValueSpan = document.getElementById('nValue');
+        
+        function initIntegralCanvas() {
+            integralCanvas.width = integralCanvas.offsetWidth;
+            integralCanvas.height = integralCanvas.offsetHeight;
+            drawIntegral(parseInt(nSlider.value));
+        }
+        
+        function drawIntegral(n) {
+            const canvas = integralCanvas;
+            const ctx = ctxIntegral;
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const a = 0, b = 2;
+            const centerX = 50;
+            const centerY = height - 50;
+            const scaleX = (width - 100) / (b - a + 2);
+            const scaleY = (height - 100) / 4;
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(centerX, 20);
+            ctx.lineTo(centerX, centerY);
+            ctx.lineTo(width - 20, centerY);
+            ctx.stroke();
+            
+            // 绘制曲线 y = x
+            ctx.strokeStyle = '#4c51bf';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for (let x = a; x <= b; x += 0.01) {
+                const px = centerX + (x - a + 1) * scaleX;
+                const py = centerY - x * scaleY;
+                if (x === a) {
+                    ctx.moveTo(px, py);
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+            
+            // 绘制矩形
+            const dx = (b - a) / n;
+            let totalArea = 0;
+            
+            for (let i = 0; i < n; i++) {
+                const x = a + i * dx;
+                const y = x; // f(x) = x
+                totalArea += y * dx;
+                
+                const px = centerX + (x - a + 1) * scaleX;
+                const py = centerY - y * scaleY;
+                const rectWidth = dx * scaleX;
+                const rectHeight = y * scaleY;
+                
+                ctx.fillStyle = 'rgba(102, 126, 234, 0.3)';
+                ctx.strokeStyle = '#667eea';
+                ctx.lineWidth = 1;
+                ctx.fillRect(px, py, rectWidth, rectHeight);
+                ctx.strokeRect(px, py, rectWidth, rectHeight);
+            }
+            
+            // 精确值
+            const exactValue = (b * b - a * a) / 2;
+            
+            // 标注
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.fillText(`矩形数 n = ${n}`, 10, 20);
+            ctx.fillText(`矩形面积和 ≈ ${totalArea.toFixed(3)}`, 10, 40);
+            ctx.fillText(`精确值 = ${exactValue.toFixed(3)}`, 10, 60);
+            ctx.fillText(`误差 = ${Math.abs(totalArea - exactValue).toFixed(4)}`, 10, 80);
+            ctx.fillText('∫₀² x dx', width - 70, 20);
+            ctx.fillText('y = x', width - 50, 40);
+        }
+        
+        nSlider.addEventListener('input', function() {
+            nValueSpan.textContent = this.value;
+            drawIntegral(parseInt(this.value));
+        });
+        
+        let integralAnimationId = null;
+        
+        function animateIntegral() {
+            let n = 1;
+            function animate() {
+                n = (n % 100) + 1;
+                nSlider.value = n;
+                nValueSpan.textContent = n;
+                drawIntegral(n);
+                integralAnimationId = setTimeout(animate, 100);
+            }
+            if (integralAnimationId) clearTimeout(integralAnimationId);
+            animate();
+        }
+        
+        function showExactIntegral() {
+            if (integralAnimationId) clearTimeout(integralAnimationId);
+            nSlider.value = 100;
+            nValueSpan.textContent = '100';
+            drawIntegral(100);
+        }
+        
+        // ========== 练习题判断 ==========
+        function checkAnswer1() {
+            const answer = parseFloat(document.getElementById('answer1').value);
+            const feedback = document.getElementById('feedback1');
+            if (answer === 6) {
+                feedback.textContent = '✅ 正确！f(x) = x² 的导数为 f\'(x) = 2x，在 x=3 处 f\'(3) = 6';
+                feedback.className = 'feedback correct';
+            } else {
+                feedback.textContent = '❌ 再想想！提示：利用导数公式 (x²)\' = 2x';
+                feedback.className = 'feedback incorrect';
+            }
+        }
+        
+        function checkAnswer2() {
+            const answer = document.getElementById('answer2').value.toLowerCase().replace(/\s/g, '');
+            const feedback = document.getElementById('feedback2');
+            if (answer === 'x^2' || answer === 'x²' || answer === 'x*x') {
+                feedback.textContent = '✅ 正确！∫2x dx = x² + C';
+                feedback.className = 'feedback correct';
+            } else {
+                feedback.textContent = '❌ 提示：对 x² 求导得到 2x，所以 ∫2x dx = x² + C';
+                feedback.className = 'feedback incorrect';
+            }
+        }
+        
+        function checkAnswer3() {
+            const answer = parseFloat(document.getElementById('answer3').value);
+            const feedback = document.getElementById('feedback3');
+            if (answer === 6) {
+                feedback.textContent = '✅ 正确！v(t) = s\'(t) = 2t + 2，在 t=2 时 v(2) = 6';
+                feedback.className = 'feedback correct';
+            } else {
+                feedback.textContent = '❌ 提示：瞬时速度是位移对时间的导数';
+                feedback.className = 'feedback incorrect';
+            }
+        }
+        
+        function checkAnswer4() {
+            const answer = parseFloat(document.getElementById('answer4').value);
+            const feedback = document.getElementById('feedback4');
+            if (Math.abs(answer - 2) < 0.1) {
+                feedback.textContent = '✅ 正确！∫₀² x dx = [x²/2]₀² = 2²/2 - 0 = 2';
+                feedback.className = 'feedback correct';
+            } else {
+                feedback.textContent = '❌ 提示：∫x dx = x²/2，然后代入上下限计算';
+                feedback.className = 'feedback incorrect';
+            }
+        }
+        
+        // 初始化
+        window.onload = function() {
+            initDerivativeCanvas();
+            initIntegralCanvas();
+        };
+        
+        window.onresize = function() {
+            initDerivativeCanvas();
+            initIntegralCanvas();
+        };
+    </script>
+</body>
+</html>

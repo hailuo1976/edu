@@ -110,6 +110,11 @@ export class ToolManager {
   }
 
   async executeTool(toolCall: ToolCall): Promise<ToolResult> {
+    console.log(`    [ToolManager] ========================================`);
+    console.log(`    [ToolManager] 开始执行工具: ${toolCall.name}`);
+    console.log(`    [ToolManager] 工具调用ID: ${toolCall.id}`);
+    console.log(`    [ToolManager] 参数: ${JSON.stringify(toolCall.arguments, null, 2).split('\n').join('\n    [ToolManager] ')}`);
+
     const startTime = Date.now();
     const tool = this.tools.get(toolCall.name);
     let retries = 0;
@@ -125,6 +130,7 @@ export class ToolManager {
       const executionTime = Date.now() - startTime;
       this.updateToolStats(toolCall.name, false, executionTime);
       
+      console.error(`    [ToolManager] 错误: 工具不存在: ${toolCall.name}`);
       ToolManager.logger.error('tool_not_found', `工具不存在: ${toolCall.name}`, {
         toolCallId: toolCall.id,
         executionTime,
@@ -146,6 +152,7 @@ export class ToolManager {
         const executionTime = Date.now() - startTime;
         this.updateToolStats(toolCall.name, false, executionTime);
         
+        console.error(`    [ToolManager] 参数验证失败: ${validationError}`);
         ToolManager.logger.warn('tool_validation_failed', `参数验证失败: ${validationError}`, {
           toolCallId: toolCall.id,
           toolName: toolCall.name,
@@ -164,6 +171,7 @@ export class ToolManager {
       }
 
       // 执行工具（带重试）
+      console.log(`    [ToolManager] 参数验证通过，开始执行工具...`);
       ToolManager.logger.debug('tool_executing', `正在执行工具: ${toolCall.name}`, {
         toolCallId: toolCall.id,
         arguments: toolCall.arguments,
@@ -173,6 +181,11 @@ export class ToolManager {
       
       const executionTime = Date.now() - startTime;
       this.updateToolStats(toolCall.name, true, executionTime);
+      
+      console.log(`    [ToolManager] 工具执行成功，耗时: ${executionTime}ms`);
+      const resultPreview = typeof result === 'object' ? JSON.stringify(result).substring(0, 300) : String(result).substring(0, 300);
+      console.log(`    [ToolManager] 结果: ${resultPreview}${(typeof result === 'object' ? JSON.stringify(result).length : String(result).length) > 300 ? '...' : ''}`);
+      console.log(`    [ToolManager] ========================================`);
       
       // 记录工具执行成功
       ToolManager.logger.info('tool_call_success', `工具执行成功: ${toolCall.name}`, {
@@ -195,6 +208,10 @@ export class ToolManager {
     } catch (error: any) {
       const executionTime = Date.now() - startTime;
       this.updateToolStats(toolCall.name, false, executionTime);
+      
+      console.error(`    [ToolManager] 工具执行失败，耗时: ${executionTime}ms`);
+      console.error(`    [ToolManager] 错误: ${error.message}`);
+      console.error(`    [ToolManager] ========================================`);
       
       // 记录工具执行失败
       ToolManager.logger.error('tool_call_failed', `工具执行失败: ${toolCall.name}`, {
@@ -352,6 +369,54 @@ export class ToolManager {
       },
     });
 
+    // 生成SVG图表工具
+    this.registerTool({
+      name: 'generate_svg_diagram',
+      description: '根据描述生成SVG图形',
+      parameters: {
+        type: 'object',
+        properties: {
+          description: {
+            type: 'string',
+            description: '图形描述',
+          },
+          diagram_type: {
+            type: 'string',
+            description: '图形类型，如rect、circle、triangle等',
+          },
+        },
+        required: ['description'],
+      },
+      execute: async (args, workDir) => {
+        const { description, diagram_type = 'rect' } = args;
+        let svg = '';
+
+        switch (diagram_type.toLowerCase()) {
+          case 'circle':
+            svg = `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="90" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/>
+  <text x="100" y="100" text-anchor="middle" fill="white" font-size="12">${description}</text>
+</svg>`;
+            break;
+          case 'triangle':
+            svg = `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="100,10 190,190 10,190" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/>
+  <text x="100" y="100" text-anchor="middle" fill="white" font-size="12">${description}</text>
+</svg>`;
+            break;
+          case 'rect':
+          default:
+            svg = `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="10" width="180" height="180" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/>
+  <text x="100" y="100" text-anchor="middle" fill="white" font-size="12">${description}</text>
+</svg>`;
+            break;
+        }
+
+        return { svg, description, diagram_type };
+      },
+    });
+
     // 生成HTML组件工具
     this.registerTool({
       name: 'generate_html_component',
@@ -485,21 +550,25 @@ export class ToolManager {
           },
           grade_level: {
             type: 'number',
-            description: '年级',
+            description: '年级（可选，默认0）',
           },
           subject: {
             type: 'string',
-            description: '学科',
+            description: '学科（可选，默认"未知学科"）',
           },
         },
-        required: ['query', 'grade_level', 'subject'],
+        required: ['query'],
       },
       execute: async (args, workDir) => {
-        const { query, grade_level, subject } = args;
+        const { query, grade_level = 0, subject = '未知学科' } = args;
         
         try {
           const axios = require('axios');
-          const apiKey = 'bce-v3/ALTAK-LNU3yjGmY72rkB8V1f9wz/83b8cfd5e83bf6467ca5328134274971f49faa0d';
+          const apiKey = process.env.BAIDU_API_KEY || '';
+          
+          if (!apiKey) {
+            throw new Error('BAIDU_API_KEY is required for search_educational_content tool');
+          }
           
           const response = await axios.post(
             'https://qianfan.baidubce.com/v2/ai_search/web_search',

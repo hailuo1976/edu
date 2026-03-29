@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>立体几何全面复习 - 小学6年级数学</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .section {
+            margin-bottom: 50px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #2d3748;
+            margin: 20px 0 15px 0;
+            font-size: 1.4em;
+        }
+
+        /* 动画演示区域 */
+        .demo-area {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+
+        .demo-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin: 15px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .demo-box:hover {
+            transform: translateY(-5px);
+        }
+
+        .demo-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        /* 正方体3D旋转动画 */
+        .cube-container {
+            width: 200px;
+            height: 200px;
+            perspective: 600px;
+            margin: 20px auto;
+        }
+
+        .cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotateCube 8s infinite linear;
+        }
+
+        .cube-face {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border: 2px solid #333;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            left: 25px;
+            top: 25px;
+        }
+
+        .front  { background: rgba(255, 0, 0, 0.7); transform: translateZ(75px); }
+        .back   { background: rgba(0, 255, 0, 0.7); transform: rotateY(180deg) translateZ(75px); }
+        .right  { background: rgba(0, 0, 255, 0.7); transform: rotateY(90deg) translateZ(75px); }
+        .left   { background: rgba(255, 255, 0, 0.7); transform: rotateY(-90deg) translateZ(75px); }
+        .top    { background: rgba(255, 0, 255, 0.7); transform: rotateX(90deg) translateZ(75px); }
+        .bottom { background: rgba(0, 255, 255, 0.7); transform: rotateX(-90deg) translateZ(75px); }
+
+        @keyframes rotateCube {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(360deg) rotateY(360deg); }
+        }
+
+        /* 长方体展开动画 */
+        .unfold-container {
+            width: 300px;
+            height: 250px;
+            position: relative;
+            margin: 20px auto;
+        }
+
+        .unfold-face {
+            position: absolute;
+            border: 2px solid #333;
+            background: rgba(102, 126, 234, 0.8);
+            transition: all 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .unfold-face.front-face {
+            width: 80px;
+            height: 60px;
+            left: 110px;
+            top: 95px;
+            background: rgba(255, 99, 132, 0.8);
+        }
+
+        .unfold-face.back-face {
+            width: 80px;
+            height: 60px;
+            left: 110px;
+            top: 95px;
+            background: rgba(54, 162, 235, 0.8);
+            transform: translateZ(-30px);
+        }
+
+        .unfold-face.left-face {
+            width: 40px;
+            height: 60px;
+            left: 70px;
+            top: 95px;
+            background: rgba(255, 206, 86, 0.8);
+        }
+
+        .unfold-face.right-face {
+            width: 40px;
+            height: 60px;
+            left: 190px;
+            top: 95px;
+            background: rgba(75, 192, 192, 0.8);
+        }
+
+        .unfold-face.top-face {
+            width: 80px;
+            height: 40px;
+            left: 110px;
+            top: 55px;
+            background: rgba(153, 102, 255, 0.8);
+        }
+
+        .unfold-face.bottom-face {
+            width: 80px;
+            height: 40px;
+            left: 110px;
+            top: 155px;
+            background: rgba(255, 159, 64, 0.8);
+        }
+
+        .unfold-container.unfolded .front-face {
+            transform: translateZ(30px);
+        }
+
+        .unfold-container.unfolded .back-face {
+            transform: translateZ(-30px) translateY(100px);
+        }
+
+        .unfold-container.unfolded .left-face {
+            left: 30px;
+        }
+
+        .unfold-container.unfolded .right-face {
+            left: 230px;
+        }
+
+        .unfold-container.unfolded .top-face {
+            top: 15px;
+        }
+
+        .unfold-container.unfolded .bottom-face {
+            top: 195px;
+        }
+
+        /* 圆柱体动画 */
+        .cylinder-demo {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            margin: 20px auto;
+        }
+
+        .cylinder {
+            width: 120px;
+            height: 150px;
+            margin: 25px auto;
+            position: relative;
+            animation: rotateCylinder 6s infinite linear;
+        }
+
+        .cylinder-body {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                rgba(102, 126, 234, 0.3) 0%,
+                rgba(102, 126, 234, 0.8) 50%,
+                rgba(102, 126, 234, 0.3) 100%);
+            border-radius: 60px / 20px;
+            position: relative;
+        }
+
+        .cylinder-top {
+            width: 120px;
+            height: 40px;
+            background: rgba(102, 126, 234, 0.9);
+            border-radius: 50%;
+            position: absolute;
+            top: -20px;
+            left: 0;
+        }
+
+        .cylinder-bottom {
+            width: 120px;
+            height: 40px;
+            background: rgba(102, 126, 234, 0.6);
+            border-radius: 50%;
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+        }
+
+        @keyframes rotateCylinder {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        /* 体积推导动画 */
+        .volume-demo {
+            width: 300px;
+            height: 200px;
+            position: relative;
+            margin: 20px auto;
+        }
+
+        .layer {
+            position: absolute;
+            width: 100px;
+            height: 20px;
+            background: rgba(102, 126, 234, 0.7);
+            border: 1px solid #333;
+            animation: buildUp 3s infinite;
+        }
+
+        .layer:nth-child(1) { bottom: 0; animation-delay: 0s; }
+        .layer:nth-child(2) { bottom: 20px; animation-delay: 0.3s; }
+        .layer:nth-child(3) { bottom: 40px; animation-delay: 0.6s; }
+        .layer:nth-child(4) { bottom: 60px; animation-delay: 0.9s; }
+        .layer:nth-child(5) { bottom: 80px; animation-delay: 1.2s; }
+
+        @keyframes buildUp {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* 切割动画 */
+        .cut-demo {
+            width: 250px;
+            height: 200px;
+            position: relative;
+            margin: 20px auto;
+        }
+
+        .cut-piece {
+            position: absolute;
+            background: rgba(255, 99, 132, 0.8);
+            border: 2px solid #333;
+            transition: all 1s ease;
+        }
+
+        .cut-piece.piece1 {
+            width: 60px;
+            height: 60px;
+            left: 50px;
+            top: 70px;
+        }
+
+        .cut-piece.piece2 {
+            width: 60px;
+            height: 60px;
+            left: 110px;
+            top: 70px;
+            animation: cutRight 4s infinite;
+        }
+
+        .cut-piece.piece3 {
+            width: 60px;
+            height: 60px;
+            left: 50px;
+            top: 130px;
+            animation: cutDown 4s infinite;
+        }
+
+        .cut-piece.piece4 {
+            width: 60px;
+            height: 60px;
+            left: 110px;
+            top: 130px;
+            animation: cutDiagonal 4s infinite;
+        }
+
+        @keyframes cutRight {
+            0%, 100% { left: 110px; }
+            50% { left: 140px; }
+        }
+
+        @keyframes cutDown {
+            0%, 100% { top: 130px; }
+            50% { top: 160px; }
+        }
+
+        @keyframes cutDiagonal {
+            0%, 100% { left: 110px; top: 130px; }
+            50% { left: 140px; top: 160px; }
+        }
+
+        /* 互动按钮 */
+        .control-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 公式展示 */
+        .formula-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .formula {
+            font-size: 1.3em;
+            color: #4a5568;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* 知识点卡片 */
+        .knowledge-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .knowledge-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .knowledge-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        /* 互动练习区 */
+        .practice-area {
+            background: #f0f4f8;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .question {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .option-btn.correct {
+            background: #48bb78;
+            border-color: #48bb78;
+            color: white;
+        }
+
+        .option-btn.wrong {
+            background: #f56565;
+            border-color: #f56565;
+            color: white;
+        }
+
+        /* 进度条 */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* 提示框 */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            border-bottom: 2px dotted #667eea;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            white-space: nowrap;
+            font-size: 14px;
+            z-index: 100;
+        }
+
+        /* 动画控制面板 */
+        .animation-controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .demo-area {
+                flex-direction: column;
+            }
+            
+            .demo-box {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        /* 特殊效果 */
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 5px #667eea, 0 0 10px #667eea, 0 0 15px #667eea;
+            }
+            to {
+                box-shadow: 0 0 10px #764ba2, 0 0 20px #764ba2, 0 0 30px #764ba2;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 立体几何全面复习 - 小学6年级数学</h1>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+        </div>
+
+        <!-- 第一部分：立体图形认识 -->
+        <div class="section">
+            <h2>📐 一、立体图形的认识</h2>
+            
+            <div class="demo-area">
+                <div class="demo-box">
+                    <div class="demo-title">正方体 3D旋转</div>
+                    <div class="cube-container">
+                        <div class="cube" id="cube">
+                            <div class="cube-face front">前</div>
+                            <div class="cube-face back">后</div>
+                            <div class="cube-face right">右</div>
+                            <div class="cube-face left">左</div>
+                            <div class="cube-face top">上</div>
+                            <div class="cube-face bottom">下</div>
+                        </div>
+                    </div>
+                    <button class="control-btn" onclick="toggleCubeAnimation()">暂停/播放</button>
+                </div>
+
+                <div class="demo-box">
+                    <div class="demo-title">长方体展开图</div>
+                    <div class="unfold-container" id="unfoldBox">
+                        <div class="unfold-face front-face">前</div>
+                        <div class="unfold-face back-face">后</div>
+                        <div class="unfold-face left-face">左</div>
+                        <div class="unfold-face right-face">右</div>
+                        <div class="unfold-face top-face">上</div>
+                        <div class="unfold-face bottom-face">下</div>
+                    </div>
+                    <button class="control-btn" onclick="toggleUnfold()">展开/折叠</button>
+                </div>
+            </div>
+
+            <div class="knowledge-card">
+                <h4>🔷 正方体的特征</h4>
+                <ul>
+                    <li>有 <strong>6个面</strong>，每个面都是正方形</li>
+                    <li>有 <strong>12条棱</strong>，每条棱长度相等</li>
+                    <li>有 <strong>8个顶点</strong></li>
+                    <li>正方体是特殊的长方体</li>
+                </ul>
+            </div>
+
+            <div class="knowledge-card">
+                <h4>📦 长方体的特征</h4>
+                <ul>
+                    <li>有 <strong>6个面</strong>，相对的面完全相同</li>
+                    <li>有 <strong>12条棱</strong>，相对的棱长度相等</li>
+                    <li>有 <strong>8个顶点</strong></li>
+                    <li>长方体的棱长总和 = (长+宽+高) × 4</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 第二部分：体积公式推导 -->
+        <div class="section">
+            <h2>📏 二、体积公式推导动画</h2>
+            
+            <div class="demo-area">
+                <div class="demo-box">
+                    <div class="demo-title">体积单位堆积</div>
+                    <div class="volume-demo">
+                        <div class="layer"></div>
+                        <div class="layer"></div>
+                        <div class="layer"></div>
+                        <div class="layer"></div>
+                        <div class="layer"></div>
+                    </div>
+                    <p style="margin-top: 20px; color: #667eea; font-weight: bold;">体积 = 底面积 × 高</p>
+                </div>
+
+                <div class="demo-box">
+                    <div class="demo-title">圆柱体旋转</div>
+                    <div class="cylinder-demo">
+                        <div class="cylinder">
+                            <div class="cylinder-top"></div>
+                            <div class="cylinder-body"></div>
+                            <div class="cylinder-bottom"></div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 10px; color: #667eea; font-weight: bold;">V = πr²h</p>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <h3>📐 体积公式汇总</h3>
+                <div class="formula">✦ 长方体体积 = 长 × 宽 × 高 = 底面积 × 高</div>
+                <div class="formula">✦ 正方体体积 = 棱长 × 棱长 × 棱长 = 棱长³</div>
+                <div class="formula">✦ 圆柱体积 = 底面积 × 高 = πr²h</div>
+                <div class="formula">✦ 圆锥体积 = ⅓ × 底面积 × 高 = ⅓πr²h</div>
+            </div>
+
+            <div class="knowledge-card glow">
+                <h4>💡 重要提示</h4>
+                <p>圆锥的体积是等底等高圆柱体积的 <strong style="color: #e53e3e; font-size: 1.2em;">⅓</strong></p>
+                <p>这个关系非常重要，可以通过实验验证！</p>
+            </div>
+        </div>
+
+        <!-- 第三部分：切割与组合 -->
+        <div class="section">
+            <h2>✂️ 三、立体图形的切割与组合</h2>
+            
+            <div class="demo-area">
+                <div class="demo-box">
+                    <div class="demo-title">正方体切割演示</div>
+                    <div class="cut-demo">
+                        <div class="cut-piece piece1"></div>
+                        <div class="cut-piece piece2"></div>
+                        <div class="cut-piece piece3"></div>
+                        <div class="cut-piece piece4"></div>
+                    </div>
+                    <p style="color: #667eea; font-weight: bold;">切割后体积不变</p>
+                </div>
+            </div>
+
+            <div class="knowledge-card">
+                <h4>🔪 切割规律</h4>
+                <ul>
+                    <li>立体图形切割后，<strong>体积不变</strong></li>
+                    <li>切割会增加<strong>表面积</strong></li>
+                    <li>沿不同方向切割，表面积增加量不同</li>
+                    <li>切割次数越多，表面积增加越多</li>
+                </ul>
+            </div>
+
+            <div class="formula-box">
+                <h3>📊 表面积公式</h3>
+                <div class="formula">✦ 长方体表面积 = (长×宽 + 长×高 + 宽×高) × 2</div>
+                <div class="formula">✦ 正方体表面积 = 棱长² × 6</div>
+                <div class="formula">✦ 圆柱表面积 = 侧面积 + 2个底面积 = 2πrh + 2πr²</div>
+            </div>
+        </div>
+
+        <!-- 第四部分：互动练习 -->
+        <div class="section">
+            <h2>🎯 四、互动练习</h2>
+            
+            <div class="practice-area">
+                <div class="question" id="question1">
+                    <h4>问题 1：一个正方体的棱长是5厘米，它的体积是多少立方厘米？</h4>
+                    <div class="options">
+                        <button class="option-btn" onclick="checkAnswer(1, 'A', this)">A. 25 cm³</button>
+                        <button class="option-btn" onclick="checkAnswer(1, 'B', this)">B. 75 cm³</button>
+                        <button class="option-btn" onclick="checkAnswer(1, 'C', this)">C. 125 cm³</button>
+                        <button class="option-btn" onclick="checkAnswer(1, 'D', this)">D. 150 cm³</button>
+                    </div>
+                    <div id="feedback1" style="margin-top: 15px; font-weight: bold;"></div>
+                </div>
+
+                <div class="question" id="question2">
+                    <h4>问题 2：一个长方体的长是8cm，宽是5cm，高是3cm，它的表面积是多少？</h4>
+                    <div class="options">
+                        <button class="option-btn" onclick="checkAnswer(2, 'A', this)">A. 94 cm²</button>
+                        <button class="option-btn" onclick="checkAnswer(2, 'B', this)">B. 158 cm²</button>
+                        <button class="option-btn" onclick="checkAnswer(2, 'C', this)">C. 120 cm²</button>
+                        <button class="option-btn" onclick="checkAnswer(2, 'D', this)">D. 188 cm²</button>
+                    </div>
+                    <div id="feedback2" style="margin-top: 15px; font-weight: bold;"></div>
+                </div>
+
+                <div class="question" id="question3">
+                    <h4>问题 3：圆柱的底面半径是3cm，高是10cm，它的体积约是多少立方厘米？(π取3.14)</h4>
+                    <div class="options">
+                        <button class="option-btn" onclick="checkAnswer(3, 'A', this)">A. 94.2 cm³</button>
+                        <button class="option-btn" onclick="checkAnswer(3, 'B', this)">B. 282.6 cm³</button>
+                        <button class="option-btn" onclick="checkAnswer(3, 'C', this)">C. 188.4 cm³</button>
+                        <button class="option-btn" onclick="checkAnswer(3, 'D', this)">D. 376.8 cm³</button>
+                    </div>
+                    <div id="feedback3" style="margin-top: 15px; font-weight: bold;"></div>
+                </div>
+
+                <div class="question" id="question4">
+                    <h4>问题 4：圆锥的体积是与它等底等高的圆柱体积的多少？</h4>
+                    <div class="options">
+                        <button class="option-btn" onclick="checkAnswer(4, 'A', this)">A. ½</button>
+                        <button class="option-btn" onclick="checkAnswer(4, 'B', this)">B. ⅓</button>
+                        <button class="option-btn" onclick="checkAnswer(4, 'C', this)">C. ¼</button>
+                        <button class="option-btn" onclick="checkAnswer(4, 'D', this)">D. ⅔</button>
+                    </div>
+                    <div id="feedback4" style="margin-top: 15px; font-weight: bold;"></div>
+                </div>
+            </div>
+
+            <div class="animation-controls">
+                <button class="control-btn" onclick="resetQuiz()">🔄 重新开始</button>
+                <button class="control-btn" onclick="showAllAnswers()">💡 显示答案</button>
+            </div>
+        </div>
+
+        <!-- 第五部分：知识拓展 -->
+        <div class="section">
+            <h2>🌟 五、知识拓展与应用</h2>
+            
+            <div class="knowledge-card pulse">
+                <h4>🏠 生活中的立体几何</h4>
+                <ul>
+                    <li><strong>建筑：</strong>高楼大厦、桥梁、体育馆等</li>
+                    <li><strong>包装：</strong>盒子、罐头、瓶子等</li>
+                    <li><strong>艺术：</strong>雕塑、纪念碑等</li>
+                    <li><strong>日常用品：</strong>冰箱、洗衣机、家具等</li>
+                </ul>
+            </div>
+
+            <div class="knowledge-card">
+                <h4>🧮 解题技巧</h4>
+                <ol>
+                    <li><strong>画图分析：</strong>遇到复杂问题时，先画出立体图形</li>
+                    <li><strong>分步计算：</strong>将复杂图形分解成简单图形</li>
+                    <li><strong>单位统一：</strong>计算前确保所有单位一致</li>
+                    <li><strong>检验答案：</strong>用不同方法验证结果的合理性</li>
+                </ol>
+            </div>
+
+            <div class="formula-box">
+                <h3>⚡ 快速记忆口诀</h3>
+                <div style="background: #f7fafc; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                    <p style="font-size: 1.1em; line-height: 1.8;">
+                        🎯 长方体，六个面，相对两面全相同<br>
+                        🎯 十二条棱分三组，每组四条长度等<br>
+                        🎯 体积底面乘以高，表面积要算六面<br>
+                        🎯 正方体，特殊化，六面全等棱相同<br>
+                        🎯 圆柱圆锥记关系，圆锥三分一圆柱
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <div style="text-align: center; margin-top: 40px; color: #718096;">
+            <p>📚 立体几何全面复习课件 | 小学6年级数学</p>
+            <p>💡 通过动画演示，让抽象的几何概念变得生动有趣！</p>
+        </div>
+    </div>
+
+    <script>
+        // 正方体动画控制
+        let cubeAnimating = true;
+        const cube = document.getElementById('cube');
+        
+        function toggleCubeAnimation() {
+            if (cubeAnimating) {
+                cube.style.animationPlayState = 'paused';
+            } else {
+                cube.style.animationPlayState = 'running';
+            }
+            cubeAnimating = !cubeAnimating;
+        }
+
+        // 长方体展开动画
+        let unfolded = false;
+        const unfoldBox = document.getElementById('unfoldBox');
+        
+        function toggleUnfold() {
+            unfolded = !unfolded;
+            if (unfolded) {
+                unfoldBox.classList.add('unfolded');
+            } else {
+                unfoldBox.classList.remove('unfolded');
+            }
+        }
+
+        // 答案和反馈
+        const answers = {
+            1: { correct: 'C', explanation: '正方体体积 = 棱长³ = 5³ = 125 cm³' },
+            2: { correct: 'B', explanation: '表面积 = (8×5 + 8×3 + 5×3) × 2 = (40 + 24 + 15) × 2 = 79 × 2 = 158 cm²' },
+            3: { correct: 'B', explanation: '圆柱体积 = πr²h = 3.14 × 3² × 10 = 3.14 × 9 × 10 = 282.6 cm³' },
+            4: { correct: 'B', explanation: '圆锥体积是与它等底等高圆柱体积的三分之一' }
+        };
+
+        let answeredQuestions = 0;
+        const totalQuestions = 4;
+
+        function checkAnswer(questionNum, selectedAnswer, button) {
+            const feedback = document.getElementById(`feedback${questionNum}`);
+            const correctAnswer = answers[questionNum].correct;
+            const explanation = answers[questionNum].explanation;
+            
+            // 禁用所有选项按钮
+            const questionDiv = document.getElementById(`question${questionNum}`);
+            const buttons = questionDiv.querySelectorAll('.option-btn');
+            buttons.forEach(btn => btn.disabled = true);
+            
+            if (selectedAnswer === correctAnswer) {
+                button.classList.add('correct');
+                feedback.innerHTML = `<span style="color: #48bb78;">✅ 正确！${explanation}</span>`;
+            } else {
+                button.classList.add('wrong');
+                // 高亮正确答案
+                buttons[correctAnswer.charCodeAt(0) - 65].classList.add('correct');
+                feedback.innerHTML = `<span style="color: #f56565;">❌ 错误！正确答案是 ${correctAnswer}。${explanation}</span>`;
+            }
+            
+            answeredQuestions++;
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const progress = (answeredQuestions / totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+
+        function resetQuiz() {
+            answeredQuestions = 0;
+            updateProgress();
+            
+            for (let i = 1; i <= totalQuestions; i++) {
+                const questionDiv = document.getElementById(`question${i}`);
+                const buttons = questionDiv.querySelectorAll('.option-btn');
+                const feedback = document.getElementById(`feedback${i}`);
+                
+                buttons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove('correct', 'wrong');
+                });
+                
+                feedback.innerHTML = '';
+            }
+        }
+
+        function showAllAnswers() {
+            for (let i = 1; i <= totalQuestions; i++) {
+                const questionDiv = document.getElementById(`question${i}`);
+                const buttons = questionDiv.querySelectorAll('.option-btn');
+                const feedback = document.getElementById(`feedback${i}`);
+                const correctAnswer = answers[i].correct;
+                const explanation = answers[i].explanation;
+                
+                buttons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.classList.remove('correct', 'wrong');
+                });
+                
+                buttons[correctAnswer.charCodeAt(0) - 65].classList.add('correct');
+                feedback.innerHTML = `<span style="color: #4299e1;">💡 正确答案是 ${correctAnswer}。${explanation}</span>`;
+            }
+            
+            answeredQuestions = totalQuestions;
+            updateProgress();
+        }
+
+        // 页面加载完成后的初始化
+        window.onload = function() {
+            console.log('立体几何课件加载完成！');
+            
+            // 添加键盘快捷键
+            document.addEventListener('keydown', function(e) {
+                if (e.key === ' ') {
+                    toggleCubeAnimation();
+                } else if (e.key === 'Enter') {
+                    toggleUnfold();
+                }
+            });
+        };
+    </script>
+</body>
+</html>

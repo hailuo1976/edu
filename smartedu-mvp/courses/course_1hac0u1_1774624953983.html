@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三年级数学 - 正方形的面积</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ea580c;
+            --primary-dark: #c2410c;
+            --primary-light: #fed7aa;
+            --secondary: #0891b2;
+            --accent: #eab308;
+            --success: #059669;
+            --error: #dc2626;
+            --bg: #fefce8;
+            --bg-pattern: #fef3c7;
+            --card-bg: #ffffff;
+            --text: #292524;
+            --text-secondary: #78716c;
+            --border: #fde68a;
+            --shadow: rgba(234, 88, 12, 0.15);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: "Noto Sans SC", sans-serif; 
+            background: var(--bg);
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(234, 88, 12, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(8, 145, 178, 0.08) 0%, transparent 50%),
+                repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(254, 243, 199, 0.5) 20px, rgba(254, 243, 199, 0.5) 21px);
+            color: var(--text); 
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .header { 
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white; 
+            padding: 32px 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 30px,
+                rgba(255,255,255,0.03) 30px,
+                rgba(255,255,255,0.03) 60px
+            );
+            animation: patternMove 20s linear infinite;
+        }
+        
+        @keyframes patternMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(60px, 60px); }
+        }
+        
+        .header h1 { 
+            font-size: 2.2rem; 
+            font-weight: 900;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header p { 
+            font-size: 1.1rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .nav-tabs { 
+            display: flex; 
+            justify-content: center; 
+            gap: 12px; 
+            padding: 20px; 
+            background: white; 
+            border-bottom: 3px solid var(--border);
+            flex-wrap: wrap;
+        }
+        
+        .nav-tab { 
+            padding: 14px 28px; 
+            border: 3px solid transparent;
+            background: var(--bg); 
+            color: var(--text-secondary); 
+            border-radius: 12px; 
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-tab::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: var(--primary);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        
+        .nav-tab:hover { 
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .nav-tab.active { 
+            background: var(--primary); 
+            color: white;
+            border-color: var(--primary-dark);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+        
+        .main-content { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 32px 20px;
+        }
+        
+        .tab-content { 
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        
+        .tab-content.active { 
+            display: block; 
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card { 
+            background: var(--card-bg); 
+            border-radius: 20px; 
+            padding: 28px; 
+            margin-bottom: 24px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 2px solid var(--border);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+        
+        .card h2 {
+            color: var(--primary-dark);
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px dashed var(--border);
+        }
+        
+        .card h3 {
+            color: var(--text);
+            font-size: 1.2rem;
+            margin: 20px 0 12px 0;
+        }
+        
+        .card p {
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+        
+        .formula-box { 
+            background: linear-gradient(135deg, var(--primary-light) 0%, #fff7ed 100%);
+            border: 3px solid var(--primary);
+            padding: 24px 28px; 
+            border-radius: 16px; 
+            text-align: center; 
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin: 20px 0;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+        
+        .formula-box span {
+            color: var(--secondary);
+        }
+        
+        .example-box {
+            background: linear-gradient(135deg, #ecfeff 0%, #f0fdfa 100%);
+            border: 2px solid var(--secondary);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 16px 0;
+        }
+        
+        .example-box h4 {
+            color: var(--secondary);
+            margin-bottom: 12px;
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, var(--accent) 0%, #fde047 100%);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        
+        canvas { 
+            background: white; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            border: 3px solid var(--border);
+            max-width: 100%;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .canvas-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--shadow);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: var(--primary-dark);
+            border: 3px solid var(--primary);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--primary-light);
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .slider-container label {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 1.1rem;
+        }
+        
+        input[type="range"] {
+            width: 200px;
+            height: 8px;
+            -webkit-appearance: none;
+            background: linear-gradient(90deg, var(--primary-light) 0%, var(--primary) 100%);
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+        
+        .slider-value {
+            background: var(--primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .quiz-container {
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+            border: 3px solid var(--success);
+            border-radius: 20px;
+            padding: 24px;
+            margin: 20px 0;
+        }
+        
+        .quiz-question {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 16px;
+        }
+        
+        .quiz-visual {
+            text-align: center;
+            margin: 16px 0;
+        }
+        
+        .quiz-input-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .quiz-input {
+            width: 100px;
+            padding: 12px 16px;
+            font-size: 1.2rem;
+            text-align: center;
+            border: 3px solid var(--border);
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .quiz-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+        
+        .feedback {
+            padding: 16px 24px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-top: 16px;
+            display: none;
+        }
+        
+        .feedback.correct {
+            display: block;
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: var(--success);
+            border: 2px solid var(--success);
+            animation: bounceIn 0.5s ease;
+        }
+        
+        .feedback.wrong {
+            display: block;
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: var(--error);
+            border: 2px solid var(--error);
+            animation: shake 0.5s ease;
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        
+        .score-display {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 16px;
+            text-align: center;
+            margin: 24px auto;
+            max-width: 300px;
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+        
+        .score-display span {
+            font-size: 2.5rem;
+            font-weight: 900;
+        }
+        
+        .progress-bar {
+            background: var(--border);
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+        
+        .next-btn {
+            margin-top: 16px;
+        }
+        
+        .grid-visual {
+            display: grid;
+            gap: 2px;
+            background: var(--border);
+            padding: 4px;
+            border-radius: 12px;
+            width: fit-content;
+            margin: 16px auto;
+        }
+        
+        .grid-cell {
+            width: 28px;
+            height: 28px;
+            background: var(--primary-light);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+        
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 24px 0;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            border: 2px solid var(--border);
+            text-align: center;
+        }
+        
+        .info-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+        
+        .info-card h4 {
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .info-card p {
+            font-size: 0.95rem;
+        }
+        
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.6rem; }
+            .nav-tab { padding: 10px 16px; font-size: 0.9rem; }
+            .card { padding: 20px; }
+            .formula-box { font-size: 1.3rem; padding: 16px 20px; }
+            canvas { width: 100% !important; height: auto !important; }
+        }
+        
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>正方形的面积</h1>
+        <p>三年级数学 · 图形与测量</p>
+    </div>
+    
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="switchTab('concept')">概念讲解</button>
+        <button class="nav-tab" onclick="switchTab('demo')">图形演示</button>
+        <button class="nav-tab" onclick="switchTab('exercise')">练习测试</button>
+    </div>
+    
+    <div class="main-content">
+        <!-- 概念讲解模块 -->
+        <div id="concept" class="tab-content active">
+            <div class="card">
+                <h2>什么是正方形？</h2>
+                <p>正方形是一种特殊的四边形，它有<span class="highlight">四条相等的边</span>和<span class="highlight">四个直角</span>（90度的角）。</p>
+                
+                <div class="canvas-container">
+                    <canvas id="conceptCanvas" width="300" height="300"></canvas>
+                </div>
+                
+                <div class="info-cards">
+                    <div class="info-card">
+                        <div class="icon">📏</div>
+                        <h4>四条边相等</h4>
+                        <p>正方形的四条边长度都一样</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="icon">📐</div>
+                        <h4>四个直角</h4>
+                        <p>每个角都是90度</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="icon">⚖️</div>
+                        <h4>对角线相等</h4>
+                        <p>两条对角线长度相等且互相垂直</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>面积是什么？</h2>
+                <p>面积就是<span class="highlight">物体表面的大小</span>。比如，课本封面的大小就是课本的面积，课桌桌面的大小就是课桌的面积。</p>
+                <p>对于正方形来说，面积就是它<span class="highlight">内部区域的大小</span>。</p>
+            </div>
+            
+            <div class="card">
+                <h2>正方形面积公式</h2>
+                <div class="formula-box">
+                    正方形面积 = <span>边长</span> × <span>边长</span>
+                </div>
+                <p>如果用字母 <strong>S</strong> 表示面积，用 <strong>a</strong> 表示边长，公式可以写成：</p>
+                <div class="formula-box">
+                    S = a × a = a²
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>一起来理解</h2>
+                <p>想象一下，我们要用一个一个的小正方形（边长为1）来填满一个大正方形。</p>
+                
+                <div class="example-box">
+                    <h4>举例：边长为4的正方形</h4>
+                    <p>如果正方形的边长是4，我们可以：</p>
+                    <ul style="margin-left: 20px; margin-top: 10px; color: #666;">
+                        <li>横着数：每行有 4 个小正方形</li>
+                        <li>竖着数：共有 4 行</li>
+                        <li>总共：4 × 4 = <strong style="color: var(--primary-dark);">16</strong> 个小正方形</li>
+                    </ul>
+                    <p style="margin-top: 12px;">所以面积就是 <strong style="color: var(--primary-dark); font-size: 1.2rem;">16</strong> 平方单位。</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 图形演示模块 -->
+        <div id="demo" class="tab-content">
+            <div class="card">
+                <h2>动态演示：边长与面积</h2>
+                <p>拖动下面的滑块，改变正方形的边长，观察面积是如何变化的！</p>
+                
+                <div class="slider-container">
+                    <label>边长：</label>
+                    <input type="range" id="sideSlider" min="1" max="8" value="4">
+                    <span class="slider-value" id="sideValue">4</span>
+                </div>
+                
+                <div class="canvas-container">
+                    <canvas id="mainCanvas" width="500" height="450"></canvas>
+                </div>
+                
+                <div class="formula-box" id="calcResult">
+                    面积 = 4 × 4 = <span>16</span> 平方单位
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="animateGrow()">动画演示</button>
+                    <button class="btn btn-secondary" onclick="resetDemo()">重置</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>小方格计数法</h2>
+                <p>我们可以通过数小方格的数量来验证面积公式：</p>
+                <div id="gridContainer" class="grid-visual" style="grid-template-columns: repeat(4, 1fr);"></div>
+                <p style="text-align: center; margin-top: 12px;">共 <strong id="gridCount" style="color: var(--primary-dark); font-size: 1.3rem;">16</strong> 个小方格</p>
+            </div>
+        </div>
+        
+        <!-- 练习测试模块 -->
+        <div id="exercise" class="tab-content">
+            <div class="score-display">
+                得分：<span id="score">0</span> / <span id="total">5</span>
+                <div class="progress-bar" style="margin-top: 12px;">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div id="quizArea">
+                <!-- 题目1 -->
+                <div class="quiz-container" id="q1">
+                    <div class="quiz-question">第1题：一个正方形的边长是5厘米，它的面积是多少？</div>
+                    <div class="quiz-visual">
+                        <canvas id="quiz1Canvas" width="200" height="200"></canvas>
+                    </div>
+                    <div class="quiz-input-container">
+                        <span>面积 = </span>
+                        <input type="number" class="quiz-input" id="answer1" placeholder="?">
+                        <span>平方厘米</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="checkAnswer(1, 25)">提交答案</button>
+                    <div class="feedback" id="feedback1"></div>
+                </div>
+                
+                <!-- 题目2 -->
+                <div class="quiz-container" id="q2" style="display: none;">
+                    <div class="quiz-question">第2题：一个正方形的边长是3米，它的面积是多少？</div>
+                    <div class="quiz-visual">
+                        <canvas id="quiz2Canvas" width="200" height="200"></canvas>
+                    </div>
+                    <div class="quiz-input-container">
+                        <span>面积 = </span>
+                        <input type="number" class="quiz-input" id="answer2" placeholder="?">
+                        <span>平方米</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="checkAnswer(2, 9)">提交答案</button>
+                    <div class="feedback" id="feedback2"></div>
+                </div>
+                
+                <!-- 题目3 -->
+                <div class="quiz-container" id="q3" style="display: none;">
+                    <div class="quiz-question">第3题：正方形的面积是36平方分米，边长是多少？</div>
+                    <p style="text-align: center; color: #666;">提示：想一想，哪个数乘以自己等于36？</p>
+                    <div class="quiz-input-container">
+                        <span>边长 = </span>
+                        <input type="number" class="quiz-input" id="answer3" placeholder="?">
+                        <span>分米</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="checkAnswer(3, 6)">提交答案</button>
+                    <div class="feedback" id="feedback3"></div>
+                </div>
+                
+                <!-- 题目4 -->
+                <div class="quiz-container" id="q4" style="display: none;">
+                    <div class="quiz-question">第4题：一个正方形花坛的边长是7米，它的面积是多少？</div>
+                    <div class="quiz-visual">
+                        <canvas id="quiz4Canvas" width="200" height="200"></canvas>
+                    </div>
+                    <div class="quiz-input-container">
+                        <span>面积 = </span>
+                        <input type="number" class="quiz-input" id="answer4" placeholder="?">
+                        <span>平方米</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="checkAnswer(4, 49)">提交答案</button>
+                    <div class="feedback" id="feedback4"></div>
+                </div>
+                
+                <!-- 题目5 -->
+                <div class="quiz-container" id="q5" style="display: none;">
+                    <div class="quiz-question">第5题：小明用边长2分米的正方形纸片拼成一个大正方形，每条边用了4张纸片，大正方形的面积是多少？</div>
+                    <p style="text-align: center; color: #666;">先算大正方形的边长，再算面积哦！</p>
+                    <div class="quiz-input-container">
+                        <span>面积 = </span>
+                        <input type="number" class="quiz-input" id="answer5" placeholder="?">
+                        <span>平方分米</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="checkAnswer(5, 64)">提交答案</button>
+                    <div class="feedback" id="feedback5"></div>
+                </div>
+            </div>
+            
+            <div class="card" id="resultCard" style="display: none; text-align: center;">
+                <h2>练习完成！</h2>
+                <div class="formula-box" id="finalScore" style="font-size: 2rem;"></div>
+                <button class="btn btn-primary" onclick="resetQuiz()" style="margin-top: 20px;">再做一次</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 全局变量初始化
+        let score = 0;
+        let currentQuestion = 1;
+        let animationId = null;
+        let currentSide = 4;
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initConceptCanvas();
+            initMainCanvas();
+            updateGrid(4);
+            initQuizCanvases();
+            
+            // 滑块事件
+            const slider = document.getElementById('sideSlider');
+            if (slider) {
+                slider.addEventListener('input', function() {
+                    currentSide = parseInt(this.value);
+                    document.getElementById('sideValue').textContent = currentSide;
+                    updateMainCanvas(currentSide);
+                    updateGrid(currentSide);
+                });
+            }
+        });
+        
+        // 标签切换函数
+        function switchTab(tabId) {
+            // 移除所有活动状态
+            document.querySelectorAll('.nav-tab').forEach(function(tab) {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(function(content) {
+                content.classList.remove('active');
+            });
+            
+            // 添加当前活动状态
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+            
+            // 重新初始化画布
+            if (tabId === 'demo') {
+                setTimeout(function() {
+                    initMainCanvas();
+                    updateMainCanvas(currentSide);
+                }, 100);
+            }
+        }
+        
+        // 概念讲解画布
+        function initConceptCanvas() {
+            const canvas = document.getElementById('conceptCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const size = 150;
+            const x = (canvas.width - size) / 2;
+            const y = (canvas.height - size) / 2;
+            
+            // 绘制正方形
+            ctx.fillStyle = '#fed7aa';
+            ctx.strokeStyle = '#ea580c';
+            ctx.lineWidth = 4;
+            ctx.fillRect(x, y, size, size);
+            ctx.strokeRect(x, y, size, size);
+            
+            // 绘制直角标记
+            ctx.strokeStyle = '#ea580c';
+            ctx.lineWidth = 2;
+            const markSize = 15;
+            
+            // 四个角的直角标记
+            ctx.beginPath();
+            ctx.moveTo(x + markSize, y);
+            ctx.lineTo(x + markSize, y + markSize);
+            ctx.lineTo(x, y + markSize);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x + size - markSize, y);
+            ctx.lineTo(x + size - markSize, y + markSize);
+            ctx.lineTo(x + size, y + markSize);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x + size - markSize, y + size);
+            ctx.lineTo(x + size - markSize, y + size - markSize);
+            ctx.lineTo(x + size, y + size - markSize);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x + markSize, y + size);
+            ctx.lineTo(x + markSize, y + size - markSize);
+            ctx.lineTo(x, y + size - markSize);
+            ctx.stroke();
+            
+            // 边长标注
+            ctx.fillStyle = '#292524';
+            ctx.font = 'bold 18px "Noto Sans SC"';
+            ctx.textAlign = 'center';
+            ctx.fillText('边长 = a', x + size / 2, y + size + 30);
+            
+            // 四边相等的标注
+            ctx.font = '14px "Noto Sans SC"';
+            ctx.fillStyle = '#0891b2';
+            
+            ctx.save();
+            ctx.translate(x - 20, y + size / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('a', 0, 0);
+            ctx.restore();
+            
+            ctx.fillText('a', x + size / 2, y - 10);
+            ctx.fillText('a', x + size + 20, y + size / 2);
+            ctx.fillText('a', x + size / 2, y + size + 50);
+        }
+        
+        // 主画布初始化
+        function initMainCanvas() {
+            updateMainCanvas(4);
+        }
+        
+        // 更新主画布
+        function updateMainCanvas(side) {
+            const canvas = document.getElementById('mainCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const cellSize = 40;
+            const totalSize = side * cellSize;
+            const startX = (canvas.width - totalSize) / 2;
+            const startY = 60;
+            
+            // 绘制网格背景
+            ctx.fillStyle = '#fff7ed';
+            ctx.strokeStyle = '#fdba74';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i < side; i++) {
+                for (let j = 0; j < side; j++) {
+                    ctx.fillRect(startX + i * cellSize, startY + j * cellSize, cellSize, cellSize);
+                    ctx.strokeRect(startX + i * cellSize, startY + j * cellSize, cellSize, cellSize);
+                }
+            }
+            
+            // 绘制正方形边框
+            ctx.strokeStyle = '#ea580c';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(startX, startY, totalSize, totalSize);
+            
+            // 绘制边长标注
+            ctx.fillStyle = '#292524';
+            ctx.font = 'bold 20px "Noto Sans SC"';
+            ctx.textAlign = 'center';
+            
+            // 底部边长
+            ctx.fillText('边长 = ' + side, startX + totalSize / 2, startY + totalSize + 35);
+            
+            // 绘制小方格计数提示
+            ctx.font = '16px "Noto Sans SC"';
+            ctx.fillStyle = '#0891b2';
+            ctx.fillText('每行 ' + side + ' 个小方格', startX + totalSize / 2, startY + totalSize + 60);
+            ctx.fillText('共 ' + side + ' 行', startX + totalSize / 2, startY + totalSize + 80);
+            
+            // 更新计算结果
+            const area = side * side;
+            document.getElementById('calcResult').innerHTML = 
+                '面积 = ' + side + ' × ' + side + ' = <span>' + area + '</span> 平方单位';
+        }
+        
+        // 更新网格显示
+        function updateGrid(side) {
+            const container = document.getElementById('gridContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            container.style.gridTemplateColumns = 'repeat(' + side + ', 1fr)';
+            
+            for (let i = 0; i < side * side; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell';
+                cell.textContent = i + 1;
+                cell.style.animationDelay = (i * 0.02) + 's';
+                container.appendChild(cell);
+            }
+            
+            document.getElementById('gridCount').textContent = side * side;
+        }
+        
+        // 动画演示
+        function animateGrow() {
+            const canvas = document.getElementById('mainCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            let currentSize = 1;
+            const targetSize = parseInt(document.getElementById('sideSlider').value);
+            
+            function animate() {
+                if (currentSize <= targetSize) {
+                    updateMainCanvas(currentSize);
+                    updateGrid(currentSize);
+                    currentSize++;
+                    animationId = setTimeout(function() {
+                        requestAnimationFrame(animate);
+                    }, 300);
+                }
+            }
+            
+            if (animationId) {
+                clearTimeout(animationId);
+            }
+            animate();
+        }
+        
+        // 重置演示
+        function resetDemo() {
+            if (animationId) {
+                clearTimeout(animationId);
+            }
+            document.getElementById('sideSlider').value = 4;
+            document.getElementById('sideValue').textContent = '4';
+            currentSide = 4;
+            updateMainCanvas(4);
+            updateGrid(4);
+        }
+        
+        // 初始化练习题画布
+        function initQuizCanvases() {
+            drawQuizCanvas('quiz1Canvas', 5, '#dcfce7', '#059669');
+            drawQuizCanvas('quiz2Canvas', 3, '#dbeafe', '#2563eb');
+            drawQuizCanvas('quiz4Canvas', 7, '#fef3c7', '#d97706');
+        }
+        
+        function drawQuizCanvas(canvasId, side, fillColor, strokeColor) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const cellSize = Math.min(180 / side, 40);
+            const totalSize = side * cellSize;
+            const startX = (canvas.width - totalSize) / 2;
+            const startY = (canvas.height - totalSize) / 2;
+            
+            ctx.fillStyle = fillColor;
+            ctx.fillRect(startX, startY, totalSize, totalSize);
+            
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= side; i++) {
+                ctx.beginPath();
+                ctx.moveTo(startX + i * cellSize, startY);
+                ctx.lineTo(startX + i * cellSize, startY + totalSize);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(startX, startY + i * cellSize);
+                ctx.lineTo
