@@ -25,6 +25,7 @@ import {
   ValidationResult,
   ValidationError
 } from '../types/generation';
+import { initAISystem, agentFactory, promptManager } from '../core/ai';
 
 const DEFAULT_OPTIONS: GenerationOptions = {
   maxRetries: 3,
@@ -62,6 +63,9 @@ export class CourseAgent {
   private options: GenerationOptions;
 
   constructor(options: Partial<GenerationOptions> = {}) {
+    // 初始化AI系统
+    initAISystem();
+    
     this.client = new OpenCodeClient();
     this.validator = htmlValidator;
     this.codeValidator = codeValidator;
@@ -87,11 +91,22 @@ export class CourseAgent {
       return this.generate(prompt, onProgress, courseId);
     }
 
+    // 使用新的提示词管理系统生成提示词
+    const promptParams = {
+      user_question: prompt,
+      subject: '数学',
+      grade_text: '小学',
+      difficulty_text: '中等',
+      duration_minutes: 25
+    };
+    
+    const refinedPrompt = promptManager.generatePrompt('course-generation', promptParams);
+
     this.reportProgress({
       stage: 'prompt',
       message: '开始多轮调优生成...',
       timestamp: Date.now(),
-      promptPreview: this.getPromptPreview(prompt),
+      promptPreview: this.getPromptPreview(refinedPrompt),
     });
 
     const refinementProgressCallback: RefinementProgressCallback = (progress) => {
@@ -121,7 +136,7 @@ export class CourseAgent {
     };
 
     try {
-      const result = await this.refinementLoop.execute(prompt, refinementProgressCallback);
+      const result = await this.refinementLoop.execute(refinedPrompt, refinementProgressCallback);
 
       this.reportProgress({
         stage: 'complete',
@@ -227,12 +242,23 @@ export class CourseAgent {
       }
     }
 
+    // 使用新的提示词管理系统生成提示词
+    const promptParams = {
+      user_question: prompt,
+      subject: '数学',
+      grade_text: '小学',
+      difficulty_text: '中等',
+      duration_minutes: 25
+    };
+    
+    let currentPrompt = promptManager.generatePrompt('course-generation', promptParams);
+
     while (attempts < this.options.maxRetries) {
       attempts++;
 
-      const currentPrompt = attempts > 1 && lastError 
-        ? this.enrichPromptWithError(originalPrompt, lastError, codeValidationErrors)
-        : enrichedPrompt;
+      if (attempts > 1 && lastError) {
+        currentPrompt = this.enrichPromptWithError(originalPrompt, lastError, codeValidationErrors);
+      }
 
       this.reportProgress({
         stage: 'api_call',
