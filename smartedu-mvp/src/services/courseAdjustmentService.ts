@@ -18,7 +18,7 @@ import {
   LogLevel,
   LogCategory,
 } from '../types/adjustment';
-import { toolManager } from './toolManager';
+import { executeTools } from '../tools/executor';
 import { contextManager } from './contextManager';
 
 function generateId(): string {
@@ -889,22 +889,20 @@ ${activeFile ? `- 当前操作文件: ${activeFile.name} (${activeFile.descripti
               subject: functionArgs.subject ?? session.courseInfo.subject,
             };
             console.log(`  [callAI]   增强参数: grade_level=${enhancedArgs.grade_level}, subject=${enhancedArgs.subject}`);
-            const toolCallObj: { id: string; name: string; arguments: Record<string, any> } = {
+            const searchResults = await executeTools([{
               id: tc.id,
               name: functionName,
               arguments: enhancedArgs,
-            };
-            const searchResult = await toolManager.executeTool(toolCallObj);
-            functionResult = searchResult;
+            }], { workDir: this.coursesDir });
+            functionResult = searchResults[0]?.success ? searchResults[0].result : { error: searchResults[0]?.error };
           } else if (functionName === 'generate_svg_diagram') {
             console.log(`  [callAI]   生成SVG图表: ${functionArgs.description}`);
-            const toolCallObj2: { id: string; name: string; arguments: Record<string, any> } = {
+            const svgResults = await executeTools([{
               id: tc.id,
               name: functionName,
               arguments: functionArgs,
-            };
-            const svgResult = await toolManager.executeTool(toolCallObj2);
-            functionResult = svgResult;
+            }], { workDir: this.coursesDir });
+            functionResult = svgResults[0]?.success ? svgResults[0].result : { error: svgResults[0]?.error };
           } else {
             console.warn(`  [callAI]   未知工具: ${functionName}`);
             functionResult = { error: '未知工具' };

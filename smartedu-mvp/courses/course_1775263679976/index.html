@@ -1,0 +1,410 @@
+好的，我已经获取到教学参考资料，现在为你生成完整的一年级数学课件 HTML 页面。
+
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>正方形的面积 - 小学数学课件</title>
+<style>
+  /* ========== 全局样式 ========== */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: linear-gradient(135deg, #e0f7fa 0%, #fff9c4 50%, #f3e5f5 100%);
+    color: #333;
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  /* ========== 顶部标题栏 ========== */
+  .header {
+    background: linear-gradient(90deg, #ff7043, #ff9800, #ffc107);
+    color: #fff;
+    text-align: center;
+    padding: 28px 20px 22px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: "";
+    position: absolute;
+    top: -30px; left: -30px;
+    width: 120px; height: 120px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 50%;
+  }
+  .header::after {
+    content: "";
+    position: absolute;
+    bottom: -40px; right: -20px;
+    width: 160px; height: 160px;
+    background: rgba(255,255,255,0.10);
+    border-radius: 50%;
+  }
+  .header h1 {
+    font-size: 2.2em;
+    text-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+    position: relative;
+    z-index: 1;
+  }
+  .header .subtitle {
+    font-size: 1em;
+    margin-top: 6px;
+    opacity: 0.92;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ========== 导航栏 ========== */
+  .nav-bar {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    padding: 16px 10px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-wrap: wrap;
+  }
+  .nav-btn {
+    padding: 10px 26px;
+    border: none;
+    border-radius: 30px;
+    font-size: 1.05em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+  }
+  .nav-btn:nth-child(1) { background: linear-gradient(135deg, #42a5f5, #1e88e5); }
+  .nav-btn:nth-child(2) { background: linear-gradient(135deg, #66bb6a, #43a047); }
+  .nav-btn:nth-child(3) { background: linear-gradient(135deg, #ab47bc, #8e24aa); }
+  .nav-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+  .nav-btn.active { transform: scale(1.08); box-shadow: 0 5px 18px rgba(0,0,0,0.25); }
+
+  /* ========== 通用 Section ========== */
+  section {
+    max-width: 960px;
+    margin: 30px auto;
+    padding: 30px 28px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    display: none;
+  }
+  section.active { display: block; animation: fadeIn 0.5s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-title {
+    font-size: 1.6em;
+    text-align: center;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 3px dashed #ffc107;
+    color: #e65100;
+  }
+
+  /* ========== 概念讲解 ========== */
+  .concept-card {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    border-left: 6px solid #1e88e5;
+  }
+  .concept-card h3 {
+    color: #1565c0;
+    font-size: 1.3em;
+    margin-bottom: 10px;
+  }
+  .concept-card p {
+    font-size: 1.1em;
+    color: #333;
+  }
+  .formula-box {
+    background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+    border: 3px solid #ff9800;
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    margin: 24px 0;
+    position: relative;
+  }
+  .formula-box .label {
+    font-size: 1em;
+    color: #e65100;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  .formula-box .formula {
+    font-size: 2em;
+    font-weight: bold;
+    color: #d84315;
+    letter-spacing: 2px;
+  }
+  .formula-box .star {
+    position: absolute;
+    font-size: 1.6em;
+    animation: twinkle 1.5s infinite alternate;
+  }
+  .formula-box .star:nth-child(1) { top: 8px; left: 14px; }
+  .formula-box .star:nth-child(2) { top: 8px; right: 14px; animation-delay: 0.5s; }
+  .formula-box .star:nth-child(3) { bottom: 8px; left: 14px; animation-delay: 1s; }
+  .formula-box .star:nth-child(4) { bottom: 8px; right: 14px; animation-delay: 0.3s; }
+  @keyframes twinkle { from { opacity: 0.4; transform: scale(0.8); } to { opacity: 1; transform: scale(1.2); } }
+
+  .example-box {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    border-radius: 16px;
+    padding: 22px;
+    margin-top: 20px;
+    border-left: 6px solid #43a047;
+  }
+  .example-box h3 { color: #2e7d32; font-size: 1.2em; margin-bottom: 8px; }
+  .example-box p { font-size: 1.1em; }
+  .highlight { color: #d32f2f; font-weight: bold; font-size: 1.15em; }
+
+  /* ========== 图形演示 ========== */
+  .demo-area {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 30px;
+    margin-top: 20px;
+  }
+  .svg-container {
+    background: #fafafa;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+  }
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+  }
+  .controls label {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #555;
+  }
+  .slider-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .slider-group input[type="range"] {
+    width: 180px;
+    height: 8px;
+    -webkit-appearance: none;
+    background: linear-gradient(90deg, #42a5f5, #1e88e5);
+    border-radius: 4px;
+    outline: none;
+  }
+  .slider-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px; height: 22px;
+    background: #ff9800;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+  .slider-val {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #1e88e5;
+    min-width: 36px;
+    text-align: center;
+  }
+  .calc-display {
+    background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+    border-radius: 14px;
+    padding: 18px 24px;
+    text-align: center;
+    font-size: 1.2em;
+    color: #880e4f;
+    font-weight: bold;
+    min-width: 260px;
+  }
+  .calc-display .result { font-size: 1.5em; color: #c62828; }
+
+  /* ========== 练习测试 ========== */
+  .quiz-card {
+    background: #fafafa;
+    border-radius: 16px;
+    padding: 22px 26px;
+    margin-bottom: 18px;
+    border: 2px solid #e0e0e0;
+    transition: border-color 0.3s;
+    position: relative;
+  }
+  .quiz-card.correct { border-color: #4caf50; background: #e8f5e9; }
+  .quiz-card.wrong { border-color: #f44336; background: #ffebee; }
+  .quiz-num {
+    display: inline-block;
+    width: 36px; height: 36px;
+    line-height: 36px;
+    text-align: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7e57c2, #5e35b1);
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+  .quiz-question {
+    font-size: 1.15em;
+    margin: 12px 0;
+    color: #333;
+  }
+  .quiz-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 12px 0;
+  }
+  .quiz-opt {
+    padding: 10px 22px;
+    border: 2px solid #ce93d8;
+    border-radius: 30px;
+    background: #fff;
+    font-size: 1.05em;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-weight: bold;
+    color: #6a1b9a;
+  }
+  .quiz-opt:hover { background: #f3e5f5; transform: scale(1.05); }
+  .quiz-opt.selected { background: #ce93d8; color: #fff; }
+  .quiz-opt.correct-answer { background: #66bb6a; color: #fff; border-color: #43a047; }
+  .quiz-opt.wrong-answer { background: #ef5350; color: #fff; border-color: #d32f2f; }
+  .quiz-feedback {
+    margin-top: 10px;
+    font-size: 1.05em;
+    font-weight: bold;
+    min-height: 28px;
+  }
+  .quiz-feedback.correct { color: #2e7d32; }
+  .quiz-feedback.wrong { color: #c62828; }
+
+  .check-btn {
+    display: block;
+    margin: 24px auto 0;
+    padding: 14px 50px;
+    border: none;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #ff7043, #f4511e);
+    color: #fff;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(244,81,30,0.3);
+    transition: all 0.3s;
+  }
+  .check-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(244,81,30,0.4); }
+
+  .score-board {
+    text-align: center;
+    margin-top: 20px;
+    padding: 18px;
+    background: linear-gradient(135deg, #fff9c4, #fff176);
+    border-radius: 16px;
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #e65100;
+    display: none;
+  }
+  .score-board .big-score { font-size: 2em; color: #d32f2f; }
+
+  /* ========== 小装饰 ========== */
+  .emoji-float {
+    position: fixed;
+    font-size: 2em;
+    opacity: 0.15;
+    pointer-events: none;
+    animation: floatUp 8s linear infinite;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.15; }
+    90% { opacity: 0.15; }
+    100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+  }
+
+  /* ========== 响应式 ========== */
+  @media (max-width: 640px) {
+    .header h1 { font-size: 1.5em; }
+    section { padding: 20px 14px; margin: 16px 8px; }
+    .demo-area { flex-direction: column; align-items: center; }
+    .formula-box .formula { font-size: 1.4em; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== 背景浮动装饰 ===== -->
+<div class="emoji-float" style="left:5%; animation-delay:0s;">📐</div>
+<div class="emoji-float" style="left:20%; animation-delay:2s;">🟧</div>
+<div class="emoji-float" style="left:40%; animation-delay:4s;">✏️</div>
+<div class="emoji-float" style="left:60%; animation-delay:1s;">📏</div>
+<div class="emoji-float" style="left:80%; animation-delay:3s;">🔢</div>
+<div class="emoji-float" style="left:90%; animation-delay:5s;">🟩</div>
+
+<!-- ===== 顶部标题 ===== -->
+<header class="header">
+  <h1>📐 正方形的面积</h1>
+  <div class="subtitle">小学数学 · 课件</div>
+</header>
+
+<!-- ===== 导航栏 ===== -->
+<nav class="nav-bar">
+  <button class="nav-btn active" onclick="showSection('concept')">📖 概念讲解</button>
+  <button class="nav-btn" onclick="showSection('demo')">🎨 图形演示</button>
+  <button class="nav-btn" onclick="showSection('exercise')">✏️ 练习测试</button>
+</nav>
+
+<!-- ============================== -->
+<!--        模块一：概念讲解          -->
+<!-- ============================== -->
+<section id="concept" class="active">
+  <h2 class="section-title">📖 认识正方形的面积</h2>
+
+  <!-- 什么是正方形 -->
+  <div class="concept-card">
+    <h3>🤔 什么是正方形？</h3>
+    <p>正方形是一种特殊的图形，它有 <strong>4 条边</strong>，而且每条边的 <strong>长度都一样</strong>！它还有 <strong>4 个直角</strong>（就像课本的角一样方方正正的）。</p>
+  </div>
+
+  <!-- 什么是面积 -->
+  <div class="concept-card" style="border-left-color:#ff9800; background: linear-gradient(135deg, #fff3e0, #ffe0b2);">
+    <h3>📦 什么是面积？</h3>
+    <p>面积就是<strong>一个图形表面有多大</strong>。比如你的课桌桌面有多大、数学书封面有多大，说的就是面积！正方形的面积就是它里面能放下多少个"小方格"。</p>
+  </div>
+
+  <!-- 核心公式 -->
+  <div class="formula-box">
+    <span class="star">⭐</span>
+    <span class="star">⭐</span>
+    <span class="star">⭐</span>
+    <span class="star">⭐</span>
+    <div class="label">✨ 正方形面积公式 ✨</div>
+    <div class="formula">面积 = 边长 × 边长</div>
+    <p style="margin-top:10px; color:#bf360c;">用字母表示：S = a × a</p>
+  </div>
+
+  <!-- 举例说明 -->
+  <div class="example-box">
+    <h3>🌟 举个例子</h3>
+    <p>如果一个正方形的边长是 <span class="highlight">5 厘米</span>，那么：</p>
+    <p style="margin-top:8px;">面积 = <span class="highlight">5 × 5 = 25</span>（平方厘米）</p>
+    <p style="margin-top:8px;">也就是说，这个正方形里面正好可以摆下 <strong>25 个 1厘米的小方格</strong>！</p>
+ 

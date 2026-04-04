@@ -1577,6 +1577,27 @@
     function handleProgress(data) {
       const { stage, message, retryCount, qualityScore, promptPreview, issues, totalDuration, ai_input, ai_output, tool_call, draft_content } = data;
 
+      // 流式 AI token 输出
+      if (stage === 'ai_stream') {
+        aiInteraction.classList.add('show');
+        // 首个 token：初始化输出区
+        if (!aiOutput.dataset.streaming) {
+          aiOutput.innerHTML = '<pre></pre>';
+          aiOutput.dataset.streaming = 'true';
+        }
+        const pre = aiOutput.querySelector('pre');
+        if (pre) {
+          pre.textContent += message;
+          aiOutput.scrollTop = aiOutput.scrollHeight;
+        }
+        return;
+      }
+
+      // 非流式阶段结束流式标记
+      if (stage !== 'ai_stream' && aiOutput.dataset.streaming) {
+        delete aiOutput.dataset.streaming;
+      }
+
       // 显示AI交互面板
       if (ai_input || ai_output) {
         aiInteraction.classList.add('show');

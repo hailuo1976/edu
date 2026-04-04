@@ -1,0 +1,261 @@
+好的，我来根据搜索到的教学内容，为你生成一个适合小学生的**分数加减法**交互式课件。由于分数加减法涉及通分等概念，我会以**同分母分数加减法**为核心，配合直观的图形演示，让小朋友轻松理解！
+
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分数的加减法 - 小学数学课件</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: linear-gradient(135deg, #e0f7fa 0%, #fff9c4 50%, #f3e5f5 100%);
+    min-height: 100vh; color: #333; overflow-x: hidden;
+  }
+  /* ====== 顶部标题栏 ====== */
+  .header {
+    background: linear-gradient(90deg, #ff6f61, #ff9a76, #ffc75f);
+    padding: 20px 30px; text-align: center; color: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15); position: relative; overflow: hidden;
+  }
+  .header h1 { font-size: 2.2em; text-shadow: 2px 2px 6px rgba(0,0,0,0.2); margin-bottom: 5px; }
+  .header .subtitle { font-size: 1.1em; opacity: 0.95; }
+  .header .stars { position: absolute; top: 8px; left: 20px; font-size: 1.5em; }
+  .header .stars2 { position: absolute; top: 8px; right: 20px; font-size: 1.5em; }
+
+  /* ====== 导航 ====== */
+  .nav {
+    display: flex; justify-content: center; gap: 15px;
+    padding: 15px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .nav button {
+    padding: 10px 28px; border: none; border-radius: 30px;
+    font-size: 1.1em; font-weight: bold; cursor: pointer;
+    transition: all 0.3s ease; color: #fff;
+  }
+  .nav .btn-concept { background: linear-gradient(135deg, #4fc3f7, #0288d1); }
+  .nav .btn-demo { background: linear-gradient(135deg, #81c784, #388e3c); }
+  .nav .btn-exercise { background: linear-gradient(135deg, #ffb74d, #f57c00); }
+  .nav button:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+  .nav button.active { transform: scale(1.08); box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
+
+  /* ====== 通用容器 ====== */
+  .container { max-width: 960px; margin: 25px auto; padding: 0 20px; }
+  section { display: none; animation: fadeIn 0.5s ease; }
+  section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ====== 卡片 ====== */
+  .card {
+    background: #fff; border-radius: 20px; padding: 30px;
+    margin-bottom: 25px; box-shadow: 0 6px 25px rgba(0,0,0,0.08);
+    border-left: 6px solid;
+  }
+  .card-blue { border-left-color: #0288d1; }
+  .card-green { border-left-color: #388e3c; }
+  .card-orange { border-left-color: #f57c00; }
+  .card-purple { border-left-color: #7b1fa2; }
+  .card h2 {
+    font-size: 1.6em; margin-bottom: 15px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card h3 { font-size: 1.3em; margin: 15px 0 10px; color: #555; }
+  .card p, .card li { font-size: 1.15em; line-height: 1.9; color: #444; }
+  .card ul { padding-left: 25px; }
+
+  /* ====== 高亮文字 ====== */
+  .highlight { color: #e53935; font-weight: bold; font-size: 1.15em; }
+  .highlight-blue { color: #1565c0; font-weight: bold; }
+  .highlight-green { color: #2e7d32; font-weight: bold; }
+  .formula-box {
+    background: linear-gradient(135deg, #fff3e0, #fff8e1);
+    border: 3px dashed #ff9800; border-radius: 15px;
+    padding: 20px; margin: 15px 0; text-align: center; font-size: 1.4em;
+    font-weight: bold; color: #e65100;
+  }
+
+  /* ====== 演示区 ====== */
+  .demo-controls {
+    display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;
+    margin: 20px 0; align-items: center;
+  }
+  .demo-controls label { font-size: 1.15em; font-weight: bold; color: #555; }
+  .demo-controls select, .demo-controls input {
+    padding: 8px 15px; border-radius: 10px; border: 2px solid #ccc;
+    font-size: 1.1em; outline: none; transition: border-color 0.3s;
+  }
+  .demo-controls select:focus, .demo-controls input:focus { border-color: #4fc3f7; }
+  .btn-action {
+    padding: 10px 25px; border: none; border-radius: 12px;
+    font-size: 1.1em; font-weight: bold; cursor: pointer; color: #fff;
+    background: linear-gradient(135deg, #7e57c2, #5c6bc0);
+    transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .btn-action:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
+  .demo-canvas-wrap {
+    display: flex; justify-content: center; margin: 20px 0;
+  }
+  .demo-result {
+    text-align: center; font-size: 2em; font-weight: bold;
+    color: #e53935; margin: 15px 0; min-height: 50px;
+  }
+  .fraction-display {
+    display: inline-flex; flex-direction: column; align-items: center;
+    margin: 0 12px; vertical-align: middle; position: relative; top: -5px;
+  }
+  .fraction-display .num { font-size: 1.8em; line-height: 1; }
+  .fraction-display .line { width: 100%; height: 3px; background: #333; margin: 3px 0; }
+  .fraction-display .den { font-size: 1.8em; line-height: 1; }
+
+  /* ====== 练习区 ====== */
+  .question-card {
+    background: #fff; border-radius: 18px; padding: 25px;
+    margin-bottom: 20px; box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+    border: 2px solid transparent; transition: border-color 0.3s;
+  }
+  .question-card.correct { border-color: #4caf50; background: #e8f5e9; }
+  .question-card.wrong { border-color: #f44336; background: #ffebee; }
+  .question-num {
+    display: inline-block; background: linear-gradient(135deg, #ff6f61, #ff9a76);
+    color: #fff; width: 36px; height: 36px; border-radius: 50%;
+    text-align: center; line-height: 36px; font-weight: bold;
+    font-size: 1.1em; margin-right: 10px;
+  }
+  .question-text {
+    font-size: 1.4em; font-weight: bold; display: inline-block; vertical-align: middle;
+  }
+  .options { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+  .option-btn {
+    padding: 12px 28px; border: 3px solid #e0e0e0; border-radius: 14px;
+    font-size: 1.2em; font-weight: bold; cursor: pointer; background: #fafafa;
+    transition: all 0.3s; color: #333;
+  }
+  .option-btn:hover { border-color: #4fc3f7; background: #e1f5fe; transform: scale(1.05); }
+  .option-btn.selected { border-color: #1565c0; background: #bbdefb; color: #0d47a1; }
+  .option-btn.correct-answer { border-color: #4caf50; background: #c8e6c9; color: #2e7d32; }
+  .option-btn.wrong-answer { border-color: #f44336; background: #ffcdd2; color: #c62828; }
+  .feedback {
+    margin-top: 15px; padding: 12px 18px; border-radius: 12px;
+    font-size: 1.15em; font-weight: bold; display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct-fb { background: #e8f5e9; color: #2e7d32; }
+  .feedback.wrong-fb { background: #ffebee; color: #c62828; }
+  .check-btn {
+    margin-top: 15px; padding: 10px 30px; border: none; border-radius: 12px;
+    font-size: 1.1em; font-weight: bold; cursor: pointer; color: #fff;
+    background: linear-gradient(135deg, #66bb6a, #43a047);
+    transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
+  .check-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
+  .score-board {
+    text-align: center; padding: 20px; margin-top: 20px;
+    background: linear-gradient(135deg, #fff9c4, #fff3e0);
+    border-radius: 18px; font-size: 1.3em; font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+  .score-board .score-num { font-size: 2.5em; color: #e53935; }
+  .retry-btn {
+    margin-top: 15px; padding: 12px 35px; border: none; border-radius: 14px;
+    font-size: 1.2em; font-weight: bold; cursor: pointer; color: #fff;
+    background: linear-gradient(135deg, #ff7043, #e64a19);
+    transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .retry-btn:hover { transform: translateY(-2px); }
+
+  /* ====== 动画装饰 ====== */
+  .floating {
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .bounce { animation: bounce 0.6s ease; }
+  @keyframes bounce {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.15); }
+    60% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+  }
+
+  /* ====== 步骤动画 ====== */
+  .step-flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 10px; margin: 20px 0;
+  }
+  .step-box {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    border-radius: 14px; padding: 15px 20px; text-align: center;
+    min-width: 120px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  }
+  .step-box .step-label { font-size: 0.85em; color: #1565c0; font-weight: bold; margin-bottom: 5px; }
+  .step-box .step-content { font-size: 1.4em; font-weight: bold; color: #0d47a1; }
+  .step-arrow { font-size: 2em; color: #ff9800; font-weight: bold; }
+
+  /* ====== 小提示框 ====== */
+  .tip-box {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    border-left: 5px solid #43a047; border-radius: 0 12px 12px 0;
+    padding: 15px 20px; margin: 15px 0; font-size: 1.1em;
+  }
+  .tip-box .tip-title { font-weight: bold; color: #2e7d32; margin-bottom: 5px; font-size: 1.15em; }
+
+  /* ====== 响应式 ====== */
+  @media (max-width: 600px) {
+    .header h1 { font-size: 1.5em; }
+    .nav button { padding: 8px 16px; font-size: 0.95em; }
+    .card { padding: 20px; }
+    .formula-box { font-size: 1.1em; }
+    .demo-result { font-size: 1.5em; }
+    .question-text { font-size: 1.15em; }
+    .option-btn { padding: 10px 20px; font-size: 1em; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== 标题栏 ====== -->
+<div class="header">
+  <span class="stars">⭐🌟✨</span>
+  <h1>📐 分数的加减法 📐</h1>
+  <div class="subtitle">小学数学 · 同分母分数加减法 · 趣味学习课件</div>
+  <span class="stars2">✨🌟⭐</span>
+</div>
+
+<!-- ====== 导航 ====== -->
+<div class="nav">
+  <button class="btn-concept active" onclick="switchTab('concept')">📖 概念讲解</button>
+  <button class="btn-demo" onclick="switchTab('demo')">🎨 图形演示</button>
+  <button class="btn-exercise" onclick="switchTab('exercise')">✏️ 练习测试</button>
+</div>
+
+<div class="container">
+
+<!-- ==================== 概念讲解 ==================== -->
+<section id="concept" class="active">
+
+  <!-- 卡片1：什么是分数 -->
+  <div class="card card-blue">
+    <h2>🔍 一、先来认识分数</h2>
+    <p>把一个整体<strong>平均分成</strong>若干份，其中的几份就可以用<strong>分数</strong>来表示！</p>
+    <div style="text-align:center; margin:20px 0;">
+      <svg width="320" height="120" viewBox="0 0 320 120">
+        <!-- 一个圆平均分成4份，涂了3份 -->
+        <circle cx="60" cy="60" r="50" fill="#fff" stroke="#333" stroke-width="2.5"/>
+        <line x1="60" y1="10" x2="60" y2="110" stroke="#333" stroke-width="2"/>
+        <line x1="10" y1="60" x2="110" y2="60" stroke="#333" stroke-width="2"/>
+        <path d="M60,60 L60,10 A50,50 0 0,1 110,60 Z" fill="#4fc3f7"/>
+        <path d="M60,60 L110,60 A50,50 0 0,1 60,110 Z" fill="#4fc3f7"/>
+        <path d="M60,60 L60,110 A50,50 0 0,1 10,60 Z" fill="#4fc3f7"/>
+        <text x="60" y="130" text-anchor="middle" font-size="18" font-weight="bold" fill="#e53935">3/4</text>
+
+        <!-- 等号 -->
+        <text x="160" y="65" text-anchor="middle" font-size="30" font-weight="bold" fill="#ff9800">=</text>
+
+        <!-- 说明 -->
+        <text x="220" y="35" font-size="15" fill="#333">把一个圆</text>
+        <text

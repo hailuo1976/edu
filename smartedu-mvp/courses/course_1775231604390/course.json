@@ -1,0 +1,45 @@
+{
+  "id": "course_1775231604390",
+  "topic": "分数的加减法怎么做？",
+  "subject": "数学",
+  "gradeLevel": 1,
+  "createdAt": "2026-04-03T15:56:40.206Z",
+  "html": "<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>1年级数学 - 分数的加减法怎么做？</title>\n  <style>\n    *{margin:0;padding:0;box-sizing:border-box}\n    body{font-family:sans-serif;background:#f8fafc;color:#1e293b;min-height:100vh;}\n    .header{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:white;padding:24px 32px;text-align:center;}\n    .header h1{font-size:2rem;margin-bottom:8px;}\n  </style>\n</head>\n<body>\n  <div class=\"header\"><h1>分数的加减法怎么做？</h1><p>1年级 数学</p></div>\n</body>\n</html>",
+  "toolCalls": [
+    {
+      "toolCallId": "call_c8e144f5f416403aa1e4d89e",
+      "toolName": "search_educational_content",
+      "success": true,
+      "result": {
+        "content": "同分母分数相加减，分母不变，分子相加减。异分母需先通分。例：1/2 + 1/4 = 3/4",
+        "query": "分数加减法",
+        "grade_level": 1,
+        "subject": "数学",
+        "total": 0
+      },
+      "duration": 1
+    },
+    {
+      "toolCallId": "call_1aaa973d47a644e0965371be",
+      "toolName": "generate_svg_diagram",
+      "success": true,
+      "result": {
+        "svg_code": "<svg width=\"200\" height=\"200\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"10\" y=\"10\" width=\"180\" height=\"180\" fill=\"#3b82f6\" stroke=\"#1d4ed8\" stroke-width=\"2\"/><text x=\"100\" y=\"100\" text-anchor=\"middle\" fill=\"white\" font-size=\"12\">一个圆形被平均分成4份，其中1份涂色表示1/4，另外1份涂不同颜色表示另一个1/4，合并显示2/4=1/2</text></svg>",
+        "description": "一个圆形被平均分成4份，其中1份涂色表示1/4，另外1份涂不同颜色表示另一个1/4，合并显示2/4=1/2",
+        "diagram_type": "fraction"
+      },
+      "duration": 0
+    },
+    {
+      "toolCallId": "call_76c26eaeb23643da97b85932",
+      "toolName": "generate_html_component",
+      "success": true,
+      "result": {
+        "html_content": "<div class=\"formula-box\" style=\"colorful card with large font for grade 1 students\">同分母分数加减法：分母不变，分子相加减。例如 1/4 + 2/4 = 3/4，3/5 - 1/5 = 2/5</div>",
+        "component_type": "formula"
+      },
+      "duration": 1
+    }
+  ],
+  "sections": []
+}
