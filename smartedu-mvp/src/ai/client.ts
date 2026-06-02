@@ -1,10 +1,20 @@
 import axios from 'axios';
+import http from 'http';
+import https from 'https';
 import { Readable } from 'stream';
 import { config } from '../config';
 import { Message, AIResponse, ParsedToolCall } from './types';
 import { ToolDefinition, toOpenAITools } from '../tools/types';
 import { logger } from '../utils/logger';
 import { retry } from '../utils/retry';
+
+/** 每次 API 请求创建新连接，避免复用被远端关闭的连接导致 ECONNRESET */
+function getAxiosConfig(baseUrl: string, extra: Record<string, any> = {}) {
+  const agent = baseUrl.startsWith('https')
+    ? new https.Agent({ keepAlive: false })
+    : new http.Agent({ keepAlive: false });
+  return { httpAgent: agent, httpsAgent: agent, ...extra };
+}
 
 /**
  * 统一 AI Client（流式版本）
@@ -99,8 +109,36 @@ async function parseStreamResponse(
       reject(new Error(`流超时 (${timeoutMs}ms)`));
     }, timeoutMs);
 
+    // 首 token 超时：连接建立后如果长时间没收到数据，主动断开
+    const FIRST_TOKEN_TIMEOUT = 45000; // 45秒内必须收到首个 data chunk
+    const firstTokenTimer = setTimeout(() => {
+      stream.destroy();
+      reject(new Error(`首token超时 (${FIRST_TOKEN_TIMEOUT}ms)：SSE连接建立但未收到任何数据`));
+    }, FIRST_TOKEN_TIMEOUT);
+
+    let lastDataMs = Date.now();
+    // 数据间隔超时：两次 data 之间超过 60 秒视为连接死亡
+    const DATA_GAP_TIMEOUT = 60000;
+    let dataGapTimer = setTimeout(() => {
+      stream.destroy();
+      reject(new Error(`数据间隔超时 (${DATA_GAP_TIMEOUT}ms)：两次 SSE data 间隔过长`));
+    }, DATA_GAP_TIMEOUT);
+
     stream.on('data', (chunk: Buffer) => {
-      if (!firstTokenMs) firstTokenMs = Date.now();
+      // 收到任何数据，重置数据间隔计时
+      const now = Date.now();
+      const gapMs = now - lastDataMs;
+      lastDataMs = now;
+      clearTimeout(dataGapTimer);
+      dataGapTimer = setTimeout(() => {
+        stream.destroy();
+        reject(new Error(`数据间隔超时 (${DATA_GAP_TIMEOUT}ms)：两次 SSE data 间隔过长`));
+      }, DATA_GAP_TIMEOUT);
+
+      if (!firstTokenMs) {
+        firstTokenMs = now;
+        clearTimeout(firstTokenTimer); // 收到首个数据，取消首 token 超时
+      }
       const text = chunk.toString();
       buffer += text;
       rawBody += text;
@@ -159,12 +197,15 @@ async function parseStreamResponse(
 
     stream.on('end', () => {
       clearTimeout(timer);
+      clearTimeout(firstTokenTimer);
+      clearTimeout(dataGapTimer);
       const duration = Date.now() - startMs;
       const ttft = firstTokenMs ? firstTokenMs - startMs : 0;
+      const totalStreamBytes = rawBody.length;
 
       // 路径1：SSE 解析成功
       if (content || toolCallMap.size > 0) {
-        logger.info(`SSE 完成: ${content.length} 字符, ${toolCallMap.size} 工具, 首token ${ttft}ms, 总 ${duration}ms`);
+        logger.info(`SSE 完成: ${content.length} 字符, ${toolCallMap.size} 工具, 首token ${ttft}ms, 总 ${duration}ms, 流字节 ${totalStreamBytes}`);
         resolve({
           content,
           toolCalls: Array.from(toolCallMap.values()),
@@ -205,12 +246,14 @@ async function parseStreamResponse(
 
     stream.on('error', (err) => {
       clearTimeout(timer);
+      clearTimeout(firstTokenTimer);
+      clearTimeout(dataGapTimer);
       reject(err);
     });
   });
 }
 
-/** 发起一次流式请求 */
+/** 发起一次流式请求，每次用新连接避免 ECONNRESET */
 async function doStreamRequest(
   baseUrl: string,
   apiKey: string,
@@ -218,27 +261,42 @@ async function doStreamRequest(
   timeoutMs: number,
   onToken?: (text: string) => void
 ): Promise<StreamResult> {
-  const response = await axios.post(
-    `${baseUrl}/chat/completions`,
-    requestBody,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      responseType: 'stream',
-      timeout: 60000, // 连接超时 60s（后续轮次 API 响应较慢）
+  const reqStart = Date.now();
+  const payloadSize = JSON.stringify(requestBody).length;
+  logger.info(`流式请求开始: payload=${(payloadSize / 1024).toFixed(1)}KB, timeout=${timeoutMs}ms`);
+  try {
+    const response = await axios.post(
+      `${baseUrl}/chat/completions`,
+      requestBody,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+          'Connection': 'close',
+        },
+        responseType: 'stream',
+        timeout: 180000,
+        ...getAxiosConfig(baseUrl),
+      }
+    );
+    const connMs = Date.now() - reqStart;
+    logger.info(`SSE 连接建立: ${connMs}ms, 等待流式数据...`);
+    const result = await parseStreamResponse(response.data, timeoutMs, onToken);
+
+    // 如果流式解析完全为空， fallback 到非流式
+    if (!result.content && result.toolCalls.length === 0) {
+      logger.info('流式结果为空，fallback 到非流式请求');
+      return doRegularRequest(baseUrl, apiKey, { ...requestBody, stream: false }, timeoutMs);
     }
-  );
-  const result = await parseStreamResponse(response.data, timeoutMs, onToken);
 
-  // 如果流式解析完全为空， fallback 到非流式
-  if (!result.content && result.toolCalls.length === 0) {
-    logger.info('流式结果为空，fallback 到非流式请求');
-    return doRegularRequest(baseUrl, apiKey, { ...requestBody, stream: false }, timeoutMs);
+    return result;
+  } catch (err: any) {
+    const elapsed = Date.now() - reqStart;
+    const code = err?.code || '';
+    const status = err?.response?.status;
+    logger.warn(`流式请求失败: ${elapsed}ms, code=${code}, status=${status || '-'}, msg=${err?.message}`);
+    throw err;
   }
-
-  return result;
 }
 
 /** 非流式 fallback */
@@ -256,7 +314,8 @@ async function doRegularRequest(
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
       },
-      timeout: Math.min(timeoutMs, 120000), // 非流式最长等 120s
+      timeout: Math.min(timeoutMs, 120000),
+      ...getAxiosConfig(baseUrl),
     }
   );
   const choice = response.data?.choices?.[0]?.message;
@@ -291,8 +350,7 @@ export async function chat(
     throw new Error('AI API Key 未配置');
   }
 
-  // 动态 max_tokens：工具调用轮次也需要足够空间放 HTML 参数
-  const defaultMaxTokens = tools && tools.length > 0 ? 4096 : 4096;
+  const defaultMaxTokens = 131072;
 
   const requestBody: any = {
     model,
@@ -312,13 +370,16 @@ export async function chat(
   logger.debug(`AI 请求消息:\n${messages.map((m, i) => `[${i}] ${m.role}: ${truncate(m.content || JSON.stringify((m as any).toolCalls || ''), 500)}`).join('\n')}`);
 
   const result = await retry(
-    () => doStreamRequest(baseUrl, apiKey, requestBody, config.agent.timeoutMs, options?.onToken),
+    () => doStreamRequest(baseUrl, apiKey, { ...requestBody }, config.agent.timeoutMs, options?.onToken),
     {
       maxAttempts: 10,
       delayMs: 500,
       exponentialBackoff: true,
       shouldRetry: (err: any) => {
         const status = err?.response?.status;
+        const code = err?.code;
+        // 网络级错误直接重试
+        if (['ECONNRESET', 'ECONNREFUSED', 'ETIMEDOUT', 'EPIPE', 'EAI_AGAIN'].includes(code)) return true;
         return !status || status === 504 || status === 502 || status === 503 || status === 429;
       },
     }

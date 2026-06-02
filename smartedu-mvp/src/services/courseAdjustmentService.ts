@@ -18,8 +18,10 @@ import {
   LogLevel,
   LogCategory,
 } from '../types/adjustment';
-import { executeTools } from '../tools/executor';
 import { contextManager } from './contextManager';
+import { runAgentLoop, AgentProgress } from '../agent/core';
+import { toolRegistry } from '../tools/registry';
+import { createAdjustmentTools } from '../tools/definitions/adjustmentTools';
 
 function generateId(): string {
   return crypto.randomBytes(16).toString('hex');
@@ -282,7 +284,7 @@ export class CourseAdjustmentService {
   }
 
   /**
-   * 处理调整请求
+   * 处理调整请求 — 使用统一 Agent 循环
    */
   async processAdjustment(
     request: AdjustmentRequest,
@@ -290,49 +292,32 @@ export class CourseAdjustmentService {
     onLog?: (log: LogMessage) => void
   ): Promise<AdjustmentResponse> {
     try {
-      console.log('========================================');
-      console.log('[CourseAdjustmentService] 开始处理课件调整请求');
-      console.log(`[CourseAdjustmentService] 会话ID: ${request.sessionId || '新会话'}`);
-      console.log(`[CourseAdjustmentService] 课件ID: ${request.courseId}`);
-      console.log(`[CourseAdjustmentService] 用户请求: ${request.userRequest}`);
-      console.log('========================================');
-
+      // 1. 获取或创建 session
       let session: AdjustmentSession | null = null;
-
       if (request.sessionId) {
-        console.log('[CourseAdjustmentService] 正在获取现有会话...');
         session = await this.getSession(request.sessionId);
         if (!session) {
           throw new Error(`会话不存在: ${request.sessionId}`);
         }
-        console.log('[CourseAdjustmentService] 会话获取成功');
       } else {
-        console.log('[CourseAdjustmentService] 正在创建新会话...');
         session = await this.createSession(request.courseId);
-        console.log('[CourseAdjustmentService] 新会话创建成功');
       }
 
       if (!session) {
         throw new Error('无法创建或获取会话');
       }
 
-      console.log(`[CourseAdjustmentService] 课件信息: 主题=${session.courseInfo.topic}, 学科=${session.courseInfo.subject}, 年级=${session.courseInfo.gradeLevel}`);
-
+      // 2. 注册回调
       if (onProgress) {
         this.progressCallbacks.set(session.sessionId, onProgress);
       }
       if (onLog) {
         this.logCallbacks.set(session.sessionId, onLog);
-        this.reportLog(session.sessionId, 'info', 'system', '开始处理课件调整请求', {
-          sessionId: session.sessionId,
-          courseId: request.courseId,
-          userRequest: request.userRequest,
-        }, 0);
       }
 
-      console.log('[CourseAdjustmentService] 阶段: 分析用户请求');
       this.reportProgress(session.sessionId, 'analyzing', '正在分析您的修改请求...', 10);
 
+      // 3. 添加用户消息到历史
       const userMessage: ConversationMessage = {
         id: generateId(),
         role: 'user',
@@ -341,90 +326,127 @@ export class CourseAdjustmentService {
       };
       session.conversationHistory.push(userMessage);
 
-      console.log('[CourseAdjustmentService] 阶段: 规划修改方案');
       this.reportProgress(session.sessionId, 'planning', '正在规划修改方案...', 30);
 
-      console.log('[CourseAdjustmentService] 构建系统提示词和消息...');
-      
-      // 检查是否需要上下文优化
-      if (contextManager.shouldOptimize(session.conversationHistory)) {
-        console.log('[CourseAdjustmentService] 检测到上下文过大，将启用智能摘要');
-        if (onLog) {
-          this.reportLog(session.sessionId, 'info', 'system', '对话历史较长，启用智能摘要优化', {
-            messageCount: session.conversationHistory.length,
-          }, 0);
-        }
-      }
-      
-      const systemPrompt = this.buildSystemPrompt(session);
-      const messages = this.buildMessages(session, systemPrompt);
-      console.log(`[CourseAdjustmentService] 消息数量: ${messages.length}`);
+      // 4. 构建调整专用工具（闭包捕获 session）
+      const { tools: adjustmentTools, getCapturedHtml } = createAdjustmentTools(
+        session,
+        (files) => this.mergeFilesToHtml(files),
+        { onProgress, onLog },
+      );
 
-      console.log('[CourseAdjustmentService] 阶段: 执行AI调用');
+      // 通用工具（search 带参数增强）
+      const searchTool = toolRegistry.get('search_educational_content');
+      const svgTool = toolRegistry.get('generate_svg_diagram');
+      const allTools = [
+        ...adjustmentTools,
+        ...(searchTool ? [searchTool] : []),
+        ...(svgTool ? [svgTool] : []),
+      ];
+
+      // 5. 构建 systemPrompt（含当前 HTML 和上下文）
+      const systemPrompt = this.buildSystemPrompt(session);
+
+      // 6. 构建用户消息（含对话历史摘要）
+      const userPrompt = this.buildUserPrompt(session, request.userRequest);
+
+      // 7. 调用 runAgentLoop
       this.reportProgress(session.sessionId, 'executing', '正在执行修改...', 50);
 
-      console.log('[CourseAdjustmentService] 开始调用AI...');
-      const aiResponse = await this.callAI(messages, session, onLog);
-      console.log(`[CourseAdjustmentService] AI调用完成，处理时间: ${aiResponse.processingTime}ms`);
-      console.log(`[CourseAdjustmentService] 工具调用次数: ${aiResponse.toolCalls.length}`);
+      const agentResult = await runAgentLoop(userPrompt, {
+        systemPrompt,
+        tools: allTools,
+        maxIterations: 10,
+        exitKeywords: ['[调整完成]', '[课件完成]', '[DONE]', '[FINISH]', '[任务完成]', '[完成]'],
+        onProgress: (progress: AgentProgress) => {
+          this.reportProgress(
+            session!.sessionId,
+            'executing',
+            `第 ${progress.iteration} 轮：${progress.stage === 'tool_call' ? '执行工具' : progress.stage === 'thinking' ? '正在思考' : '处理中'}`,
+            Math.min(50 + progress.iteration * 5, 90),
+          );
+        },
+      });
 
-      console.log('[CourseAdjustmentService] 阶段: 验证修改结果');
+      // 8. 获取结果 HTML
+      let html = getCapturedHtml();
+      if (!html && agentResult.finalContent) {
+        const htmlMatch = agentResult.finalContent.match(/```html\n([\s\S]*?)\n```/);
+        if (htmlMatch) {
+          html = htmlMatch[1];
+        }
+      }
+
       this.reportProgress(session.sessionId, 'validating', '正在验证修改结果...', 80);
 
+      // 9. 创建调整记录，更新 session
       const adjustmentRecord = await this.createAdjustmentRecord(
         session,
         request.userRequest,
-        aiResponse.content,
-        aiResponse.html
+        agentResult.finalContent,
+        html,
       );
 
       session.adjustmentHistory.push(adjustmentRecord);
-      session.currentHtml = aiResponse.html;
+      if (html) {
+        session.currentHtml = html;
+      }
       session.updatedAt = new Date();
 
       const assistantMessage: ConversationMessage = {
         id: generateId(),
         role: 'assistant',
-        content: aiResponse.content,
+        content: agentResult.finalContent,
         timestamp: new Date(),
         metadata: {
-          toolCalls: aiResponse.toolCalls,
-          processingTime: aiResponse.processingTime,
+          processingTime: Date.now(),
         },
       };
       session.conversationHistory.push(assistantMessage);
 
-      console.log('[CourseAdjustmentService] 保存会话...');
       await this.saveSession(session);
-
-      console.log('[CourseAdjustmentService] 阶段: 完成');
       this.reportProgress(session.sessionId, 'complete', '修改完成!', 100);
-
-      console.log('========================================');
-      console.log('[CourseAdjustmentService] 课件调整请求处理完成');
-      console.log(`[CourseAdjustmentService] 会话ID: ${session.sessionId}`);
-      console.log(`[CourseAdjustmentService] AI回复长度: ${aiResponse.content?.length || 0} 字符`);
-      console.log(`[CourseAdjustmentService] HTML长度: ${aiResponse.html?.length || 0} 字符`);
-      console.log('========================================');
 
       return {
         success: true,
         sessionId: session.sessionId,
-        message: aiResponse.content,
-        html: aiResponse.html,
+        message: agentResult.finalContent,
+        html: html,
         conversationHistory: session.conversationHistory,
         adjustmentRecord,
       };
     } catch (error: any) {
-      console.error('========================================');
       console.error('[CourseAdjustmentService] 处理调整请求失败:', error);
-      console.error('========================================');
       return {
         success: false,
         sessionId: request.sessionId || '',
         error: error.message,
       };
     }
+  }
+
+  /**
+   * 构建用户消息（含对话历史摘要）
+   */
+  private buildUserPrompt(session: AdjustmentSession, currentUserRequest: string): string {
+    const parts: string[] = [];
+
+    // 对话历史摘要
+    if (session.conversationHistory.length > 1) {
+      const recentHistory = session.conversationHistory.slice(-6, -1);
+      if (recentHistory.length > 0) {
+        parts.push('## 对话历史');
+        for (const msg of recentHistory) {
+          const role = msg.role === 'user' ? '用户' : '助手';
+          parts.push(`**${role}**: ${msg.content.substring(0, 200)}`);
+        }
+      }
+    }
+
+    // 当前请求
+    parts.push(`## 当前请求\n${currentUserRequest}`);
+
+    return parts.join('\n\n');
   }
 
   private reportProgress(
@@ -450,7 +472,16 @@ export class CourseAdjustmentService {
   private buildSystemPrompt(session: AdjustmentSession): string {
     const fileCount = session.files?.length || 0;
     const activeFile = session.files?.find(f => f.id === session.activeFileId);
-    
+    const htmlPreview = session.currentHtml
+      ? (session.currentHtml.length > 3000
+        ? session.currentHtml.substring(0, 3000) + '\n... [已截断，共 ' + session.currentHtml.length + ' 字符]'
+        : session.currentHtml)
+      : '(无HTML内容)';
+
+    const fileListInfo = session.files?.length
+      ? session.files.map(f => `- ${f.name} (${f.type}, ${f.size}字符, ID: ${f.id})`).join('\n')
+      : '(无文件)';
+
     return `你是一个专业的课件调整助手。你的任务是帮助教师修改和完善HTML课件。
 
 ## 当前课件信息
@@ -460,18 +491,13 @@ export class CourseAdjustmentService {
 - 文件数量: ${fileCount}
 ${activeFile ? `- 当前操作文件: ${activeFile.name} (${activeFile.description || '无描述'})` : ''}
 
-## 多文件管理策略
-当课件内容较大时（超过3000字符），你应该：
-1. 将课件拆分为多个逻辑文件（如：主文件、各章节文件、样式文件等）
-2. 每次只针对特定文件进行修改，降低上下文大小
-3. 使用save_file工具保存每个文件
-4. 在需要时使用merge_files工具合并文件
+## 当前HTML内容
+\`\`\`html
+${htmlPreview}
+\`\`\`
 
-## 文件拆分建议
-- 主文件 (main): 包含课件的基本结构和导航
-- 章节文件 (section): 按教学章节拆分，每个文件一个主题
-- 样式文件 (style): 独立的CSS样式
-- 脚本文件 (script): JavaScript交互逻辑
+## 文件列表
+${fileListInfo}
 
 ## 你的能力
 1. 修改课件内容（文字、图片、公式等）
@@ -484,493 +510,31 @@ ${activeFile ? `- 当前操作文件: ${activeFile.name} (${activeFile.descripti
 ## 工作流程
 1. 理解用户的修改需求
 2. 分析当前HTML结构
-3. 如果HTML较大（>3000字符），考虑拆分为多个文件
-4. 针对特定文件进行修改
-5. 使用save_file工具保存修改后的文件
-6. 向用户说明修改内容
+3. 针对特定文件进行修改
+4. 使用 save_course_html 保存修改后的完整HTML，或使用 save_file 保存单个文件
+5. 向用户说明修改内容
 
 ## 重要规则
 - 保持课件的教学完整性
 - 确保HTML结构正确
 - 保留原有的教学重点
-- 修改后必须使用save_file工具保存
-- 大课件应拆分为多个文件以优化上下文
-- 每次只修改必要的文件，减少token消耗
+- 修改后必须使用 save_course_html 或 save_file 工具保存
+- 每次只修改必要的部分，减少token消耗
 - 用中文回复用户
+- 完成修改后输出 [调整完成] 标记
 
 ## 可用工具
-- save_file: 保存或更新单个文件内容
+- save_course_html: 保存修改后的完整HTML课件内容（推荐）
+- save_file: 保存或更新单个文件内容（多文件场景）
 - split_file: 将大文件拆分为多个文件
 - merge_files: 合并多个文件为一个
+- list_session_files: 列出当前课件的所有文件
 - search_educational_content: 搜索教育内容
 - generate_svg_diagram: 生成SVG图形`;
   }
 
-  private buildMessages(session: AdjustmentSession, systemPrompt: string): any[] {
-    console.log(`[CourseAdjustmentService] 构建消息，历史消息数: ${session.conversationHistory.length}, 文件数: ${session.files?.length || 0}`);
 
-    // 使用上下文管理器优化消息（支持多文件）
-    const optimizedMessages = contextManager.optimizeMessages(
-      session.conversationHistory,
-      session.currentHtml,
-      session.files,
-      session.activeFileId
-    );
 
-    // 在第一条消息前插入系统提示词
-    const messages: any[] = [
-      { role: 'system', content: systemPrompt },
-      ...optimizedMessages,
-    ];
-
-    // 如果是首次对话且没有文件管理，添加初始HTML内容
-    if (session.conversationHistory.length === 0 && (!session.files || session.files.length === 0)) {
-      messages.push({
-        role: 'user',
-        content: `这是当前的课件HTML内容，请先分析一下这个课件的结构和内容：\n\n\`\`\`html\n${session.currentHtml}\n\`\`\``,
-      });
-    }
-
-    // 添加token使用估计日志
-    const estimatedTokens = contextManager.estimateMessageTokens(messages);
-    console.log(`[CourseAdjustmentService] 优化后消息数: ${messages.length}, 估计token数: ${estimatedTokens}`);
-
-    return messages;
-  }
-
-  private async callAI(
-    messages: any[],
-    session: AdjustmentSession,
-    onLog?: (log: LogMessage) => void
-  ): Promise<{ content: string; html: string; toolCalls: any[]; processingTime: number }> {
-    console.log('  [callAI] 开始AI调用流程');
-    if (onLog) {
-      this.reportLog(session.sessionId, 'info', 'ai', '开始AI调用流程', null, 1);
-    }
-    const startTime = Date.now();
-    const toolCalls: any[] = [];
-    let currentHtml = '';
-    let lastContent = '';
-
-    const apiKey = process.env.OPENAI_API_KEY || process.env.DASHSCOPE_API_KEY;
-    const baseUrl = process.env.OPENAI_BASE_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1';
-    const model = process.env.OPENAI_MODEL || 'qwen-plus';
-
-    console.log(`  [callAI] API配置: baseUrl=${baseUrl}, model=${model}`);
-    if (onLog) {
-      this.reportLog(session.sessionId, 'info', 'ai', 'API配置', {
-        baseUrl,
-        model,
-      }, 1);
-    }
-
-    if (!apiKey) {
-      console.error('  [callAI] 错误: 未配置API密钥');
-      throw new Error('未配置API密钥');
-    }
-
-    const tools = [
-      {
-        type: 'function',
-        function: {
-          name: 'save_course_html',
-          description: '保存修改后的HTML课件内容',
-          parameters: {
-            type: 'object',
-            properties: {
-              html_content: {
-                type: 'string',
-                description: '完整的HTML课件内容',
-              },
-              changes_summary: {
-                type: 'string',
-                description: '修改内容摘要',
-              },
-            },
-            required: ['html_content'],
-          },
-        },
-      },
-      {
-        type: 'function',
-        function: {
-          name: 'search_educational_content',
-          description: '搜索教育相关内容',
-          parameters: {
-            type: 'object',
-            properties: {
-              query: {
-                type: 'string',
-                description: '搜索关键词',
-              },
-            },
-            required: ['query'],
-          },
-        },
-      },
-      {
-        type: 'function',
-        function: {
-          name: 'generate_svg_diagram',
-          description: '生成SVG图形',
-          parameters: {
-            type: 'object',
-            properties: {
-              description: {
-                type: 'string',
-                description: '图形描述',
-              },
-              diagram_type: {
-                type: 'string',
-                description: '图形类型',
-              },
-            },
-            required: ['description'],
-          },
-        },
-      },
-    ];
-
-    const maxIterations = 10;
-    let iterations = 0;
-
-    while (iterations < maxIterations) {
-      iterations++;
-      console.log(`  [callAI] 开始第 ${iterations}/${maxIterations} 轮迭代`);
-      if (onLog) {
-        this.reportLog(session.sessionId, 'info', 'ai', `开始第 ${iterations}/${maxIterations} 轮迭代`, null, 1);
-      }
-
-      this.reportProgress(session.sessionId, 'executing', `正在处理 (第${iterations}轮)...`, 50 + iterations * 3);
-
-      console.log(`  [callAI] 发送请求到AI API...`);
-      if (onLog) {
-        this.reportLog(session.sessionId, 'info', 'ai', '发送请求到AI API', null, 2);
-      }
-      const apiStartTime = Date.now();
-      const response = await fetch(`${baseUrl}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model,
-          messages,
-          tools,
-          tool_choice: 'auto',
-          temperature: 0.7,
-          max_tokens: 16000,
-        }),
-      });
-
-      const apiDuration = Date.now() - apiStartTime;
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`  [callAI] AI API调用失败: ${response.status} - ${errorText}`);
-        if (onLog) {
-          this.reportLog(session.sessionId, 'error', 'ai', `AI API调用失败`, {
-            status: response.status,
-            error: errorText,
-          }, 2);
-        }
-        throw new Error(`AI调用失败: ${response.status} - ${errorText}`);
-      }
-
-      console.log(`  [callAI] AI API响应成功，耗时: ${apiDuration}ms`);
-      if (onLog) {
-        this.reportLog(session.sessionId, 'info', 'ai', `AI API响应成功，耗时: ${apiDuration}ms`, null, 2);
-      }
-
-      const data = await response.json() as any;
-      const choice = data.choices[0];
-      const message = choice.message;
-
-      if (message.content) {
-        console.log(`  [callAI] 收到AI回复，长度: ${message.content.length} 字符`);
-        if (onLog) {
-          this.reportLog(session.sessionId, 'info', 'ai', `收到AI回复，长度: ${message.content.length} 字符`, {
-            contentLength: message.content.length,
-          }, 2);
-        }
-        lastContent = message.content;
-        messages.push({
-          role: 'assistant',
-          content: message.content,
-        });
-      }
-
-      if (message.tool_calls && message.tool_calls.length > 0) {
-        console.log(`  [callAI] AI请求调用 ${message.tool_calls.length} 个工具`);
-        if (onLog) {
-          this.reportLog(session.sessionId, 'info', 'tool', `AI请求调用 ${message.tool_calls.length} 个工具`, null, 2);
-        }
-        messages.push(message);
-
-        for (let i = 0; i < message.tool_calls.length; i++) {
-          const tc = message.tool_calls[i];
-          const functionName = tc.function.name;
-          const functionArgs = JSON.parse(tc.function.arguments);
-
-          console.log(`  [callAI] 工具调用 ${i + 1}/${message.tool_calls.length}: ${functionName}`);
-          console.log(`  [callAI]   参数: ${JSON.stringify(functionArgs, null, 2).split('\n').join('\n  [callAI]   ')}`);
-          if (onLog) {
-            this.reportLog(session.sessionId, 'info', 'tool', `开始执行工具: ${functionName}`, {
-              toolIndex: i + 1,
-              totalTools: message.tool_calls.length,
-              parameters: functionArgs,
-            }, 3);
-          }
-
-          let functionResult: any;
-
-          console.log(`  [callAI] 执行工具: ${functionName}...`);
-          const toolStartTime = Date.now();
-
-          if (functionName === 'save_course_html') {
-            console.log(`  [callAI]   保存HTML内容，长度: ${functionArgs.html_content?.length || 0} 字符`);
-            currentHtml = functionArgs.html_content;
-            functionResult = {
-              success: true,
-              message: 'HTML内容已保存',
-              content_length: functionArgs.html_content.length,
-            };
-          } else if (functionName === 'save_file') {
-            console.log(`  [callAI]   保存文件: ${functionArgs.file_name}, 类型: ${functionArgs.file_type}, 长度: ${functionArgs.html_content?.length || 0} 字符`);
-            
-            // 更新或添加文件到会话
-            const fileId = functionArgs.file_id || `file_${Date.now()}`;
-            const fileObj = {
-              id: fileId,
-              name: functionArgs.file_name,
-              type: functionArgs.file_type,
-              html: functionArgs.html_content,
-              description: functionArgs.description || '',
-              order: functionArgs.order || 0,
-              size: functionArgs.html_content.length,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            };
-            
-            // 查找是否已存在该文件
-            const existingFileIndex = session.files.findIndex(f => f.id === fileId);
-            if (existingFileIndex >= 0) {
-              // 更新现有文件
-              session.files[existingFileIndex] = fileObj;
-              console.log(`  [callAI]   更新现有文件: ${fileId}`);
-            } else {
-              // 添加新文件
-              session.files.push(fileObj);
-              console.log(`  [callAI]   添加新文件: ${fileId}`);
-            }
-            
-            // 更新活动文件
-            session.activeFileId = fileId;
-            
-            // 更新currentHtml（合并所有文件）
-            currentHtml = this.mergeFilesToHtml(session.files);
-            
-            functionResult = {
-              success: true,
-              file_id: fileId,
-              file_name: functionArgs.file_name,
-              message: `文件 ${functionArgs.file_name} 保存成功`,
-              content_length: functionArgs.html_content.length,
-            };
-          } else if (functionName === 'split_file') {
-            console.log(`  [callAI]   拆分文件: ${functionArgs.file_id}, 策略: ${functionArgs.strategy}`);
-            
-            // 查找要拆分的文件
-            const fileToSplit = session.files.find(f => f.id === functionArgs.file_id);
-            if (!fileToSplit) {
-              functionResult = {
-                success: false,
-                error: `文件不存在: ${functionArgs.file_id}`,
-              };
-            } else {
-              // 模拟拆分（实际应该解析HTML并拆分）
-              const newFiles = functionArgs.split_points.map((point: string, index: number) => ({
-                id: `file_${Date.now()}_${index}`,
-                name: `${point}.html`,
-                type: 'section',
-                html: `<!-- ${point} 的内容 -->\n<div class="section" id="${point}">\n  <!-- 从原文件拆分的内容 -->\n</div>`,
-                description: `拆分出的文件: ${point}`,
-                order: index + 1,
-                size: 100,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-              }));
-              
-              // 移除原文件，添加新文件
-              session.files = session.files.filter(f => f.id !== functionArgs.file_id);
-              session.files.push(...newFiles);
-              
-              // 更新活动文件为第一个新文件
-              session.activeFileId = newFiles[0].id;
-              
-              // 更新currentHtml
-              currentHtml = this.mergeFilesToHtml(session.files);
-              
-              functionResult = {
-                success: true,
-                original_file_id: functionArgs.file_id,
-                new_files: newFiles,
-                strategy: functionArgs.strategy,
-                message: `文件已成功拆分为 ${newFiles.length} 个小文件`,
-              };
-            }
-          } else if (functionName === 'merge_files') {
-            console.log(`  [callAI]   合并文件: ${functionArgs.file_ids?.length || 0} 个文件`);
-            
-            // 验证所有文件是否存在
-            const missingFiles = functionArgs.file_ids.filter((id: string) => !session.files.find(f => f.id === id));
-            if (missingFiles.length > 0) {
-              functionResult = {
-                success: false,
-                error: `以下文件不存在: ${missingFiles.join(', ')}`,
-              };
-            } else {
-              // 合并文件内容
-              const filesToMerge = functionArgs.file_ids.map((id: string) => session.files.find(f => f.id === id));
-              const mergedHtml = this.mergeFilesToHtml(filesToMerge);
-              
-              // 创建合并后的文件
-              const mergedFile: any = {
-                id: `merged_${Date.now()}`,
-                name: functionArgs.output_name,
-                type: 'main' as const,
-                html: mergedHtml,
-                description: `合并 ${functionArgs.file_ids.length} 个文件的结果`,
-                order: 0,
-                size: mergedHtml.length,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-              };
-              
-              // 移除被合并的文件，添加新文件
-              session.files = session.files.filter(f => !functionArgs.file_ids.includes(f.id));
-              session.files.push(mergedFile);
-              
-              // 更新活动文件
-              session.activeFileId = mergedFile.id;
-              
-              // 更新currentHtml
-              currentHtml = mergedHtml;
-              
-              functionResult = {
-                success: true,
-                merged_file_id: mergedFile.id,
-                merged_file_name: functionArgs.output_name,
-                html_length: mergedHtml.length,
-                message: `${functionArgs.file_ids.length} 个文件已成功合并为 ${functionArgs.output_name}`,
-              };
-            }
-          } else if (functionName === 'list_files') {
-            console.log(`  [callAI]   列出文件，筛选: ${functionArgs.file_type || 'all'}`);
-            
-            let filteredFiles = session.files;
-            if (functionArgs.file_type && functionArgs.file_type !== 'all') {
-              filteredFiles = session.files.filter(f => f.type === functionArgs.file_type);
-            }
-            
-            functionResult = {
-              success: true,
-              files: filteredFiles,
-              total: filteredFiles.length,
-              filter: functionArgs.file_type || 'all',
-              message: `找到 ${filteredFiles.length} 个文件`,
-            };
-          } else if (functionName === 'search_educational_content') {
-            // 自动补充grade_level和subject参数
-            const enhancedArgs = {
-              ...functionArgs,
-              grade_level: functionArgs.grade_level ?? session.courseInfo.gradeLevel,
-              subject: functionArgs.subject ?? session.courseInfo.subject,
-            };
-            console.log(`  [callAI]   增强参数: grade_level=${enhancedArgs.grade_level}, subject=${enhancedArgs.subject}`);
-            const searchResults = await executeTools([{
-              id: tc.id,
-              name: functionName,
-              arguments: enhancedArgs,
-            }], { workDir: this.coursesDir });
-            functionResult = searchResults[0]?.success ? searchResults[0].result : { error: searchResults[0]?.error };
-          } else if (functionName === 'generate_svg_diagram') {
-            console.log(`  [callAI]   生成SVG图表: ${functionArgs.description}`);
-            const svgResults = await executeTools([{
-              id: tc.id,
-              name: functionName,
-              arguments: functionArgs,
-            }], { workDir: this.coursesDir });
-            functionResult = svgResults[0]?.success ? svgResults[0].result : { error: svgResults[0]?.error };
-          } else {
-            console.warn(`  [callAI]   未知工具: ${functionName}`);
-            functionResult = { error: '未知工具' };
-          }
-
-          const toolDuration = Date.now() - toolStartTime;
-          console.log(`  [callAI] 工具执行完成，耗时: ${toolDuration}ms`);
-          console.log(`  [callAI]   结果: ${JSON.stringify(functionResult).substring(0, 200)}${JSON.stringify(functionResult).length > 200 ? '...' : ''}`);
-          if (onLog) {
-            this.reportLog(session.sessionId, 'info', 'tool', `工具执行完成: ${functionName}`, {
-              duration: toolDuration,
-              result: functionResult,
-            }, 3);
-          }
-
-          toolCalls.push({
-            tool: functionName,
-            input: functionArgs,
-            output: functionResult,
-            timestamp: new Date(),
-          });
-
-          messages.push({
-            role: 'tool',
-            tool_call_id: tc.id,
-            content: JSON.stringify(functionResult),
-          });
-        }
-      } else {
-        console.log('  [callAI] 没有工具调用，结束迭代');
-        break;
-      }
-    }
-
-    if (!currentHtml) {
-      console.log('  [callAI] 未保存HTML，尝试从内容中提取...');
-      currentHtml = this.extractHtmlFromContent(lastContent);
-      if (currentHtml) {
-        console.log(`  [callAI] 成功提取HTML，长度: ${currentHtml.length} 字符`);
-      } else {
-        console.warn('  [callAI] 未能提取到HTML');
-      }
-    }
-
-    const totalDuration = Date.now() - startTime;
-    console.log(`  [callAI] AI调用流程结束，总耗时: ${totalDuration}ms`);
-    if (onLog) {
-      this.reportLog(session.sessionId, 'info', 'ai', `AI调用流程结束，总耗时: ${totalDuration}ms`, {
-        toolCallsCount: toolCalls.length,
-        htmlLength: currentHtml.length,
-      }, 1);
-    }
-
-    return {
-      content: lastContent,
-      html: currentHtml,
-      toolCalls,
-      processingTime: totalDuration,
-    };
-  }
-
-  private extractHtmlFromContent(content: string): string {
-    const htmlMatch = content.match(/```html\n([\s\S]*?)\n```/);
-    if (htmlMatch) {
-      return htmlMatch[1];
-    }
-    return '';
-  }
 
   /**
    * 将多个文件合并为完整的HTML

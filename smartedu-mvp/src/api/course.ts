@@ -1,7 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { CourseService } from '../services/courseService';
-import { AgentProgress } from '../agent/core';
+
+type AnyProgress = Record<string, any>;
 
 const router = Router();
 const courseService = new CourseService();
@@ -20,139 +21,50 @@ router.get('/health', (_req: Request, res: Response) => {
 });
 
 /**
- * 将 AgentProgress 转换为前端期望的 SSE 事件格式
- * 前端 handleProgress 期望的字段: stage, message, retryCount, ai_input, ai_output, tool_call, draft_content, promptPreview
+ * 将生成进度转换为前端 SSE 事件
+ * 新版 courseGeneration 直接传 { stage, message, ... } 格式
  */
-function transformProgress(progress: AgentProgress, topic: string): any[] {
+function transformProgress(progress: AnyProgress): any[] {
   const events: any[] = [];
+  const stage = progress.stage || 'thinking';
+  const message = progress.message || '';
 
-  switch (progress.stage) {
-    case 'streaming':
+  if (stage === 'streaming' || stage === 'ai_stream') {
+    events.push({ stage: 'ai_stream', message });
+  } else if (stage === 'design') {
+    events.push({ stage: 'api_call', message: message || '正在设计课件结构...' });
+  } else if (stage === 'module_generate') {
+    events.push({ stage: 'api_call', message: message || '正在生成模块...' });
+  } else if (stage === 'integrate') {
+    events.push({ stage: 'api_call', message: message || '正在集成课件...' });
+  } else if (stage === 'plan' || stage === 'search' || stage === 'thinking') {
+    events.push({ stage: 'api_call', message, ai_output: message });
+  } else if (stage === 'generate') {
+    events.push({ stage: 'api_call', message: '正在生成 HTML 课件...' });
+  } else if (stage === 'validate') {
+    events.push({ stage: 'api_call', message: '正在验证课件...' });
+  } else if (stage === 'fix') {
+    events.push({ stage: 'retry', message });
+  } else if (stage === 'tool_call') {
+    events.push({
+      stage: 'tool_call',
+      message,
+      tool_call: { name: progress.toolCalls?.[0]?.toolName || '', success: undefined },
+    });
+  } else if (stage === 'tool_result') {
+    for (const tr of progress.toolResults || []) {
       events.push({
-        stage: 'ai_stream',
-        message: progress.message,
-        retryCount: progress.iteration,
+        stage: 'tool_result',
+        message: `${tr.toolName}: ${tr.success ? '成功' : '失败'}`,
       });
-      break;
-
-    case 'thinking':
-      events.push({
-        stage: 'api_call',
-        message: progress.message,
-        retryCount: progress.iteration,
-        ai_input: progress.ai_input,
-        ai_output: progress.ai_output,
-      });
-      break;
-
-    case 'tool_call':
-      // 发送 AI 输出（工具调用意图）
-      events.push({
-        stage: 'api_call',
-        message: progress.message,
-        retryCount: progress.iteration,
-        ai_output: `准备调用工具: ${progress.toolCalls?.map(tc => tc.toolName).join(', ')}`,
-      });
-      // 逐个发送工具调用
-      for (const tc of progress.toolCalls || []) {
-        events.push({
-          stage: 'tool_call',
-          message: `调用 ${tc.toolName}`,
-          retryCount: progress.iteration,
-          tool_call: {
-            name: tc.toolName,
-            arguments: tc.args,
-            success: undefined, // 还在执行中
-          },
-        });
-      }
-      break;
-
-    case 'tool_result':
-      // 逐个发送工具结果
-      for (const tr of progress.toolResults || []) {
-        events.push({
-          stage: 'tool_result',
-          message: `${tr.toolName}: ${tr.success ? '成功' : '失败'}`,
-          retryCount: progress.iteration,
-          tool_call: {
-            name: tr.toolName,
-            success: tr.success,
-            result: summarizeResult(tr),
-            error: tr.error,
-          },
-        });
-
-        // 提取草稿内容（SVG/HTML）
-        const draft = extractDraft(tr);
-        if (draft) {
-          events.push({
-            stage: 'tool_result',
-            message: `生成内容: ${tr.toolName}`,
-            draft_content: draft,
-          });
-        }
-      }
-      break;
-
-    case 'complete':
-      events.push({
-        stage: progress.message.includes('退出') ? 'complete' : 'complete',
-        message: progress.message,
-        retryCount: progress.iteration,
-      });
-      break;
-
-    case 'error':
-      events.push({
-        stage: 'error',
-        message: progress.message,
-        retryCount: progress.iteration,
-      });
-      break;
+    }
+  } else if (stage === 'complete') {
+    events.push({ stage: 'complete', message });
+  } else if (stage === 'error') {
+    events.push({ stage: 'error', message });
   }
 
   return events;
-}
-
-/** 截断工具结果用于前端展示 */
-function summarizeResult(tr: any): any {
-  if (!tr.result) return null;
-  // 对大结果只返回摘要
-  const str = JSON.stringify(tr.result);
-  if (str.length > 500) {
-    return { summary: `${tr.toolName} 执行成功`, size: str.length };
-  }
-  return tr.result;
-}
-
-/** 从工具结果中提取可展示的草稿内容 */
-function extractDraft(tr: any): { type: string; title: string; content: string } | null {
-  if (!tr.success || !tr.result) return null;
-
-  const name = tr.toolName;
-  const result = tr.result;
-
-  if (name === 'generate_svg' || name === 'generate_svg_diagram') {
-    const svg = result.svg || result.html || result.content || '';
-    if (svg) return { type: 'svg', title: 'SVG 图形', content: svg };
-  }
-
-  if (name === 'generate_html_component') {
-    const html = result.html || result.content || '';
-    if (html) return { type: 'html', title: 'HTML 组件', content: html };
-  }
-
-  if (name === 'search_educational_content') {
-    const text = result.results || result.content || '';
-    if (text) return { type: 'search', title: '搜索结果', content: typeof text === 'string' ? text : JSON.stringify(text, null, 2) };
-  }
-
-  if (name === 'save_course_html') {
-    return { type: 'html', title: '保存课件', content: `课件已保存 (${result.content_length || 0} 字符)` };
-  }
-
-  return null;
 }
 
 router.post('/generate', async (req: Request, res: Response) => {
@@ -184,8 +96,8 @@ router.post('/generate', async (req: Request, res: Response) => {
     });
 
     // 包装 onProgress，转换为前端格式
-    const onProgress = (progress: AgentProgress) => {
-      const events = transformProgress(progress, validated.user_question);
+    const onProgress = (progress: AnyProgress) => {
+      const events = transformProgress(progress);
       for (const event of events) {
         sendEvent(event);
       }

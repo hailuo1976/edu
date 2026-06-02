@@ -7,6 +7,8 @@ import { createApp } from './app';
 import { logger } from './utils/logger';
 import { config } from './config';
 
+import './tools/index';  // 注册所有工具（必须在应用启动前完成）
+
 const app = createApp();
 const PORT = config.port;
 

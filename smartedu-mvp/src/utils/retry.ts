@@ -20,10 +20,20 @@ export async function retry<T>(
   let lastError: any;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const attemptStart = Date.now();
     try {
-      return await fn();
+      const result = await fn();
+      if (attempt > 1) {
+        const totalMs = Date.now() - attemptStart;
+        logger.info(`重试 ${attempt}/${maxAttempts} 成功, 本轮耗时 ${totalMs}ms`);
+      }
+      return result;
     } catch (error: any) {
       lastError = error;
+      const status = error?.response?.status;
+      const code = error?.code || '';
+      const errMsg = error?.message || '未知错误';
+      const failedMs = Date.now() - attemptStart;
       if (attempt < maxAttempts && shouldRetry(error)) {
         let waitMs: number;
         if (exponentialBackoff) {
@@ -33,10 +43,10 @@ export async function retry<T>(
         } else {
           waitMs = delayMs * attempt;
         }
-        const status = error?.response?.status;
-        const errMsg = error?.code || error?.message || '未知错误';
-        logger.info(`重试 ${attempt}/${maxAttempts} (${status || errMsg}), 等待 ${(waitMs / 1000).toFixed(1)}s`);
+        logger.info(`重试 ${attempt}/${maxAttempts} 失败: code=${code}, status=${status || '-'}, msg=${errMsg}, 请求耗时 ${failedMs}ms, 等待 ${(waitMs / 1000).toFixed(1)}s`);
         await delay(waitMs);
+      } else if (attempt >= maxAttempts) {
+        logger.error(`重试耗尽 ${maxAttempts}/${maxAttempts}: code=${code}, msg=${errMsg}, 本轮耗时 ${failedMs}ms`);
       }
     }
   }

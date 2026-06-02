@@ -44,7 +44,8 @@ export interface AgentConfig {
 
 const DEFAULT_EXIT_KEYWORDS = ['[课件完成]', '[DONE]', '[FINISH]', '[任务完成]', '[完成]'];
 const MAX_TOOL_RESULT_CHARS = 800;
-const COMPRESS_THRESHOLD = 8;
+const MAX_TOOL_CALL_ARGS_CHARS = 2000;
+const COMPRESS_THRESHOLD = 6;
 
 function checkExit(content: string, keywords: string[]): boolean {
   const upper = content.toUpperCase();
@@ -68,6 +69,29 @@ function buildPromptPreview(messages: Message[]): string {
     }
   }
   return parts.join('\n\n---\n\n');
+}
+
+/** 截断工具调用参数中的大字段（如 write_file 的 content），避免 payload 膨胀 */
+function truncateToolCallArgs(toolName: string, argsJson: string): string {
+  if (argsJson.length <= MAX_TOOL_CALL_ARGS_CHARS) return argsJson;
+
+  // write_file / create_file 的 content 字段是主要膨胀源
+  if (toolName === 'write_file' || toolName === 'create_file') {
+    try {
+      const args = JSON.parse(argsJson);
+      if (args.content && args.content.length > 1500) {
+        const head = args.content.substring(0, 600);
+        const tail = args.content.substring(args.content.length - 600);
+        args.content = `${head}\n...[已截断，原始${args.content.length}字符]...\n${tail}`;
+        return JSON.stringify(args);
+      }
+    } catch {
+      // JSON 解析失败，直接截断
+    }
+  }
+
+  // 其他工具：整体截断
+  return argsJson.substring(0, MAX_TOOL_CALL_ARGS_CHARS) + `...[已截断]`;
 }
 
 /** 压缩消息历史 */
@@ -117,6 +141,7 @@ export async function runAgentLoop(
   let finalContent = '';
   const allToolResults: ToolResult[] = [];
   const failCounts = new Map<string, number>(); // 工具连续失败计数
+  let consecutiveReadCount = 0; // 连续 read_file 计数（防死循环）
 
   for (let i = 0; i < maxIterations; i++) {
     agentLog.info(`--- 第 ${i + 1}/${maxIterations} 轮 ---`);
@@ -163,7 +188,7 @@ export async function runAgentLoop(
         agentLog.debug(`第 ${i + 1} 轮工具调用:\n${response.toolCalls.map((tc, j) => `  [${j}] ${tc.name}(${truncate(JSON.stringify(tc.arguments), 500)})`).join('\n')}`);
       }
 
-      // 更新消息历史
+      // 更新消息历史（截断工具调用参数，避免 payload 膨胀）
       if (response.toolCalls.length > 0) {
         messages.push({
           role: 'assistant',
@@ -171,7 +196,7 @@ export async function runAgentLoop(
           toolCalls: response.toolCalls.map(tc => ({
             id: tc.id,
             name: tc.name,
-            arguments: JSON.stringify(tc.arguments),
+            arguments: truncateToolCallArgs(tc.name, JSON.stringify(tc.arguments)),
           })),
         });
       } else {
@@ -212,6 +237,23 @@ export async function runAgentLoop(
         })),
         { workDir: config.paths.courses }
       );
+
+      // 检测连续 read_file 死循环（如 AI 反复读文件不写入）
+      const readCalls = response.toolCalls.filter(tc => tc.name === 'read_file');
+      const writeCalls = response.toolCalls.filter(tc => tc.name === 'write_file' || tc.name === 'create_file');
+      if (readCalls.length > 0 && writeCalls.length === 0) {
+        consecutiveReadCount++;
+      } else {
+        consecutiveReadCount = 0;
+      }
+      if (consecutiveReadCount >= 3) {
+        agentLog.warn(`连续 ${consecutiveReadCount} 轮只读不写，注入提示并重置计数`);
+        messages.push({
+          role: 'user',
+          content: `[系统提示] 你已经连续多次读取文件而没有写入新内容。请立即用 write_file 写入最终版本的 index.html，然后回复"[课件完成]"。不要再调用 read_file。`,
+        });
+        consecutiveReadCount = 0;
+      }
 
       allToolResults.push(...results);
 

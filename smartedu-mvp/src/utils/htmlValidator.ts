@@ -1,17 +1,23 @@
 import { ValidationResult, ValidationError } from '../types/generation';
 
+/**
+ * HTML 课件验证器（轻量版）
+ *
+ * 验证目标：
+ *   1. 基本 HTML 语法（DOCTYPE、html/head/body/title、标签闭合）
+ *   2. 多模块链接稳定（必须存在 Tab 切换 JS、每个 Tab 对应一个模块容器）
+ *
+ * 不再强制：
+ *   - 必须包含 concept/demo/exercise 三模块（模块由设计文档决定）
+ *   - 必须使用 Canvas（学科可能不需要）
+ *   - 必须有交互表单（仅作为 warning）
+ */
 export class HtmlValidator {
   private static readonly REQUIRED_ELEMENTS = [
     { tag: 'html', message: '缺少 <html> 标签' },
     { tag: 'head', message: '缺少 <head> 标签' },
     { tag: 'body', message: '缺少 <body> 标签' },
     { tag: 'title', message: '缺少 <title> 标签' },
-  ];
-
-  private static readonly REQUIRED_MODULES = [
-    { id: 'concept', name: '概念讲解' },
-    { id: 'demo', name: '图形演示' },
-    { id: 'exercise', name: '练习测试' },
   ];
 
   validate(html: string): ValidationResult {
@@ -23,11 +29,9 @@ export class HtmlValidator {
       return { isValid: false, errors, warnings };
     }
 
-    this.validateStructure(html, errors);
     this.validateDoctype(html, errors);
-    this.validateModules(html, errors);
-    this.validateCanvas(html, errors);
-    this.validateInteractive(html, warnings);
+    this.validateStructure(html, errors);
+    this.validateModuleLinks(html, errors, warnings);
     this.validateClosingTags(html, errors);
 
     return {
@@ -56,64 +60,58 @@ export class HtmlValidator {
     }
   }
 
-  private validateModules(html: string, errors: ValidationError[]): void {
-    for (const { id, name } of HtmlValidator.REQUIRED_MODULES) {
-      if (!html.includes(`id="${id}"`) && !html.includes(`id='${id}'`)) {
-        errors.push({
-          code: `MISSING_MODULE_${id.toUpperCase()}`,
-          message: `缺少 "${name}" 模块 (id="${id}")`,
-        });
-      }
+  /**
+   * 模块链接稳定性验证：
+   *   - 至少存在 2 个 .module 容器
+   *   - 每个 .module 都有 id
+   *   - 存在 Tab 切换逻辑（showModule / switchTab / data-target / onclick 任一）
+   */
+  private validateModuleLinks(html: string, errors: ValidationError[], warnings: string[]): void {
+    // 统计模块容器
+    const moduleMatches = html.match(/<div[^>]*class="[^"]*\bmodule\b[^"]*"[^>]*>/gi) || [];
+    if (moduleMatches.length < 2) {
+      warnings.push(`模块数量较少（${moduleMatches.length} 个），可能不足以构成多模块课件`);
     }
 
-    if (!html.includes('switchTab') && !html.includes('onclick=')) {
+    // 每个模块容器应该有 id
+    const modulesWithoutId = moduleMatches.filter(m => !/id\s*=/.test(m));
+    if (modulesWithoutId.length > 0) {
+      errors.push({
+        code: 'MODULE_WITHOUT_ID',
+        message: `${modulesWithoutId.length} 个模块容器缺少 id 属性，Tab 切换将无法定位`,
+      });
+    }
+
+    // Tab 切换逻辑检查
+    const hasTabLogic =
+      html.includes('showModule') ||
+      html.includes('switchTab') ||
+      html.includes('data-target') ||
+      /onclick\s*=/i.test(html);
+
+    if (!hasTabLogic) {
       errors.push({
         code: 'MISSING_NAVIGATION',
-        message: '缺少模块切换功能',
-      });
-    }
-  }
-
-  private validateCanvas(html: string, errors: ValidationError[]): void {
-    if (!html.includes('<canvas')) {
-      errors.push({
-        code: 'MISSING_CANVAS',
-        message: '缺少 Canvas 画布元素',
+        message: '缺少模块切换功能（showModule/switchTab/data-target/onclick 均未发现）',
       });
     }
 
-    if (html.includes('<canvas') && !html.includes('getContext')) {
-      warnings: [];
-      errors.push({
-        code: 'CANVAS_NO_CONTEXT',
-        message: 'Canvas 元素缺少绑定代码 (getContext)',
-      });
-    }
-  }
-
-  private validateInteractive(html: string, warnings: string[]): void {
-    const hasFormInputs = /<(input|button|select|textarea)/i.test(html);
-    const hasEventHandlers = /on(click|change|input|submit|keyup)/i.test(html);
-    const hasFeedback = /feedback|correct|wrong|错误|正确/i.test(html);
-
-    if (!hasFormInputs) {
-      warnings.push('没有发现表单输入元素');
-    }
-    if (!hasEventHandlers) {
-      warnings.push('没有发现交互事件处理');
-    }
-    if (!hasFeedback) {
-      warnings.push('缺少答案反馈机制');
+    // Tab 按钮数量与模块数量应一致（警告）
+    const tabButtons = html.match(/class="[^"]*\bnav-tab\b[^"]*"/gi) || [];
+    if (tabButtons.length > 0 && moduleMatches.length > 0 && tabButtons.length !== moduleMatches.length) {
+      warnings.push(
+        `Tab 按钮(${tabButtons.length} 个) 与模块数量(${moduleMatches.length} 个) 不一致`,
+      );
     }
   }
 
   private validateClosingTags(html: string, errors: ValidationError[]): void {
     const openTags = ['div', 'span', 'p', 'button'];
-    
+
     for (const tag of openTags) {
       const openCount = (html.match(new RegExp(`<${tag}[\\s>]`, 'gi')) || []).length;
       const closeCount = (html.match(new RegExp(`</${tag}>`, 'gi')) || []).length;
-      
+
       if (openCount > closeCount) {
         errors.push({
           code: `UNCLOSED_${tag.toUpperCase()}`,
@@ -125,35 +123,35 @@ export class HtmlValidator {
 
   sanitize(html: string): string {
     let sanitized = html.trim();
-    
+
     sanitized = sanitized.replace(/^```html\s*/i, '');
     sanitized = sanitized.replace(/^```\s*/i, '');
     sanitized = sanitized.replace(/\s*```$/i, '');
-    
+
     sanitized = sanitized.replace(/^\s*<!DOCTYPE[^>]*>\s*/i, '<!DOCTYPE html>\n');
-    
+
     return sanitized;
   }
 
   extractHtml(content: string): string {
     const trimmed = content.trim();
-    
+
     const doctypeMatch = trimmed.match(/<!DOCTYPE[^>]*>[\s\S]*?<html/i);
     if (doctypeMatch) {
       const startIndex = doctypeMatch.index!;
       const htmlStart = trimmed.indexOf('<html', startIndex);
       const htmlEnd = trimmed.lastIndexOf('</html>');
-      
+
       if (htmlStart !== -1 && htmlEnd !== -1) {
         return trimmed.substring(htmlStart, htmlEnd + '</html>'.length);
       }
     }
-    
+
     const htmlMatch = trimmed.match(/<html[\s\S]*<\/html>/i);
     if (htmlMatch) {
       return htmlMatch[0];
     }
-    
+
     return trimmed;
   }
 }
